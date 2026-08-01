@@ -228,3 +228,53 @@ footer.version {
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-3);
 }
+
+/* --- PR-04 — markup corrections --------------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   Pointer targets below are the system's 44px rounded up to the nearest sum of
+   scale steps — 32 + 16 = 48px. The spacing scale has five values and none of
+   them is 44, so the target is composed rather than declared. */
+
+/* The non-answer. Still a native radio inside its question's fieldset (INV-10),
+   but outside the five-position group: no pill border, secondary size, its own
+   line. Separated by position, size and shape — no colour (INV-12). */
+.question > .skip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: fit-content;
+  min-height: calc(var(--space-4) + var(--space-3));
+  margin-top: var(--space-2);
+  font-size: var(--text-secondary);
+  color: var(--ink-quiet);
+  cursor: pointer;
+}
+
+/* Language links: the smallest targets of the product. */
+nav.langs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--space-4) + var(--space-3));
+  min-height: calc(var(--space-4) + var(--space-3));
+}
+
+/* The submission alert sits directly above the sticky bar, which would cover it
+   when focus moves to it. The scroll margin is what keeps it visible (INV-11). */
+#warning {
+  scroll-margin-bottom: var(--space-5);
+}
+
+/* Replaces the three inline style attributes of the questionnaire (DT-04). */
+.sticky > p {
+  margin: 0;
+}
+.consent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.consent-help {
+  font-size: var(--text-secondary);
+}

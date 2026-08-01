@@ -34,19 +34,16 @@ const styleSheets = cssFiles.filter(([name]) => name !== TOKEN_FILE);
 
 // --- Inline style attributes -------------------------------------------------
 //
-// Two named exceptions, deliberately separate rather than one. A single
-// exception retired by PR-04 would leave this test red until PR-10, six PRs
-// later and parallelisable, and the CI blocked in between (DT-04).
+// One named exception left. `inline-styles-questionnaire`, which covered the 3
+// attributes of the questionnaire page, was retired by PR-04 with the attributes
+// themselves; the questionnaire is now held to zero like every other file.
 //
-//   inline-styles-questionnaire — 3 attributes in the questionnaire page.
-//                                 Retired by PR-04.
-//   inline-styles-resultats     — 4 attributes in the results page, inside the
-//                                 client-rendered string templates.
-//                                 Retired by PR-10.
+//   inline-styles-resultats — 4 attributes in the results page, inside the
+//                             client-rendered string templates.
+//                             Retired by PR-10.
 //
-// Counts are exact: adding a ninth attribute anywhere fails this test.
+// The count is exact: adding a fifth attribute there fails this test.
 const INLINE_STYLE_EXCEPTIONS = {
-  "pages/[lang]/index.astro": { name: "inline-styles-questionnaire", count: 3, retiredBy: "PR-04" },
   "pages/[lang]/results.astro": { name: "inline-styles-resultats", count: 4, retiredBy: "PR-10" },
 };
 
@@ -104,7 +101,7 @@ test("no duration above the animation bound", () => {
   }
 });
 
-test("no inline style attribute outside the two named exceptions", () => {
+test("no inline style attribute outside the named exception", () => {
   for (const [name, source] of astroFiles) {
     const count = (source.match(/\sstyle\s*=\s*["'`]/g) ?? []).length;
     const exception = INLINE_STYLE_EXCEPTIONS[name];

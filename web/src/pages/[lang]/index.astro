@@ -17,7 +17,7 @@ const themes = THEMES[lang];
 const items = questions.questions;
 ---
 
-<Base lang={lang} page="" title={t.title}>
+<Base lang={lang} page="">
   <h1>{t.title}</h1>
   <p class="tagline">{t.tagline}</p>
   <p class="muted">{t.intro}</p>
@@ -27,7 +27,7 @@ const items = questions.questions;
       items.map((question, index) => (
         <fieldset class="question">
           <legend>
-            <span class="theme">{themes[question.theme]}</span> · {index + 1}
+            <span class="theme">{themes[question.theme]}</span> · {index + 1} / {items.length}
           </legend>
           <p id={`label-${question.id}`}>{question.text[lang]}</p>
           <div class="choices" role="group" aria-labelledby={`label-${question.id}`}>
@@ -37,22 +37,27 @@ const items = questions.questions;
                 <span>{label}</span>
               </label>
             ))}
-            <label>
-              <input type="radio" name={question.id} value="" checked />
-              <span>{t.skip}</span>
-            </label>
           </div>
+          {/* Out of the five-position group, inside the fieldset: still bound to
+              its question, no longer a sixth position, and never preselected. */}
+          <label class="skip">
+            <input type="radio" name={question.id} value="" />
+            <span>{t.skip}</span>
+          </label>
         </fieldset>
       ))
     }
 
+    {/* Before the action bar, not after it: an alert the submitting user cannot
+        see is an alert only a screen reader gets. */}
+    <p class="muted" id="warning" role="alert" tabindex="-1" hidden>{t.incomplete}</p>
     <div class="sticky">
-      <p aria-live="polite" id="progress" class="muted" style="margin:0">
+      <p aria-live="polite" id="progress" class="muted">
         {t.progress(0, items.length)}
       </p>
       {
         API && (
-          <label style="display:flex;gap:.5rem;align-items:center">
+          <label class="consent">
             <input type="checkbox" id="aggregate" checked />
             <span>{t.optout}</span>
           </label>
@@ -60,8 +65,7 @@ const items = questions.questions;
       }
       <button type="submit">{t.submit}</button>
     </div>
-    {API && <p class="muted" style="font-size:.9rem">{t.optoutHelp}</p>}
-    <p class="muted" id="warning" role="alert" hidden>{t.incomplete}</p>
+    {API && <p class="muted consent-help">{t.optoutHelp}</p>}
   </form>
 </Base>
 
@@ -72,8 +76,10 @@ const items = questions.questions;
   const { api, results, lang } = form.dataset;
   const total = form.querySelectorAll("fieldset.question").length;
 
-  const answered = () =>
-    [...new FormData(form).entries()].filter(([key, value]) => key !== "aggregate" && value !== "");
+  // Nothing is preselected, so an unanswered question is absent from FormData
+  // rather than present with an empty value; "skip" is what puts the empty value
+  // there. The aggregate checkbox has an id and no name, so it never enters.
+  const answered = () => [...new FormData(form).entries()].filter(([, value]) => value !== "");
 
   form.addEventListener("change", () => {
     const done = answered().length;
@@ -81,6 +87,7 @@ const items = questions.questions;
       lang === "fr"
         ? `${done} réponse${done > 1 ? "s" : ""} sur ${total}`
         : `${done} of ${total} answered`;
+    if (done > 0) warning.hidden = true;
   });
 
   form.addEventListener("submit", (event) => {
@@ -88,6 +95,7 @@ const items = questions.questions;
     const entries = answered();
     if (entries.length === 0) {
       warning.hidden = false;
+      warning.focus();
       return;
     }
 

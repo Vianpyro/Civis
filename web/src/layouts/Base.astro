@@ -12,7 +12,9 @@ const t = T[lang];
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — {t.title}</title>
+    {/* The site name alone when a page does not name itself: composing it with
+        an identical title produced "Civis — Civis". */}
+    <title>{title ? `${title} — ${t.title}` : t.title}</title>
     <meta name="description" content={t.tagline} />
   </head>
   <body>
@@ -20,7 +22,7 @@ const t = T[lang];
     <nav class="langs" aria-label={lang === "fr" ? "Langue" : "Language"}>
       {
         LANGS.map((code) => (
-          <a href={href(`${code}/${page}`)} aria-current={code === lang ? "true" : undefined}>
+          <a href={href(`${code}/${page}`)} aria-current={code === lang ? "page" : undefined}>
             {code.toUpperCase()}
           </a>
         ))
