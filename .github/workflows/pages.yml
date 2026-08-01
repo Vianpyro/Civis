@@ -46,6 +46,10 @@ jobs:
         working-directory: web
       - run: npm run build
         working-directory: web
+      # Blindness guard: reads the compiled questionnaire, never the source, so
+      # it must run after the build and never as part of `npm test`.
+      - run: npm run check:blindness
+        working-directory: web
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web/dist
