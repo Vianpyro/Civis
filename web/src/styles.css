@@ -1,23 +1,11 @@
-:root {
-  --bg: #fbfbf9;
-  --fg: #1b1b1a;
-  --muted: #5d5d58;
-  --line: #d9d9d2;
-  --accent: #1b1b1a;
-  --focus: #0b5fff;
-  color-scheme: light dark;
-}
+/* The one stylesheet. It consumes tokens and declares no value of its own:
+   every colour, size, space, stroke and radius below is a var(). tokens.test.mjs
+   enforces that.
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16161a;
-    --fg: #f2f2ef;
-    --muted: #a3a39c;
-    --line: #34343a;
-    --accent: #f2f2ef;
-    --focus: #7aa2ff;
-  }
-}
+   PR-03 restructured this file once; later PRs append blocks at the end and do
+   not reorganise it (DT-15). The file is never moved. */
+
+@import "./tokens.css";
 
 *,
 *::before,
@@ -27,27 +15,34 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--family-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
 }
 
 main {
-  max-width: 44rem;
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: 2rem 1rem 6rem;
+  padding: var(--space-4) var(--space-3) var(--space-5);
 }
 
+h1,
+h2,
+.result h3 {
+  line-height: var(--leading-title);
+}
 h1 {
-  font-size: 1.9rem;
-  margin: 0 0 0.25rem;
+  font-size: var(--text-page);
+  margin: 0 0 var(--space-1);
 }
 h2 {
-  font-size: 1.25rem;
-  margin: 2.5rem 0 0.75rem;
+  font-size: var(--text-title);
+  margin: var(--space-4) 0 var(--space-2);
 }
 p {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-3);
 }
 
 a {
@@ -55,126 +50,144 @@ a {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--ink-quiet);
 }
 .tagline {
-  font-size: 1.05rem;
+  font-size: var(--text-reading);
 }
 
-/* Never hide focus: this is a civic tool and the form is the whole product. */
-:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+/* Never hide focus: this is a civic tool and the form is the whole product.
+   Double achromatic ring — inner ring in the page colour, outer ring in the text
+   colour. A single-hue ring always fails against one surface; this one holds
+   against paper, against a selected option, and against the ink button.
+
+   The second selector carries the ring to the option label, whose focusable
+   element is the radio inside it. */
+:focus-visible,
+.choices label:has(input:focus-visible) {
+  outline: var(--stroke-focus) solid var(--ink);
+  outline-offset: var(--stroke-focus);
+  box-shadow: 0 0 0 var(--stroke-focus) var(--paper);
 }
 
 .skip-link {
   position: absolute;
-  left: -999px;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+  border: var(--stroke) solid var(--edge);
+  transform: translateY(-100%);
 }
 .skip-link:focus {
-  left: 1rem;
-  top: 1rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  z-index: 10;
+  transform: none;
 }
 
 nav.langs {
   display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.9rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--stroke) solid var(--rule);
+  font-size: var(--text-secondary);
 }
 
+/* A question is a record: its border is affordance, so it takes --edge. */
 fieldset.question {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin: 0 0 1.25rem;
-  padding: 1rem 1.25rem 1.25rem;
+  border: var(--stroke) solid var(--edge);
+  border-radius: var(--radius);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
 }
 
 fieldset.question legend {
   font-weight: 600;
-  padding: 0 0.4rem;
+  padding: 0 var(--space-1);
+}
+
+/* The statement — our reformulation, at reading size. */
+fieldset.question > p {
+  font-size: var(--text-reading);
+  margin: 0;
 }
 
 .theme {
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink-quiet);
 }
 
 .choices {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
 }
 
 .choices label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.35rem 0.8rem;
+  gap: var(--space-1);
+  border: var(--stroke) solid var(--edge);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-3);
   cursor: pointer;
-  font-size: 0.92rem;
+  font-size: var(--text-base);
 }
 
+/* Selected state: same stroke width, colour only. A weight change or a thicker
+   border reflows the row at every selection. The native control stays visible,
+   so the state is never carried by colour alone. */
 .choices label:has(input:checked) {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  font-weight: 600;
-}
-
-.choices label:has(input:focus-visible) {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  border-color: var(--ink);
 }
 
 .bar {
-  height: 0.6rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  height: var(--space-2);
+  border: var(--stroke) solid var(--edge);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 .bar > span {
   display: block;
   height: 100%;
-  background: var(--accent);
+  background: var(--ink);
 }
 
 .result {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
+  border: var(--stroke) solid var(--edge);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 .result h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1.05rem;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-reading);
 }
 
+/* Quoted official text. The serif is a provenance marker, never a decoration:
+   it is allowed here and nowhere else (C2). Every blockquote in the repository
+   is a citation from a source document; a block that is not a citation must not
+   be marked up as one. The quote is the evidence, so it is set in --ink and not
+   quietened below our own prose. */
 blockquote {
-  margin: 0.5rem 0;
-  padding-left: 0.9rem;
-  border-left: 3px solid var(--line);
-  color: var(--muted);
-  font-style: italic;
+  margin: var(--space-2) 0;
+  padding-left: var(--space-3);
+  border-left: var(--stroke-focus) solid var(--edge);
+  font-family: var(--family-quoted);
+  font-size: var(--text-reading);
+  line-height: var(--leading-quote);
 }
 
 button,
 .button {
   font: inherit;
-  padding: 0.6rem 1.1rem;
-  border-radius: 6px;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: var(--stroke) solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-inverse);
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
@@ -183,34 +196,35 @@ button,
 .sticky {
   position: sticky;
   bottom: 0;
-  background: var(--bg);
-  border-top: 1px solid var(--line);
-  padding: 0.75rem 0;
+  background: var(--paper);
+  border-top: var(--stroke) solid var(--rule);
+  padding: var(--space-2) 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-3);
   align-items: center;
 }
 
 details {
-  border-top: 1px solid var(--line);
-  padding: 0.75rem 0;
+  border-top: var(--stroke) solid var(--rule);
+  padding: var(--space-2) 0;
 }
 summary {
   cursor: pointer;
   font-weight: 600;
 }
 
-/* Version apparatus, on every page. It sits after <main>, whose 6rem bottom
-   padding is what keeps the questionnaire's sticky bar from reaching it. */
+/* Version apparatus, on every page. It sits after <main>, whose bottom padding
+   is what keeps the questionnaire's sticky bar from reaching it. */
 footer.version {
-  max-width: 44rem;
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: 0.75rem 1rem 1.5rem;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.78rem;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: var(--stroke) solid var(--rule);
+  color: var(--ink-quiet);
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: var(--space-1) var(--space-3);
 }
