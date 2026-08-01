@@ -69,12 +69,17 @@ fn tally(db: &Connection, questions: &HashSet<String>) -> rusqlite::Result<HashM
 
     let mut statement = db.prepare("SELECT question, choice, n FROM counts")?;
     let rows = statement.query_map([], |row| {
-        Ok((row.get::<_, String>(0)?, row.get::<_, usize>(1)?, row.get::<_, i64>(2)?))
+        Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, i64>(2)?))
     })?;
 
     for row in rows {
         let (question, choice, n) = row?;
-        if let Some(slot) = out.get_mut(&question).and_then(|row| row.get_mut(choice)) {
+        // A choice outside the scale — negative, or past its width — is dropped
+        // rather than trusted: the response shape is ours to guarantee.
+        let slot = usize::try_from(choice)
+            .ok()
+            .and_then(|choice| out.get_mut(&question)?.get_mut(choice));
+        if let Some(slot) = slot {
             *slot = n;
         }
     }
@@ -200,12 +205,16 @@ mod tests {
     #[test]
     fn a_row_written_outside_the_scale_cannot_corrupt_the_response() {
         let (db, questions) = fixture();
-        db.execute(
-            "INSERT INTO counts (question, choice, n) VALUES ('q-isf', 99, 7)",
-            [],
+        db.execute_batch(
+            "INSERT INTO counts (question, choice, n) VALUES ('q-isf', 99, 7);
+             INSERT INTO counts (question, choice, n) VALUES ('q-isf', -1, 7);
+             INSERT INTO counts (question, choice, n) VALUES ('gone', 0, 7);",
         )
         .unwrap();
+        bump(&db, "q-isf", 1).unwrap();
+
         let counts = tally(&db, &questions).unwrap();
-        assert_eq!(counts["q-isf"], vec![0; CHOICES]);
+        assert_eq!(counts["q-isf"], vec![0, 1, 0, 0, 0], "only in-scale rows survive");
+        assert!(!counts.contains_key("gone"), "a retired question is not resurrected");
     }
 }
