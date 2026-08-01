@@ -1,0 +1,32 @@
+{
+  "election": "fr-2027",
+  "party": { "id": "lr", "name": "Les Républicains", "short": "LR" },
+  "source_id": "lr-nos-idees",
+  "points": [
+    {
+      "id": "lr-depense-publique",
+      "theme": "economy",
+      "quote": "Rétablir l'ordre dans nos comptes en réduisant la dépense publique plutôt qu'en augmentant toujours plus la pression fiscale."
+    },
+    {
+      "id": "lr-retraites-financement",
+      "theme": "social",
+      "quote": "Assurer le financement des retraites de ceux qui ont travaillé toute leur vie comme la retraite des actifs d'aujourd'hui."
+    },
+    {
+      "id": "lr-ecole-exigence",
+      "theme": "education",
+      "quote": "Rétablir une école de l'exigence qui transmette à nos enfants els savoirs fondamentaux et les valeurs de la République et qui garantisse l'égalité des chances."
+    },
+    {
+      "id": "lr-libertes-locales",
+      "theme": "institutions",
+      "quote": "Donner plus de libertés sur le terrain aux élus et aux collectivités locales."
+    },
+    {
+      "id": "lr-ecologie-conciliation",
+      "theme": "ecology",
+      "quote": "Porter une écologie capable de concilier préservation de la planète et développement économique et social."
+    }
+  ]
+}

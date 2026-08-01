@@ -1,0 +1,245 @@
+{
+  "election": "fr-2027",
+  "questions": [
+    {
+      "id": "q-isf",
+      "theme": "economy",
+      "text": {
+        "fr": "Faut-il rétablir un impôt sur la fortune pour les patrimoines les plus élevés ?",
+        "en": "Should a wealth tax on the largest fortunes be reinstated?"
+      }
+    },
+    {
+      "id": "q-smic",
+      "theme": "economy",
+      "text": {
+        "fr": "Faut-il augmenter les bas salaires par une hausse légale du salaire minimum plutôt que par des aides aux entreprises ?",
+        "en": "Should low pay be raised by legally increasing the minimum wage rather than through subsidies to employers?"
+      }
+    },
+    {
+      "id": "q-tva-energie",
+      "theme": "economy",
+      "text": {
+        "fr": "Faut-il baisser la TVA sur les produits énergétiques ?",
+        "en": "Should VAT on energy products be cut?"
+      }
+    },
+    {
+      "id": "q-prix-agriculteurs",
+      "theme": "economy",
+      "text": {
+        "fr": "Faut-il garantir aux agriculteurs des prix de vente minimums rémunérateurs ?",
+        "en": "Should farmers be guaranteed minimum prices that cover their costs?"
+      }
+    },
+    {
+      "id": "q-succession",
+      "theme": "economy",
+      "text": {
+        "fr": "Faut-il supprimer les droits de succession en ligne directe pour les patrimoines modestes et moyens ?",
+        "en": "Should inheritance tax between parents and children be abolished for modest and middle-sized estates?"
+      }
+    },
+    {
+      "id": "q-retraite-64",
+      "theme": "social",
+      "text": {
+        "fr": "Faut-il revenir sur le report de l'âge légal de départ à la retraite à 64 ans ?",
+        "en": "Should the increase of the legal retirement age to 64 be reversed?"
+      }
+    },
+    {
+      "id": "q-fonctionnaires",
+      "theme": "social",
+      "text": {
+        "fr": "Faut-il recruter massivement des agents publics dans les hôpitaux, les écoles et la justice ?",
+        "en": "Should the state hire large numbers of public servants in hospitals, schools and the courts?"
+      }
+    },
+    {
+      "id": "q-prestations-nationalite",
+      "theme": "social",
+      "text": {
+        "fr": "Faut-il réserver certaines prestations sociales aux nationaux et les conditionner à des années de travail dans le pays ?",
+        "en": "Should some welfare benefits be restricted to nationals and conditioned on years worked in the country?"
+      }
+    },
+    {
+      "id": "q-egalite-salariale",
+      "theme": "social",
+      "text": {
+        "fr": "Faut-il imposer l'égalité salariale entre femmes et hommes et créer un congé menstruel ?",
+        "en": "Should equal pay between women and men be legally enforced, with a menstrual leave created?"
+      }
+    },
+    {
+      "id": "q-creches",
+      "theme": "social",
+      "text": {
+        "fr": "Faut-il créer un service public de la petite enfance ouvrant des centaines de milliers de places de crèche ?",
+        "en": "Should a public early-childhood service be created, opening hundreds of thousands of nursery places?"
+      }
+    },
+    {
+      "id": "q-nucleaire",
+      "theme": "ecology",
+      "text": {
+        "fr": "Faut-il relancer la construction de réacteurs nucléaires ?",
+        "en": "Should construction of new nuclear reactors be relaunched?"
+      }
+    },
+    {
+      "id": "q-glyphosate",
+      "theme": "ecology",
+      "text": {
+        "fr": "Faut-il interdire le glyphosate et les néonicotinoïdes, plutôt que se limiter à réduire l'usage des pesticides ?",
+        "en": "Should glyphosate and neonicotinoids be banned outright, rather than merely reducing pesticide use?"
+      }
+    },
+    {
+      "id": "q-dpe",
+      "theme": "ecology",
+      "text": {
+        "fr": "Faut-il supprimer les obligations de rénovation énergétique qui pèsent sur les logements les moins performants ?",
+        "en": "Should the mandatory energy-renovation rules imposed on the least efficient homes be scrapped?"
+      }
+    },
+    {
+      "id": "q-ecologie-economie",
+      "theme": "ecology",
+      "text": {
+        "fr": "Faut-il subordonner les mesures écologiques à leur compatibilité avec la croissance économique ?",
+        "en": "Should environmental measures be made conditional on their compatibility with economic growth?"
+      }
+    },
+    {
+      "id": "q-transports-tva",
+      "theme": "ecology",
+      "text": {
+        "fr": "Faut-il baisser la TVA sur les transports en commun et étendre la gratuité pour les jeunes et les précaires ?",
+        "en": "Should VAT on public transport be cut and free travel extended to young and low-income riders?"
+      }
+    },
+    {
+      "id": "q-ric",
+      "theme": "institutions",
+      "text": {
+        "fr": "Faut-il inscrire dans la Constitution un référendum d'initiative citoyenne ?",
+        "en": "Should a citizen-initiated referendum be written into the constitution?"
+      }
+    },
+    {
+      "id": "q-audiovisuel",
+      "theme": "institutions",
+      "text": {
+        "fr": "Faut-il maintenir un audiovisuel public financé par l'État plutôt que le privatiser ?",
+        "en": "Should public broadcasting stay publicly funded rather than being privatised?"
+      }
+    },
+    {
+      "id": "q-collectivites",
+      "theme": "institutions",
+      "text": {
+        "fr": "Faut-il simplifier l'organisation territoriale et donner davantage de liberté aux collectivités locales ?",
+        "en": "Should the layers of local government be simplified and local authorities given more freedom?"
+      }
+    },
+    {
+      "id": "q-peines-planchers",
+      "theme": "security",
+      "text": {
+        "fr": "Faut-il instaurer des peines minimales obligatoires pour les récidivistes ?",
+        "en": "Should mandatory minimum sentences be introduced for repeat offenders?"
+      }
+    },
+    {
+      "id": "q-reseaux-sociaux",
+      "theme": "security",
+      "text": {
+        "fr": "Faut-il interdire l'accès aux réseaux sociaux avant 15 ans ?",
+        "en": "Should access to social media be banned below the age of 15?"
+      }
+    },
+    {
+      "id": "q-reconnaissance-faciale",
+      "theme": "security",
+      "text": {
+        "fr": "Faut-il interdire la reconnaissance faciale dans l'espace public ?",
+        "en": "Should facial recognition in public spaces be banned?"
+      }
+    },
+    {
+      "id": "q-justice-moyens",
+      "theme": "security",
+      "text": {
+        "fr": "Faut-il augmenter les moyens de la justice et recruter magistrats et greffiers ?",
+        "en": "Should court funding be increased and more judges and clerks hired?"
+      }
+    },
+    {
+      "id": "q-etudiants-medecine",
+      "theme": "health",
+      "text": {
+        "fr": "Faut-il augmenter fortement le nombre d'étudiants en médecine formés chaque année ?",
+        "en": "Should the number of medical students trained each year be sharply increased?"
+      }
+    },
+    {
+      "id": "q-ars",
+      "theme": "health",
+      "text": {
+        "fr": "Faut-il supprimer les agences régionales de santé et réduire l'administration sanitaire ?",
+        "en": "Should the regional health agencies be abolished and health administration cut back?"
+      }
+    },
+    {
+      "id": "q-ame",
+      "theme": "health",
+      "text": {
+        "fr": "Faut-il garantir aux étrangers en situation irrégulière l'accès à une couverture médicale publique ?",
+        "en": "Should undocumented foreigners keep guaranteed access to public medical cover?"
+      }
+    },
+    {
+      "id": "q-asile-ambassades",
+      "theme": "immigration",
+      "text": {
+        "fr": "Faut-il obliger les demandeurs d'asile à déposer leur demande depuis les ambassades et consulats à l'étranger ?",
+        "en": "Should asylum seekers be required to file their claim from embassies and consulates abroad?"
+      }
+    },
+    {
+      "id": "q-expulsions",
+      "theme": "immigration",
+      "text": {
+        "fr": "Faut-il expulser systématiquement les étrangers condamnés ou considérés comme radicalisés ?",
+        "en": "Should convicted or radicalised foreign nationals be systematically deported?"
+      }
+    },
+    {
+      "id": "q-droit-du-sol",
+      "theme": "immigration",
+      "text": {
+        "fr": "Faut-il garantir la nationalité à tous les enfants nés sur le territoire ?",
+        "en": "Should citizenship be guaranteed to every child born on national soil?"
+      }
+    },
+    {
+      "id": "q-schengen",
+      "theme": "europe",
+      "text": {
+        "fr": "Faut-il réserver la libre circulation dans l'espace Schengen aux seuls ressortissants européens ?",
+        "en": "Should free movement in the Schengen area be restricted to European nationals only?"
+      }
+    },
+    {
+      "id": "q-superprofits",
+      "theme": "europe",
+      "text": {
+        "fr": "Faut-il taxer les superprofits des grandes entreprises à l'échelle européenne ?",
+        "en": "Should windfall profits of large companies be taxed at European level?"
+      }
+    }
+  ]
+}

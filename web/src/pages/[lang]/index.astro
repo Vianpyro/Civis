@@ -1,0 +1,111 @@
+---
+// The blind questionnaire. It imports the questions file and nothing else:
+// no programs, no positions, no party data reaches this page's bundle.
+import Base from "../../layouts/Base.astro";
+import questions from "../../../../content/questions/fr-2027.json";
+import { CHOICE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
+
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const t = T[lang];
+const labels = CHOICE_LABELS[lang];
+const themes = THEMES[lang];
+const api = import.meta.env.PUBLIC_CIVIS_API ?? "http://127.0.0.1:8787";
+const items = questions.questions;
+---
+
+<Base lang={lang} page="" title={t.title}>
+  <h1>{t.title}</h1>
+  <p class="tagline">{t.tagline}</p>
+  <p class="muted">{t.intro}</p>
+
+  <form id="questionnaire" data-api={api} data-lang={lang}>
+    {
+      items.map((question, index) => (
+        <fieldset class="question">
+          <legend>
+            <span class="theme">{themes[question.theme]}</span> · {index + 1}
+          </legend>
+          <p id={`label-${question.id}`}>{question.text[lang]}</p>
+          <div class="choices" role="group" aria-labelledby={`label-${question.id}`}>
+            {labels.map((label, choice) => (
+              <label>
+                <input type="radio" name={question.id} value={choice} />
+                <span>{label}</span>
+              </label>
+            ))}
+            <label>
+              <input type="radio" name={question.id} value="" checked />
+              <span>{t.skip}</span>
+            </label>
+          </div>
+        </fieldset>
+      ))
+    }
+
+    <div class="sticky">
+      <p aria-live="polite" id="progress" class="muted" style="margin:0">
+        {t.progress(0, items.length)}
+      </p>
+      <label style="display:flex;gap:.5rem;align-items:center">
+        <input type="checkbox" id="aggregate" checked />
+        <span>{t.optout}</span>
+      </label>
+      <button type="submit">{t.submit}</button>
+    </div>
+    <p class="muted" style="font-size:.9rem">{t.optoutHelp}</p>
+    <p class="muted" id="warning" role="alert" hidden>{t.incomplete}</p>
+  </form>
+</Base>
+
+<script>
+  const form = document.getElementById("questionnaire");
+  const progress = document.getElementById("progress");
+  const warning = document.getElementById("warning");
+  const { api, lang } = form.dataset;
+  const total = form.querySelectorAll("fieldset.question").length;
+
+  const answered = () =>
+    [...new FormData(form).entries()].filter(([key, value]) => key !== "aggregate" && value !== "");
+
+  form.addEventListener("change", () => {
+    const done = answered().length;
+    progress.textContent =
+      lang === "fr"
+        ? `${done} réponse${done > 1 ? "s" : ""} sur ${total}`
+        : `${done} of ${total} answered`;
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const entries = answered();
+    if (entries.length === 0) {
+      warning.hidden = false;
+      return;
+    }
+
+    const scale = [-1, -0.5, 0, 0.5, 1];
+    const answers = Object.fromEntries(entries.map(([id, value]) => [id, scale[Number(value)]]));
+
+    if (document.getElementById("aggregate").checked) {
+      // One independent request per answer, in random order. Nothing on the wire
+      // links them: no session, no id, no timestamp, and the server stores only
+      // counters. ponytail: a shared source IP is still a correlation ceiling we
+      // do not control from the client — a relay in front of the API is the exit.
+      for (const [id, value] of entries.sort(() => Math.random() - 0.5)) {
+        fetch(`${api}/counts`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ question: id, choice: Number(value) }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    }
+
+    sessionStorage.setItem("civis:answers", JSON.stringify(answers));
+    location.href = `/${lang}/results`;
+  });
+</script>

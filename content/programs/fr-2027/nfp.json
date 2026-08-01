@@ -1,0 +1,122 @@
+{
+  "election": "fr-2027",
+  "party": { "id": "nfp", "name": "Nouveau Front Populaire", "short": "NFP" },
+  "source_id": "nfp-contrat-legislature-2024",
+  "points": [
+    {
+      "id": "nfp-prix-bloques",
+      "theme": "economy",
+      "quote": "Bloquer les prix des biens de première nécessité dans l'alimentation, l'énergie et les carburants par décret"
+    },
+    {
+      "id": "nfp-smic-1600",
+      "theme": "economy",
+      "quote": "Augmenter les salaires par le passage du SMIC à 1600€ net"
+    },
+    {
+      "id": "nfp-isf",
+      "theme": "economy",
+      "quote": "Rétablir un impôt de solidarité sur la fortune (ISF) renforcé avec un volet climatique"
+    },
+    {
+      "id": "nfp-superprofits",
+      "theme": "europe",
+      "quote": "Généraliser de la taxation des superprofits au niveau européen"
+    },
+    {
+      "id": "nfp-protectionnisme",
+      "theme": "europe",
+      "quote": "Instaurer un protectionnisme écologique et social aux frontières de l'Europe"
+    },
+    {
+      "id": "nfp-retraites-abrogation",
+      "theme": "social",
+      "quote": "Abroger immédiatement les décrets d'application de la réforme d'Emmanuel Macron passant l'âge de départ à la retraite à 64 ans"
+    },
+    {
+      "id": "nfp-creches",
+      "theme": "social",
+      "quote": "Garantir l'accès à chaque famille à un mode de garde adapté grâce à un service public de la petite enfance ouvrant 500 000 places en crèches"
+    },
+    {
+      "id": "nfp-egalite-salariale",
+      "theme": "social",
+      "quote": "Instaurer l'égalité salariale et créer un congé menstruel dans les entreprises et administrations"
+    },
+    {
+      "id": "nfp-fonctionnaires",
+      "theme": "social",
+      "quote": "Lancer le rattrapage des postes manquants de fonctionnaires à l'hôpital public, dans le soin et le médico-social, à l'école publique, dans la justice, dans les services et les agences de l'État"
+    },
+    {
+      "id": "nfp-services-sans-nationalite",
+      "theme": "social",
+      "quote": "Garantir l'accès aux services publics à toutes et tous sans condition de nationalité et sur tout le territoire par un plan d'investissement"
+    },
+    {
+      "id": "nfp-isolation-logements",
+      "theme": "ecology",
+      "quote": "Assurer l'isolation complète des logements, en renforçant les aides pour tous les ménages et garantissant leur prise en charge complète pour les ménages modestes"
+    },
+    {
+      "id": "nfp-neutralite-carbone",
+      "theme": "ecology",
+      "quote": "Mettre en place un plan climat visant la neutralité carbone en 2050"
+    },
+    {
+      "id": "nfp-glyphosate",
+      "theme": "ecology",
+      "quote": "Rétablir le plan Ecophyto, interdire le glyphosate et les néonicotinoïdes avec accompagnement financier des paysans concernés"
+    },
+    {
+      "id": "nfp-transports",
+      "theme": "ecology",
+      "quote": "baisser la TVA sur la tarification des transports en commun à 5,5 %"
+    },
+    {
+      "id": "nfp-classes",
+      "theme": "education",
+      "quote": "Réduire les effectifs par classe pour faire mieux que la moyenne européenne de 19 élèves"
+    },
+    {
+      "id": "nfp-ric",
+      "theme": "institutions",
+      "quote": "Instaurer le référendum d'initiative citoyenne (RIC)"
+    },
+    {
+      "id": "nfp-audiovisuel-public",
+      "theme": "institutions",
+      "quote": "Garantir la pérennité d'un service public de l'audiovisuel en instaurant un financement durable, lisible, socialement juste et en garantissant son indépendance"
+    },
+    {
+      "id": "nfp-reconnaissance-faciale",
+      "theme": "security",
+      "quote": "Interdire la reconnaissance faciale et évaluer de manière indépendante les dispositifs de vidéosurveillance"
+    },
+    {
+      "id": "nfp-justice-moyens",
+      "theme": "security",
+      "quote": "Augmenter les moyens de la justice pour garantir un traitement juste et dans un délai raisonnable de l'ensemble des procédures"
+    },
+    {
+      "id": "nfp-ame",
+      "theme": "health",
+      "quote": "Garantir l'accès à l'aide médicale d'État"
+    },
+    {
+      "id": "nfp-medicament-public",
+      "theme": "health",
+      "quote": "Créer un pôle public du médicament avec renforcement des obligations de stocks"
+    },
+    {
+      "id": "nfp-droit-du-sol",
+      "theme": "immigration",
+      "quote": "Garantir le droit du sol intégral pour les enfants nés en France"
+    },
+    {
+      "id": "nfp-asile-travail",
+      "theme": "immigration",
+      "quote": "Assurer un accompagnement social et une autorisation de travailler pour les demandeurs d'asile"
+    }
+  ]
+}

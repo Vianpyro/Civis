@@ -1,0 +1,122 @@
+{
+  "election": "fr-2027",
+  "party": { "id": "rn", "name": "Rassemblement National", "short": "RN" },
+  "source_id": "rn-programme-2024",
+  "points": [
+    {
+      "id": "rn-tva-energie",
+      "theme": "economy",
+      "quote": "Baisse de la TVA sur l'ensemble des produits énergétiques"
+    },
+    {
+      "id": "rn-heritage",
+      "theme": "economy",
+      "quote": "Supprimer les impôts sur l'héritage direct pour les familles modestes et les classes moyennes"
+    },
+    {
+      "id": "rn-ir-jeunes",
+      "theme": "economy",
+      "quote": "Supprimer l'impôt sur le revenu des jeunes de moins de 30 ans"
+    },
+    {
+      "id": "rn-prix-agriculteurs",
+      "theme": "economy",
+      "quote": "Garantir des prix rémunérateurs pour les agriculteurs"
+    },
+    {
+      "id": "rn-manger-francais",
+      "theme": "economy",
+      "quote": "obligeant les cantines à utiliser 80 % de produits agricoles français à l'horizon 2027"
+    },
+    {
+      "id": "rn-retraites-abrogation",
+      "theme": "social",
+      "quote": "Abroger la réforme des retraites de Macron"
+    },
+    {
+      "id": "rn-depense-sociale",
+      "theme": "social",
+      "quote": "Réduire la dépense sociale par la mise en place de la priorité nationale"
+    },
+    {
+      "id": "rn-nucleaire-marie-curie",
+      "theme": "ecology",
+      "quote": "Lancer le plan Marie Curie de relance du nucléaire (EPR, SMR, réacteurs à neutrons rapides)"
+    },
+    {
+      "id": "rn-dpe-abrogation",
+      "theme": "ecology",
+      "quote": "Abroger toutes les interdictions et obligations liées aux DPE (travaux, mise en location...)"
+    },
+    {
+      "id": "rn-relocalisation-carbone",
+      "theme": "ecology",
+      "quote": "Réduire l'empreinte carbone de la France en soutenant les relocalisations industrielles"
+    },
+    {
+      "id": "rn-enseignant-revalorisation",
+      "theme": "education",
+      "quote": "Revaloriser le métier d'enseignant du recrutement à la fin de la carrière"
+    },
+    {
+      "id": "rn-ric",
+      "theme": "institutions",
+      "quote": "Instaurer dans la Constitution un RIC législatif"
+    },
+    {
+      "id": "rn-audiovisuel-privatisation",
+      "theme": "institutions",
+      "quote": "Privatiser l'audiovisuel public"
+    },
+    {
+      "id": "rn-agences-rationalisation",
+      "theme": "institutions",
+      "quote": "un plan de rationalisation des agences publiques de l'Etat"
+    },
+    {
+      "id": "rn-peines-planchers",
+      "theme": "security",
+      "quote": "des peines planchers pour les récidivistes, les atteintes aux personnes dépositaires d'une mission de services publics et le trafic de drogue"
+    },
+    {
+      "id": "rn-police-municipale",
+      "theme": "security",
+      "quote": "police municipale pour les communes de plus de 10 000 habitants"
+    },
+    {
+      "id": "rn-prisons",
+      "theme": "security",
+      "quote": "Lancer enfin la construction effective des places de prison dont la France a besoin"
+    },
+    {
+      "id": "rn-ars-suppression",
+      "theme": "health",
+      "quote": "Supprimer les Agences Régionales de Santé"
+    },
+    {
+      "id": "rn-numerus-apertus",
+      "theme": "health",
+      "quote": "Augmenter le nombre d'étudiants en médecine (fin du numerus apertus)"
+    },
+    {
+      "id": "rn-priorite-nationale",
+      "theme": "immigration",
+      "quote": "Réserver les allocations familiales aux Français et conditionner à 5 années de travail en France l'accès aux prestations sociales non-contributives comme le RSA"
+    },
+    {
+      "id": "rn-asile-ambassades",
+      "theme": "immigration",
+      "quote": "Instaurer l'obligation de dépôt des demandes d'asile dans les ambassades et consulats"
+    },
+    {
+      "id": "rn-schengen",
+      "theme": "europe",
+      "quote": "réserver la libre-circulation Schengen aux seuls ressortissants européens"
+    },
+    {
+      "id": "rn-prix-electricite",
+      "theme": "europe",
+      "quote": "Sortie des règles européennes de fixation des prix de l'électricité"
+    }
+  ]
+}

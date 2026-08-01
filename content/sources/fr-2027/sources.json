@@ -1,0 +1,30 @@
+[
+  {
+    "id": "nfp-contrat-legislature-2024",
+    "party": "nfp",
+    "title": "Nouveau Front Populaire — Contrat de législature",
+    "published": "2024-06-14",
+    "url": "https://lafranceinsoumise.fr/wp-content/uploads/2024/06/Programme-nouveaufrontpopulaire.pdf"
+  },
+  {
+    "id": "ensemble-programme-2024",
+    "party": "ensemble",
+    "title": "Ensemble pour la République — Projet pour les élections législatives",
+    "published": "2024-06-20",
+    "url": "https://doc.ensemble-2024.fr/programme-legislatives-24.pdf"
+  },
+  {
+    "id": "rn-programme-2024",
+    "party": "rn",
+    "title": "Rassemblement National — Programme législatives",
+    "published": "2024-06-24",
+    "url": "https://rassemblementnational.fr/documents/202406-programme.pdf"
+  },
+  {
+    "id": "lr-nos-idees",
+    "party": "lr",
+    "title": "Les Républicains — Nos idées",
+    "published": null,
+    "url": "https://republicains.fr/nos-idees/"
+  }
+]

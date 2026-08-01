@@ -1,0 +1,69 @@
+name: sources
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Re-download every declared document, refresh its fingerprint, and verify that
+  # every committed quote still appears verbatim in the document it cites. A party
+  # editing its programme surfaces as a one-line diff in one .sha256 file.
+  sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - run: python -m pipeline.run --election fr-2027 --step fetch
+      - run: python -m pipeline.check
+
+      - name: Open a pull request if a document moved
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git diff --quiet -- content/sources && exit 0
+          branch="sources/$(date -u +%Y-%m-%d)"
+          git config user.name  "civis-bot"
+          git config user.email "civis-bot@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add content/sources
+          git commit -m "content: official documents changed upstream"
+          git push -u origin "$branch"
+          # A changed fingerprint means the programme itself may have changed, so
+          # the questions derived from it need re-reading. That is a human's call.
+          gh pr create --fill --title "Un document officiel a changé" --body \
+            "Une ou plusieurs empreintes ont changé. Relire les questions qui citent ces documents avant de fusionner."
+
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: pip install -r pipeline/requirements.txt
+      # Structural content checks run without the documents; quote verification is
+      # the `sources` job's responsibility and is reported as skipped here.
+      - run: python -m pipeline.check
+      - run: npm ci && npm test && npm run build
+        working-directory: web
+      - run: cargo test
+        working-directory: api

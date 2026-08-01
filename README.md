@@ -1,79 +1,131 @@
 # 🏛️ Civis
 
-**Making politics accessible, factual, and participatory.**
+**Un questionnaire politique à l'aveugle.**
 
-Civis is an open-source civic platform that helps citizens discover their political alignment without bias or effort, by comparing their opinions with actual party programs.
+Civis présente des propositions tirées des programmes officiels **sans dire de
+qui elles viennent**. Vous vous positionnez, et l'affiliation n'est révélée
+qu'à la fin.
 
-## 🎯 Mission
+## Pourquoi
 
-Give every citizen the ability to position themselves on political ideas through an automated comparison with real party platforms, making politics accessible and increasing civic participation, especially among young people.
+Beaucoup de gens votent pour une étiquette avant de voter pour des idées. Retirer
+l'étiquette pendant qu'on se positionne, c'est retirer le biais d'appartenance.
+Ce n'est pas un sondage d'opinion : l'objectif est que vous découvriez vos
+propres réponses, pas que nous mesurions les vôtres.
 
-## 🌟 Vision
+Deux conséquences qui gouvernent tout le reste :
 
-Civis aims to become a neutral, open-source civic platform that:
+- **Aucun nom de parti, logo, couleur ou indice** n'atteint le navigateur avant
+  la dernière réponse. C'est structurel, pas déclaratif : le fichier de
+  questions ne contient aucune donnée de parti, donc la page du questionnaire ne
+  peut pas en révéler.
+- **Aucune statistique agrégée pendant le questionnaire.** Afficher « 78 % sont
+  d'accord » avant que vous ayez répondu réintroduit exactement le biais de
+  conformité que l'outil sert à supprimer.
 
-- Simplifies access to political information
-- Values individual reflection
-- Encourages informed citizenship
-- Helps parties understand voter priorities
+## Vie privée
 
-## 💡 Core Values
+Aucun résultat individuel n'est stocké. Pas de compte, pas de session, pas de
+cookie, pas d'analytics tiers.
 
-- **Neutrality** — No affiliation or bias
-- **Transparency** — Open algorithms and sources
-- **Accessibility** — Clear, multilingual, inclusive interface
-- **Civic Education** — Users learn while engaging
-- **Participation** — More informed citizens = stronger democracy
+Si vous acceptez de contribuer aux statistiques (activé par défaut, désactivable
+d'une case), **chaque réponse part dans une requête indépendante**, sans
+identifiant, sans horodatage et sans lien avec les autres. Le serveur n'a aucune
+colonne permettant de rapprocher deux réponses. C'est ce qui maintient le projet
+hors du champ de l'article 9 du RGPD : nous ne constituons jamais un profil
+d'opinions politiques, même transitoirement. Refuser n'envoie rien du tout.
 
-## 🔧 Technology Stack
+## Vérifiabilité
 
-- **Frontend:** Astro (fast static HTML + i18n)
-- **Backend:** Rust (REST API, matching logic, security)
-- **Data & Analysis:** Python (scraping, NLP)
-- **Database:** PostgreSQL (strict relational structure)
-- **Infrastructure:** Docker Compose (easily portable)
+Chaque question porte l'URL du document officiel dont elle dérive et la citation
+exacte, affichées sur la page de résultats. La CI échoue si une citation
+n'apparaît pas **mot pour mot** dans le document qu'elle cite — la neutralité est
+vérifiée par une machine, pas affirmée dans un README.
 
-## 🚀 How It Works
+Les empreintes SHA-256 des documents sont commitées. Quand un parti republie son
+programme, une ligne change dans un fichier, une pull request s'ouvre, et
+l'historique git montre publiquement ce qui a bougé et quand.
 
-1. **Political Data Collection** — Programs are extracted and classified by theme (economy, ecology, society, etc.)
-2. **Interactive Questionnaire** — Users answer simple questions based on real political statements
-3. **Smart Matching** — Our algorithm calculates affinity scores between user opinions and party positions
-4. **Transparent Results** — Clear breakdown of convergences and divergences, with optional detailed report
+## Architecture
 
-## 📦 Project Components
+```
+content/    JSON versionné — git est la base de données des questions
+pipeline/   Python : téléchargement, empreintes, extraction, génération LLM hors-ligne
+web/        Astro statique, i18n fr/en, scoring intégralement côté client
+api/        Rust + axum + SQLite : deux endpoints de compteurs anonymes
+```
 
-| Domain | Description | Technology |
-|--------|-------------|------------|
-| **Data Collection** | Automated extraction and thematic classification of political programs | Python + NLP |
-| **Matching Engine** | Algorithm calculating opinion proximity between users and parties | Rust |
-| **User Interface** | Clear, fast, multilingual, user-centered questionnaire | Astro |
-| **Transparency** | Normalized PostgreSQL database, published sources and methods | PostgreSQL + Documentation |
+| Domaine | Rôle | Technologie |
+|---|---|---|
+| Contenu | Programmes, questions, empreintes, historique diffable | Git + JSON |
+| Pipeline | Fetch, diff par empreinte, brouillons de questions | Python + API Claude (batch) |
+| Interface | Questionnaire aveugle, scoring, révélation | Astro (statique) |
+| Compteurs | Agrégats anonymes | Rust + SQLite |
 
-## 🗺️ Roadmap
+Il n'y a pas de base de données pour les questions, les programmes ou les
+empreintes : git remplit ce rôle mieux, et son historique est un argument de
+transparence. SQLite ne contient que des entiers. Si la base disparaît, on perd
+des statistiques, jamais le produit.
 
-- **MVP:** France-focused questionnaire with core features
-- **Beta:** Backend automation, frontend refinement, scraping pipeline
-- **v1:** Multi-country support, advanced weighting, analytics
-- **v1+:** Visual comparisons, PDF exports, enhanced data visualization
+## Démarrer
 
-## 🌍 Future Extensions
+```bash
+# Contenu : télécharger les documents officiels et vérifier les citations
+pip install -r pipeline/requirements.txt
+python -m pipeline.run --election fr-2027
+python -m pipeline.check
 
-- Progressive addition of other countries (modular approach)
-- Extension to local societal themes
-- Public API for educational projects and media partners
+# Interface
+cd web && npm install && npm run dev
 
-## 🤝 Contributing
+# Compteurs
+cd api && cargo run
+```
 
-We welcome contributions from developers, political analysts, translators, and civic engagement enthusiasts. Check out our repositories to get started!
+Le front lit l'API à l'adresse `PUBLIC_CIVIS_API` (par défaut
+`http://127.0.0.1:8787`). Il fonctionne sans elle : les agrégats disparaissent,
+le questionnaire et le score restent entiers.
 
-## 📄 License
+### Vérifications
 
-Open-source — details in individual repository licenses.
+```bash
+python -m pipeline.check          # cohérence du contenu, citations mot pour mot
+cd web && npm test                # scoring
+cd api && cargo test              # compteurs
+```
 
-## 🔗 Get Involved
+### Génération des questions
 
-Interested in making democracy more accessible? Join us in building a tool that empowers citizens worldwide.
+```bash
+export ANTHROPIC_API_KEY=...
+python -m pipeline.run --step generate
+```
 
----
+Un lot est envoyé à l'API Claude hors-ligne et écrit un brouillon dans
+`review/`. **Rien n'entre dans `content/questions/` sans relecture humaine**, et
+aucun appel LLM n'a lieu à l'exécution du site.
 
-*Civis: Because informed citizens make better decisions.*
+## État
+
+MVP présidentielle française 2027. Les programmes 2027 n'étant pas encore
+publiés, le jeu de données démarre sur les derniers documents officiels
+réellement parus (législatives 2024, pages de programme officielles) — voir
+[content/README.md](content/README.md). Le schéma accueille d'autres pays sans
+migration ; aucune couche d'abstraction ne sera écrite avant le deuxième pays.
+
+## Accessibilité
+
+Le questionnaire est un formulaire HTML natif : groupes de boutons radio dans
+des `fieldset` légendés, navigation clavier complète, focus toujours visible,
+progression annoncée en `aria-live`. Un outil civique inutilisable au lecteur
+d'écran n'est pas un outil civique.
+
+## Contribuer
+
+Les corrections de contenu comptent autant que le code : une citation tronquée,
+une question orientée, une position mal attribuée sont des bugs. Le schéma et
+les invariants sont décrits dans [content/README.md](content/README.md).
+
+## Licence
+
+Voir [LICENSE](LICENSE).

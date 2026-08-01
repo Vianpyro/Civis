@@ -1,0 +1,112 @@
+{
+  "election": "fr-2027",
+  "party": { "id": "ensemble", "name": "Ensemble pour la République", "short": "Ensemble" },
+  "source_id": "ensemble-programme-2024",
+  "points": [
+    {
+      "id": "ens-regle-or-impots",
+      "theme": "economy",
+      "quote": "Nous respecterons une règle d'or anti-hausse d'impôt pour les Français"
+    },
+    {
+      "id": "ens-salaires-primes",
+      "theme": "economy",
+      "quote": "Nous libèrerons les augmentations de salaires entre le SMIC et 2 500 € nets en réformant les aides aux entreprises et la prime d'activité."
+    },
+    {
+      "id": "ens-prix-remunerateurs",
+      "theme": "economy",
+      "quote": "Nous mettrons en place des prix rémunérateurs pour les agriculteurs."
+    },
+    {
+      "id": "ens-simplification-tpe",
+      "theme": "economy",
+      "quote": "Nous irons plus loin dans la simplification administrative pour les TPE et les PME"
+    },
+    {
+      "id": "ens-retraites-inflation",
+      "theme": "social",
+      "quote": "Nous revaloriserons les retraites pour suivre l'inflation et protéger le pouvoir d'achat des 17 millions de retraités"
+    },
+    {
+      "id": "ens-testing-discrimination",
+      "theme": "social",
+      "quote": "Nous généraliserons la pratique du testing pour lutter contre les discriminations à l'embauche."
+    },
+    {
+      "id": "ens-nucleaire-14-epr",
+      "theme": "ecology",
+      "quote": "Nous mettrons en chantier 14 nouveaux réacteurs nucléaires"
+    },
+    {
+      "id": "ens-pesticides-50",
+      "theme": "ecology",
+      "quote": "Nous continuerons à réduire l'usage des pesticides de 50 % d'ici 2030"
+    },
+    {
+      "id": "ens-leasing-social",
+      "theme": "ecology",
+      "quote": "Nous proposerons chaque année 100 000 véhicules électriques en leasing social"
+    },
+    {
+      "id": "ens-snu",
+      "theme": "education",
+      "quote": "Nous généraliserons le service national universel d'ici 2026 pour chaque jeune de 16 ans ou en classe de seconde"
+    },
+    {
+      "id": "ens-remplacement-absences",
+      "theme": "education",
+      "quote": "Nous organiserons le remplacement systématique des absences pour regagner des heures d'enseignement."
+    },
+    {
+      "id": "ens-millefeuille",
+      "theme": "institutions",
+      "quote": "Nous simplifierons le millefeuille territorial en poursuivant la déconcentration de l'État dans les territoires"
+    },
+    {
+      "id": "ens-france-services",
+      "theme": "institutions",
+      "quote": "Nous ouvrirons une maison France services dans chaque canton, à 20 minutes de chez soi, y compris en ruralité."
+    },
+    {
+      "id": "ens-excuse-minorite",
+      "theme": "security",
+      "quote": "Nous reverrons l'excuse de minorité pour les jeunes délinquants afin de casser la récidive et le sentiment d'impunité."
+    },
+    {
+      "id": "ens-reseaux-sociaux-15",
+      "theme": "security",
+      "quote": "Nous interdirons l'accès aux réseaux sociaux avant 15 ans"
+    },
+    {
+      "id": "ens-numerus-clausus",
+      "theme": "health",
+      "quote": "Nous ferons reculer les déserts médicaux en doublant le nombre de médecins en formation chaque année grâce à la suppression du numerus clausus"
+    },
+    {
+      "id": "ens-fauteuils-roulants",
+      "theme": "health",
+      "quote": "Nous permettrons d'ici la fin de l'année le remboursement intégral des fauteuils roulants, électriques et manuels"
+    },
+    {
+      "id": "ens-expulsions",
+      "theme": "immigration",
+      "quote": "Nous continuerons à expulser du territoire national tout étranger délinquant ou radicalisé qui représente une menace à l'ordre public."
+    },
+    {
+      "id": "ens-accueil-qualifies",
+      "theme": "immigration",
+      "quote": "Nous continuerons à accueillir des chercheurs de renom, des médecins, des étudiants à fort potentiel, tout comme les travailleurs qualifiés"
+    },
+    {
+      "id": "ens-otan",
+      "theme": "europe",
+      "quote": "Nous resterons dans l'OTAN et nous maintiendrons la dissuasion nucléaire."
+    },
+    {
+      "id": "ens-budget-militaire",
+      "theme": "europe",
+      "quote": "Nous doublerons d'ici 2030 le budget militaire de la nation, conformément à la loi de programmation militaire"
+    }
+  ]
+}

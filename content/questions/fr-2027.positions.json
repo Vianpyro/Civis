@@ -1,0 +1,82 @@
+{
+  "q-isf": [
+    { "point": "nfp-isf", "stance": 1 },
+    { "point": "ens-regle-or-impots", "stance": -1 },
+    { "point": "lr-depense-publique", "stance": -1 }
+  ],
+  "q-smic": [
+    { "point": "nfp-smic-1600", "stance": 1 },
+    { "point": "ens-salaires-primes", "stance": -1 }
+  ],
+  "q-tva-energie": [{ "point": "rn-tva-energie", "stance": 1 }],
+  "q-prix-agriculteurs": [
+    { "point": "rn-prix-agriculteurs", "stance": 1 },
+    { "point": "ens-prix-remunerateurs", "stance": 1 }
+  ],
+  "q-succession": [{ "point": "rn-heritage", "stance": 1 }],
+  "q-retraite-64": [
+    { "point": "nfp-retraites-abrogation", "stance": 1 },
+    { "point": "rn-retraites-abrogation", "stance": 1 }
+  ],
+  "q-fonctionnaires": [
+    { "point": "nfp-fonctionnaires", "stance": 1 },
+    { "point": "rn-agences-rationalisation", "stance": -1 },
+    { "point": "lr-depense-publique", "stance": -1 }
+  ],
+  "q-prestations-nationalite": [
+    { "point": "rn-priorite-nationale", "stance": 1 },
+    { "point": "nfp-services-sans-nationalite", "stance": -1 }
+  ],
+  "q-egalite-salariale": [{ "point": "nfp-egalite-salariale", "stance": 1 }],
+  "q-creches": [{ "point": "nfp-creches", "stance": 1 }],
+  "q-nucleaire": [
+    { "point": "ens-nucleaire-14-epr", "stance": 1 },
+    { "point": "rn-nucleaire-marie-curie", "stance": 1 }
+  ],
+  "q-glyphosate": [
+    { "point": "nfp-glyphosate", "stance": 1 },
+    { "point": "ens-pesticides-50", "stance": -1 }
+  ],
+  "q-dpe": [
+    { "point": "rn-dpe-abrogation", "stance": 1 },
+    { "point": "nfp-isolation-logements", "stance": -1 }
+  ],
+  "q-ecologie-economie": [
+    { "point": "lr-ecologie-conciliation", "stance": 1 },
+    { "point": "nfp-neutralite-carbone", "stance": -1 }
+  ],
+  "q-transports-tva": [{ "point": "nfp-transports", "stance": 1 }],
+  "q-ric": [
+    { "point": "nfp-ric", "stance": 1 },
+    { "point": "rn-ric", "stance": 1 }
+  ],
+  "q-audiovisuel": [
+    { "point": "nfp-audiovisuel-public", "stance": 1 },
+    { "point": "rn-audiovisuel-privatisation", "stance": -1 }
+  ],
+  "q-collectivites": [
+    { "point": "ens-millefeuille", "stance": 1 },
+    { "point": "lr-libertes-locales", "stance": 1 }
+  ],
+  "q-peines-planchers": [{ "point": "rn-peines-planchers", "stance": 1 }],
+  "q-reseaux-sociaux": [{ "point": "ens-reseaux-sociaux-15", "stance": 1 }],
+  "q-reconnaissance-faciale": [{ "point": "nfp-reconnaissance-faciale", "stance": 1 }],
+  "q-justice-moyens": [{ "point": "nfp-justice-moyens", "stance": 1 }],
+  "q-etudiants-medecine": [
+    { "point": "ens-numerus-clausus", "stance": 1 },
+    { "point": "rn-numerus-apertus", "stance": 1 }
+  ],
+  "q-ars": [
+    { "point": "rn-ars-suppression", "stance": 1 },
+    { "point": "nfp-fonctionnaires", "stance": -1 }
+  ],
+  "q-ame": [{ "point": "nfp-ame", "stance": 1 }],
+  "q-asile-ambassades": [{ "point": "rn-asile-ambassades", "stance": 1 }],
+  "q-expulsions": [{ "point": "ens-expulsions", "stance": 1 }],
+  "q-droit-du-sol": [{ "point": "nfp-droit-du-sol", "stance": 1 }],
+  "q-schengen": [{ "point": "rn-schengen", "stance": 1 }],
+  "q-superprofits": [
+    { "point": "nfp-superprofits", "stance": 1 },
+    { "point": "ens-regle-or-impots", "stance": -1 }
+  ]
+}
