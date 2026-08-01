@@ -82,9 +82,34 @@ cd web && npm install && npm run dev
 cd api && cargo run
 ```
 
-Le front lit l'API à l'adresse `PUBLIC_CIVIS_API` (par défaut
-`http://127.0.0.1:8787`). Il fonctionne sans elle : les agrégats disparaissent,
-le questionnaire et le score restent entiers.
+Le front lit l'API à l'adresse `PUBLIC_CIVIS_API` (`web/.env.development` la
+pointe sur `http://127.0.0.1:8787` en développement). **Sans elle, le site est
+complet** : le questionnaire, le score et la révélation sont intégralement
+côté client. Seule la section « réponses des autres participants » disparaît —
+et avec elle la case d'opt-in, puisqu'il n'y aurait nulle part où envoyer quoi
+que ce soit.
+
+## Déploiement
+
+Le site est statique : `.github/workflows/pages.yml` le publie sur GitHub Pages
+à chaque push sur `main`, après avoir fait tourner la vérification de contenu et
+les tests de scoring. Il suffit d'activer Pages avec la source **GitHub Actions**
+(Settings → Pages → Build and deployment → Source).
+
+Sans compteurs, c'est tout : `https://vianpyro.github.io/Civis/` fonctionne de
+bout en bout, on perd les statistiques agrégées et rien d'autre.
+
+Pour brancher les compteurs plus tard, déployer `api/` là où un processus peut
+tourner avec un disque (Fly.io, un VPS, n'importe quoi qui garde un fichier
+SQLite), puis définir la variable de dépôt `PUBLIC_CIVIS_API` sur son URL
+(Settings → Secrets and variables → Actions → Variables). Le prochain build
+fait réapparaître la case d'opt-in et la section des agrégats. L'API a besoin
+de `CIVIS_QUESTIONS` (chemin vers `content/questions/fr-2027.json`), `CIVIS_DB`
+et `CIVIS_ADDR`.
+
+Sur un nom de domaine, mettre `BASE = ""` et `site` dans
+[`web/astro.config.mjs`](web/astro.config.mjs) : tous les liens internes
+dérivent de `BASE_URL`, il n'y a rien d'autre à changer.
 
 ### Vérifications
 

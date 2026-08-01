@@ -1,5 +1,6 @@
 ---
 import "../styles.css";
+import { href } from "../lib/paths.js";
 import { LANGS, T } from "../lib/ui.js";
 
 const { lang, title, page } = Astro.props;
@@ -19,7 +20,7 @@ const t = T[lang];
     <nav class="langs" aria-label={lang === "fr" ? "Langue" : "Language"}>
       {
         LANGS.map((code) => (
-          <a href={`/${code}/${page}`} aria-current={code === lang ? "true" : undefined}>
+          <a href={href(`${code}/${page}`)} aria-current={code === lang ? "true" : undefined}>
             {code.toUpperCase()}
           </a>
         ))

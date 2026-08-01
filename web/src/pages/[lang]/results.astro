@@ -11,6 +11,7 @@ import ensemble from "../../../../content/programs/fr-2027/ensemble.json";
 import lr from "../../../../content/programs/fr-2027/lr.json";
 import nfp from "../../../../content/programs/fr-2027/nfp.json";
 import rn from "../../../../content/programs/fr-2027/rn.json";
+import { API, href } from "../../lib/paths.js";
 import { CHOICE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
 
 export function getStaticPaths() {
@@ -19,7 +20,6 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params;
 const t = T[lang];
-const api = import.meta.env.PUBLIC_CIVIS_API ?? "http://127.0.0.1:8787";
 
 const programs = [ensemble, lr, nfp, rn];
 const sourceById = Object.fromEntries(sources.map((source) => [source.id, source]));
@@ -64,13 +64,13 @@ const scoreInput = Object.fromEntries(
   <h2>{t.detail}</h2>
   <div id="detail"></div>
 
-  <p><a class="button" href={`/${lang}/`}>{t.restart}</a></p>
+  <p><a class="button" href={href(`${lang}/`)}>{t.restart}</a></p>
 
   <script
     type="application/json"
     id="data"
     set:html={JSON.stringify({
-      api,
+      api: API,
       lang,
       parties,
       byQuestion,
@@ -157,28 +157,33 @@ const scoreInput = Object.fromEntries(
     .join("");
 
   // Aggregates arrive after the reveal, never before. A failure here is silent:
-  // the questionnaire result does not depend on the counter service being up.
-  fetch(`${data.api}/counts`)
-    .then((response) => (response.ok ? response.json() : Promise.reject()))
-    .then((counts) => {
-      for (const node of document.querySelectorAll(".aggregate")) {
-        const row = counts[node.dataset.question];
-        const total = row?.reduce((sum, n) => sum + n, 0) ?? 0;
-        if (!total) {
-          node.textContent = t.aggregateEmpty;
-          continue;
+  // the questionnaire result does not depend on the counter service being up —
+  // and a deployment without one simply has no aggregate section.
+  if (!data.api) {
+    for (const node of document.querySelectorAll(".aggregate")) node.remove();
+  } else {
+    fetch(`${data.api}/counts`)
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((counts) => {
+        for (const node of document.querySelectorAll(".aggregate")) {
+          const row = counts[node.dataset.question];
+          const total = row?.reduce((sum, n) => sum + n, 0) ?? 0;
+          if (!total) {
+            node.textContent = t.aggregateEmpty;
+            continue;
+          }
+          node.innerHTML =
+            `<p style="margin:.5rem 0 .25rem"><strong>${escape(t.aggregate)}</strong></p>` +
+            row
+              .map(
+                (n, index) =>
+                  `<p style="margin:.15rem 0">${escape(labels[index])} — ${Math.round(
+                    (n / total) * 100,
+                  )}%</p>`,
+              )
+              .join("");
         }
-        node.innerHTML =
-          `<p style="margin:.5rem 0 .25rem"><strong>${escape(t.aggregate)}</strong></p>` +
-          row
-            .map(
-              (n, index) =>
-                `<p style="margin:.15rem 0">${escape(labels[index])} — ${Math.round(
-                  (n / total) * 100,
-                )}%</p>`,
-            )
-            .join("");
-      }
-    })
-    .catch(() => {});
+      })
+      .catch(() => {});
+  }
 </script>

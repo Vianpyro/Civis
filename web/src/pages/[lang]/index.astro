@@ -3,6 +3,7 @@
 // no programs, no positions, no party data reaches this page's bundle.
 import Base from "../../layouts/Base.astro";
 import questions from "../../../../content/questions/fr-2027.json";
+import { API, href } from "../../lib/paths.js";
 import { CHOICE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
 
 export function getStaticPaths() {
@@ -13,7 +14,6 @@ const { lang } = Astro.params;
 const t = T[lang];
 const labels = CHOICE_LABELS[lang];
 const themes = THEMES[lang];
-const api = import.meta.env.PUBLIC_CIVIS_API ?? "http://127.0.0.1:8787";
 const items = questions.questions;
 ---
 
@@ -22,7 +22,7 @@ const items = questions.questions;
   <p class="tagline">{t.tagline}</p>
   <p class="muted">{t.intro}</p>
 
-  <form id="questionnaire" data-api={api} data-lang={lang}>
+  <form id="questionnaire" data-api={API} data-results={href(`${lang}/results/`)} data-lang={lang}>
     {
       items.map((question, index) => (
         <fieldset class="question">
@@ -50,13 +50,17 @@ const items = questions.questions;
       <p aria-live="polite" id="progress" class="muted" style="margin:0">
         {t.progress(0, items.length)}
       </p>
-      <label style="display:flex;gap:.5rem;align-items:center">
-        <input type="checkbox" id="aggregate" checked />
-        <span>{t.optout}</span>
-      </label>
+      {
+        API && (
+          <label style="display:flex;gap:.5rem;align-items:center">
+            <input type="checkbox" id="aggregate" checked />
+            <span>{t.optout}</span>
+          </label>
+        )
+      }
       <button type="submit">{t.submit}</button>
     </div>
-    <p class="muted" style="font-size:.9rem">{t.optoutHelp}</p>
+    {API && <p class="muted" style="font-size:.9rem">{t.optoutHelp}</p>}
     <p class="muted" id="warning" role="alert" hidden>{t.incomplete}</p>
   </form>
 </Base>
@@ -65,7 +69,7 @@ const items = questions.questions;
   const form = document.getElementById("questionnaire");
   const progress = document.getElementById("progress");
   const warning = document.getElementById("warning");
-  const { api, lang } = form.dataset;
+  const { api, results, lang } = form.dataset;
   const total = form.querySelectorAll("fieldset.question").length;
 
   const answered = () =>
@@ -90,7 +94,9 @@ const items = questions.questions;
     const scale = [-1, -0.5, 0, 0.5, 1];
     const answers = Object.fromEntries(entries.map(([id, value]) => [id, scale[Number(value)]]));
 
-    if (document.getElementById("aggregate").checked) {
+    // No counter service configured means no opt-in was ever offered, so there
+    // is nothing to send and nothing to consent to.
+    if (api && document.getElementById("aggregate")?.checked) {
       // One independent request per answer, in random order. Nothing on the wire
       // links them: no session, no id, no timestamp, and the server stores only
       // counters. ponytail: a shared source IP is still a correlation ceiling we
@@ -106,6 +112,6 @@ const items = questions.questions;
     }
 
     sessionStorage.setItem("civis:answers", JSON.stringify(answers));
-    location.href = `/${lang}/results`;
+    location.href = results;
   });
 </script>

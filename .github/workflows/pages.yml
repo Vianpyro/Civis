@@ -1,0 +1,61 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A deploy in flight is never cancelled: a half-published site is worse than a
+# slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # No counter service by default. The site is complete without one — only
+      # the aggregate section disappears. Point this at a deployed API to
+      # re-enable it; the opt-in checkbox appears with it.
+      PUBLIC_CIVIS_API: ${{ vars.PUBLIC_CIVIS_API }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      # The site ships questions and quotes, so the content check gates the
+      # deploy exactly like it gates a pull request.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - run: python -m pipeline.run --election fr-2027 --step fetch
+      - run: python -m pipeline.check
+      - run: npm test
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
