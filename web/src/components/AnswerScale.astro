@@ -1,0 +1,22 @@
+---
+// The five-position scale and the non-answer for one question. Props only: it
+// imports nothing, so no program data can reach the questionnaire through it.
+const { id, labels, skipLabel } = Astro.props;
+---
+
+<div class="choices" role="group" aria-labelledby={`label-${id}`}>
+  {
+    labels.map((label, choice) => (
+      <label>
+        <input type="radio" name={id} value={choice} />
+        <span>{label}</span>
+      </label>
+    ))
+  }
+</div>
+{/* Out of the five-position group, inside the fieldset: still bound to
+    its question, no longer a sixth position, and never preselected. */}
+<label class="skip">
+  <input type="radio" name={id} value="" />
+  <span>{skipLabel}</span>
+</label>

@@ -1,6 +1,7 @@
 ---
 // The blind questionnaire. It imports the questions file and nothing else:
 // no programs, no positions, no party data reaches this page's bundle.
+import Question from "../../components/Question.astro";
 import Base from "../../layouts/Base.astro";
 import questions from "../../../../content/questions/fr-2027.json";
 import { API, href } from "../../lib/paths.js";
@@ -25,26 +26,15 @@ const items = questions.questions;
   <form id="questionnaire" data-api={API} data-results={href(`${lang}/results/`)} data-lang={lang}>
     {
       items.map((question, index) => (
-        <fieldset class="question">
-          <legend>
-            <span class="theme">{themes[question.theme]}</span> · {index + 1} / {items.length}
-          </legend>
-          <p id={`label-${question.id}`}>{question.text[lang]}</p>
-          <div class="choices" role="group" aria-labelledby={`label-${question.id}`}>
-            {labels.map((label, choice) => (
-              <label>
-                <input type="radio" name={question.id} value={choice} />
-                <span>{label}</span>
-              </label>
-            ))}
-          </div>
-          {/* Out of the five-position group, inside the fieldset: still bound to
-              its question, no longer a sixth position, and never preselected. */}
-          <label class="skip">
-            <input type="radio" name={question.id} value="" />
-            <span>{t.skip}</span>
-          </label>
-        </fieldset>
+        <Question
+          id={question.id}
+          theme={themes[question.theme]}
+          text={question.text[lang]}
+          index={index}
+          total={items.length}
+          labels={labels}
+          skipLabel={t.skip}
+        />
       ))
     }
 

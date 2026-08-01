@@ -1,0 +1,15 @@
+---
+// One question of the questionnaire. Props only: it imports nothing but the
+// scale, so no program data can reach the questionnaire through it.
+import AnswerScale from "./AnswerScale.astro";
+
+const { id, theme, text, index, total, labels, skipLabel } = Astro.props;
+---
+
+<fieldset class="question">
+  <legend>
+    <span class="theme">{theme}</span> · {index + 1} / {total}
+  </legend>
+  <p id={`label-${id}`}>{text}</p>
+  <AnswerScale id={id} labels={labels} skipLabel={skipLabel} />
+</fieldset>
