@@ -24,6 +24,10 @@ jobs:
       # the aggregate section disappears. Point this at a deployed API to
       # re-enable it; the opt-in checkbox appears with it.
       PUBLIC_CIVIS_API: ${{ vars.PUBLIC_CIVIS_API }}
+      # Provenance shown in the footer. Outside CI these stay unset and the
+      # footer says the build is local rather than inventing an id or a date.
+      PUBLIC_CIVIS_COMMIT: ${{ github.sha }}
+      PUBLIC_CIVIS_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +48,9 @@ jobs:
       - run: python -m pipeline.check
       - run: npm test
         working-directory: web
+      # Build date, not render date: computed once here so a rebuild of the same
+      # commit is the only thing that can change it.
+      - run: echo "PUBLIC_CIVIS_BUILD_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
       - run: npm run build
         working-directory: web
       # Blindness guard: reads the compiled questionnaire, never the source, so

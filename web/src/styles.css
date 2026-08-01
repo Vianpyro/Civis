@@ -200,3 +200,17 @@ summary {
   cursor: pointer;
   font-weight: 600;
 }
+
+/* Version apparatus, on every page. It sits after <main>, whose 6rem bottom
+   padding is what keeps the questionnaire's sticky bar from reaching it. */
+footer.version {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}

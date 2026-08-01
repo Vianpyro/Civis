@@ -1,6 +1,6 @@
 ---
 import "../styles.css";
-import { href } from "../lib/paths.js";
+import { BUILD_DATE, CI_RUN_URL, COMMIT, REPO_URL, href } from "../lib/paths.js";
 import { LANGS, T } from "../lib/ui.js";
 
 const { lang, title, page } = Astro.props;
@@ -29,5 +29,12 @@ const t = T[lang];
     <main id="main">
       <slot />
     </main>
+    <footer class="version">
+      <span>
+        {COMMIT && BUILD_DATE ? t.version(COMMIT.slice(0, 7), BUILD_DATE) : t.versionLocal}
+      </span>
+      <a href={REPO_URL}>{t.repository}</a>
+      {CI_RUN_URL && <a href={CI_RUN_URL}>{t.quoteCheck}</a>}
+    </footer>
   </body>
 </html>

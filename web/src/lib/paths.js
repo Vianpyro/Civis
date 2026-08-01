@@ -16,3 +16,19 @@ export const href = (path) => `${BASE}/${path.replace(/^\//, "")}`;
  * opt-in rather than offering to send answers nowhere.
  */
 export const API = (import.meta.env.PUBLIC_CIVIS_API ?? "").replace(/\/$/, "");
+
+/**
+ * Build provenance, injected by .github/workflows/pages.yml.
+ *
+ * Empty outside CI, and the footer then says the build is local. A made-up
+ * commit id or date on the very component that carries provenance would
+ * contradict what that component exists to state, so there is no fallback
+ * value — only a named state.
+ */
+export const COMMIT = import.meta.env.PUBLIC_CIVIS_COMMIT ?? "";
+export const BUILD_DATE = import.meta.env.PUBLIC_CIVIS_BUILD_DATE ?? "";
+
+/** Run that fetched the sources and checked every quote word for word. */
+export const CI_RUN_URL = import.meta.env.PUBLIC_CIVIS_RUN_URL ?? "";
+
+export const REPO_URL = "https://github.com/Vianpyro/Civis";

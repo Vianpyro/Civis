@@ -56,6 +56,10 @@ export const T = {
     supports: "Défend cette mesure",
     opposes: "S'y oppose",
     backToTop: "Retour en haut",
+    version: (commit, date) => `Version ${commit}, construite le ${date}`,
+    versionLocal: "Build local : ni identifiant de commit, ni date de construction",
+    repository: "Dépôt",
+    quoteCheck: "Vérification des citations",
   },
   en: {
     title: "Civis",
@@ -82,5 +86,9 @@ export const T = {
     supports: "Supports this measure",
     opposes: "Opposes it",
     backToTop: "Back to top",
+    version: (commit, date) => `Version ${commit}, built on ${date}`,
+    versionLocal: "Local build: no commit identifier, no build date",
+    repository: "Repository",
+    quoteCheck: "Quote verification",
   },
 };
