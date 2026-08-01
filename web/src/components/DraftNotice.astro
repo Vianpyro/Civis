@@ -1,0 +1,18 @@
+---
+// The restoration notice and the erasure control (DP-09, conditions 2 and 3).
+// Props only: it imports nothing, so nothing can reach the questionnaire
+// through it.
+//
+// The notice is a statement of fact, not an alert: no role, no icon, no tone of
+// warning and no colour (INV-12). It carries no live region either — the
+// progress counter is already one and it announces the restored count; a second
+// announcement of the same event is the verbosity H8 rejects.
+const { restored, clear } = Astro.props;
+---
+
+<div class="draft">
+  <p id="draft-restored" hidden>{restored}</p>
+  {/* Rendered whatever the state of the storage: erasure is available at all
+      times, not only at the moment of a restoration (DP-09, condition 3). */}
+  <button type="button" id="draft-clear">{clear}</button>
+</div>

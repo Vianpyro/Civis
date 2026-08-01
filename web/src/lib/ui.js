@@ -68,6 +68,9 @@ export const T = {
     optout: "Ajouter mes réponses aux statistiques publiques",
     optoutHelp:
       "Chaque réponse est envoyée séparément, sans identifiant, sans horodatage et sans lien avec les autres. Décocher n'envoie rien du tout.",
+    draftRestored:
+      "Les réponses enregistrées dans cet onglet ont été restaurées, avec l'ordre des questions. Elles disparaissent à la fermeture de l'onglet.",
+    draftClear: "Effacer mes réponses",
     results: "Vos résultats",
     noAnswers: "Aucune réponse enregistrée.",
     restart: "Recommencer",
@@ -103,6 +106,9 @@ export const T = {
     optout: "Add my answers to the public statistics",
     optoutHelp:
       "Each answer is sent separately, with no identifier, no timestamp and no link to the others. Unchecking sends nothing at all.",
+    draftRestored:
+      "The answers stored in this tab have been restored, with the question order. They are dropped when the tab is closed.",
+    draftClear: "Erase my answers",
     results: "Your results",
     noAnswers: "No answers recorded.",
     restart: "Start over",

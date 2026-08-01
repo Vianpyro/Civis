@@ -1,9 +1,11 @@
 ---
 // The blind questionnaire. It imports the questions file and nothing else:
 // no programs, no positions, no party data reaches this page's bundle.
+import DraftNotice from "../../components/DraftNotice.astro";
 import Question from "../../components/Question.astro";
 import Base from "../../layouts/Base.astro";
 import questions from "../../../../content/questions/fr-2027.json";
+import { DRAFT_KEY, ORDER_KEY } from "../../lib/draft.js";
 import { API, href } from "../../lib/paths.js";
 import { CHOICE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
 
@@ -50,7 +52,21 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
     document.documentElement.dataset.shuffling = "";
   </script>
 
-  <form id="questionnaire" data-api={API} data-results={href(`${lang}/results/`)} data-lang={lang}>
+  {/* The storage key and the property carrying the order travel from draft.js
+      through the form: the draw below is an inline script and cannot import
+      them, and a second copy of either name would be a copy that drifts. */}
+  <form
+    id="questionnaire"
+    data-api={API}
+    data-results={href(`${lang}/results/`)}
+    data-lang={lang}
+    data-draft={DRAFT_KEY}
+    data-order={ORDER_KEY}
+  >
+    {/* Above the questions, outside the header block: the erasure control is an
+        action, and DP-27 caps the header at five statements and one link. */}
+    <DraftNotice restored={t.draftRestored} clear={t.draftClear} />
+
     {
       items.map((question, index) => (
         <Question
@@ -92,14 +108,40 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
     (() => {
       const form = document.getElementById("questionnaire");
       try {
-        const drawn = [...form.querySelectorAll("fieldset.question")];
+        const questions = [...form.querySelectorAll("fieldset.question")];
 
-        // Fisher-Yates: every permutation equally likely. The counter loop uses a
-        // random comparator for a different purpose; a comparator does not give a
-        // uniform distribution and is not what draws the order here.
-        for (let i = drawn.length - 1; i > 0; i -= 1) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [drawn[i], drawn[j]] = [drawn[j], drawn[i]];
+        // A draft carries the order it was answered in (DT-09), and that order
+        // is applied here, in place of a draw: a draw running afterwards would
+        // overwrite it. Reading storage can throw — private browsing, storage
+        // blocked — and the stored order can be stale; anything unusable falls
+        // back to a draw, which is the questionnaire's normal behaviour.
+        let drawn = null;
+        try {
+          const { draft, order } = form.dataset;
+          const saved = JSON.parse(sessionStorage.getItem(draft) ?? "null")?.[order];
+          if (Array.isArray(saved) && saved.length === questions.length) {
+            const byId = new Map(
+              questions.map((question) => [
+                question.querySelector("input[type=radio]").name,
+                question,
+              ]),
+            );
+            const restored = saved.map((id) => byId.get(id));
+            if (restored.every(Boolean)) drawn = restored;
+          }
+        } catch {
+          /* No readable storage: the questionnaire works, without persistence. */
+        }
+
+        if (!drawn) {
+          drawn = questions;
+          // Fisher-Yates: every permutation equally likely. The counter loop uses a
+          // random comparator for a different purpose; a comparator does not give a
+          // uniform distribution and is not what draws the order here.
+          for (let i = drawn.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [drawn[i], drawn[j]] = [drawn[j], drawn[i]];
+          }
         }
 
         // The nodes are moved, never reordered by a layout property: document
@@ -120,24 +162,90 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
 </Base>
 
 <script>
+  import { DRAFT_KEY, fromDraft, toDraft } from "../../lib/draft.js";
+  import { CHOICES, choiceIndex } from "../../lib/score.js";
+
   const form = document.getElementById("questionnaire");
   const progress = document.getElementById("progress");
   const warning = document.getElementById("warning");
+  const notice = document.getElementById("draft-restored");
   const { api, results, lang } = form.dataset;
-  const total = form.querySelectorAll("fieldset.question").length;
+  const questions = [...form.querySelectorAll("fieldset.question")];
+  const total = questions.length;
+
+  // The order on screen — drawn or restored, settled by the inline script above,
+  // which runs while the document parses and therefore before this module.
+  const order = questions.map((question) => question.querySelector("input[type=radio]").name);
 
   // Nothing is preselected, so an unanswered question is absent from FormData
   // rather than present with an empty value; "skip" is what puts the empty value
   // there. The aggregate checkbox has an id and no name, so it never enters.
   const answered = () => [...new FormData(form).entries()].filter(([, value]) => value !== "");
 
-  form.addEventListener("change", () => {
-    const done = answered().length;
+  // The scale lives in score.js and nowhere else (DT-18): the form stores the
+  // index of a choice, the draft and the results page store its value.
+  const values = (entries) =>
+    Object.fromEntries(entries.map(([id, value]) => [id, CHOICES[Number(value)]]));
+
+  // Storage may be unavailable — private browsing, storage blocked. Every access
+  // goes through here, so what a refusal costs is the draft and nothing else.
+  const withStorage = (use) => {
+    try {
+      return use(sessionStorage);
+    } catch {
+      return null;
+    }
+  };
+
+  const count = (done) => {
     progress.textContent =
       lang === "fr"
         ? `${done} réponse${done > 1 ? "s" : ""} sur ${total}`
         : `${done} of ${total} answered`;
     if (done > 0) warning.hidden = true;
+  };
+
+  // Restoring what the user actually answered, never a preselection (DP-25):
+  // the notice below is what tells the two situations apart.
+  const draft = withStorage((store) => fromDraft(JSON.parse(store.getItem(DRAFT_KEY) ?? "null")));
+  let restored = 0;
+  for (const [id, value] of Object.entries(draft?.answers ?? {})) {
+    const choice = choiceIndex(value); // -1 for anything off the scale
+    const input =
+      choice < 0 ? null : form.querySelector(`input[name="${CSS.escape(id)}"][value="${choice}"]`);
+    if (input) {
+      input.checked = true;
+      restored += 1;
+    }
+  }
+
+  // Only when a restoration actually happened. Nothing to restore is the normal
+  // state of a new session, not an absence to report (INV-14).
+  if (restored > 0) {
+    notice.hidden = false;
+    count(restored);
+  }
+
+  document.getElementById("draft-clear").addEventListener("click", () => {
+    // The radios only: the contribution checkbox is a privacy choice of its own
+    // and erasing answers is not a reason to take it back to its default.
+    for (const input of form.querySelectorAll("input[type=radio]")) input.checked = false;
+    withStorage((store) => store.removeItem(DRAFT_KEY));
+    notice.hidden = true;
+    count(0);
+  });
+
+  form.addEventListener("change", () => {
+    const entries = answered();
+    count(entries.length);
+    // Written on every change, with the order (DT-09). An empty questionnaire
+    // holds no draft: it would restore nothing and would raise the notice over
+    // an empty form.
+    withStorage((store) =>
+      entries.length > 0
+        ? store.setItem(DRAFT_KEY, JSON.stringify(toDraft(values(entries), order)))
+        : store.removeItem(DRAFT_KEY),
+    );
   });
 
   form.addEventListener("submit", (event) => {
@@ -149,8 +257,7 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
       return;
     }
 
-    const scale = [-1, -0.5, 0, 0.5, 1];
-    const answers = Object.fromEntries(entries.map(([id, value]) => [id, scale[Number(value)]]));
+    const answers = values(entries);
 
     // No counter service configured means no opt-in was ever offered, so there
     // is nothing to send and nothing to consent to.
@@ -169,7 +276,12 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
       }
     }
 
-    sessionStorage.setItem("civis:answers", JSON.stringify(answers));
+    // The payload the results page reads, written without the order: dropping
+    // the order is what erases the draft (DP-09, condition 4). Written over,
+    // never removed first — clearing the key here would destroy the payload it
+    // is about to hand over. A blocked storage costs the results page its input,
+    // exactly as it did before the draft existed.
+    withStorage((store) => store.setItem(DRAFT_KEY, JSON.stringify(answers)));
     location.href = results;
   });
 </script>
