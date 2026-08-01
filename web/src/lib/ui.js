@@ -51,8 +51,16 @@ export const T = {
   fr: {
     title: "Civis",
     tagline: "Des propositions issues des programmes officiels. Sans étiquette, jusqu'à la fin.",
-    intro:
-      "Positionnez-vous sur chaque proposition. Aucun parti n'est nommé avant la dernière réponse, et aucune statistique n'est affichée pendant le questionnaire : les deux réintroduiraient le biais que cet outil sert à supprimer.",
+    // The questionnaire header (DP-27): five statements, in this order, 120
+    // characters each at most — the length of the longest statement of the
+    // fr-2027 corpus. The counts are passed in, never written here (K9).
+    header: (proposals, formations) => [
+      "Questionnaire à l'aveugle : positionnez-vous sur chaque proposition.",
+      `${proposals} propositions tirées de documents de ${formations} formations, publiés en 2024, pour un scrutin de 2027.`,
+      "Les énoncés sont nos reformulations des propositions, pas des citations.",
+      "L'ordre est tiré au hasard dans le navigateur, non enregistré ; aucune formation n'est nommée avant la dernière réponse.",
+      "Le questionnaire nécessite JavaScript pour enregistrer les réponses et calculer le résultat.",
+    ],
     progress: (done, total) => `${done} réponse${done > 1 ? "s" : ""} sur ${total}`,
     skip: "Passer",
     submit: "Voir mes résultats",
@@ -81,8 +89,13 @@ export const T = {
   en: {
     title: "Civis",
     tagline: "Proposals taken from official manifestos. No labels until the end.",
-    intro:
-      "Take a position on each proposal. No party is named before your last answer, and no statistics are shown during the questionnaire: either would reintroduce the bias this tool exists to remove.",
+    header: (proposals, formations) => [
+      "Blind questionnaire: take a position on each proposal.",
+      `${proposals} proposals taken from documents of ${formations} formations, published in 2024, for a 2027 election.`,
+      "The statements are our reformulations of the proposals, not quotations.",
+      "The order is drawn at random in the browser and is not recorded; no formation is named before the last answer.",
+      "The questionnaire needs JavaScript to record the answers and compute the result.",
+    ],
     progress: (done, total) => `${done} of ${total} answered`,
     skip: "Skip",
     submit: "See my results",

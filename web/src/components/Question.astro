@@ -7,8 +7,10 @@ const { id, theme, text, index, total, labels, skipLabel } = Astro.props;
 ---
 
 <fieldset class="question">
+  {/* The position marker is its own element because the draw renumbers it in the
+      browser (DP-14): rendered in file order, rewritten after the nodes move. */}
   <legend>
-    <span class="theme">{theme}</span> · {index + 1} / {total}
+    <span class="theme">{theme}</span> · <span class="position">{index + 1} / {total}</span>
   </legend>
   <p id={`label-${id}`}>{text}</p>
   <AnswerScale id={id} labels={labels} skipLabel={skipLabel} />

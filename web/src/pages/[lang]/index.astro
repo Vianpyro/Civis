@@ -16,12 +16,39 @@ const t = T[lang];
 const labels = CHOICE_LABELS[lang];
 const themes = THEMES[lang];
 const items = questions.questions;
+
+// The header states how many formations the corpus covers (DP-27). Counted at
+// build time from the file listing: the figure is read, never copied here (K9).
+// The glob is left lazy and its loaders are never called, so no file under
+// content/programs is opened and nothing of a formation — id, name or acronym —
+// can reach this page (INV-01).
+const formations = Object.keys(import.meta.glob("../../../../content/programs/fr-2027/*.json")).length;
 ---
 
 <Base lang={lang} page="">
   <h1>{t.title}</h1>
-  <p class="tagline">{t.tagline}</p>
-  <p class="muted">{t.intro}</p>
+
+  {/* The header (DP-27): one block, five statements in the fixed order, 120
+      characters each at most. No lower-level heading, no illustration, no action
+      button — the cap is what keeps it from growing back into a landing (DP-07).
+      The link to the methodology page waits for PR-13: a link to a page that
+      does not exist yet would be a dead link. */}
+  <div class="preamble">
+    {t.header(items.length, formations).map((statement) => <p>{statement}</p>)}
+  </div>
+
+  <script is:inline>
+    // The draw below moves DOM nodes and has to land before the first visible
+    // paint (DT-08). Hiding the questions here and showing them again in the
+    // inline script that follows the form is what makes that verifiable: with
+    // the HTML streaming over a slow link, the parser would otherwise paint the
+    // first questions in file order while it waits for the rest.
+    //
+    // Without JavaScript the attribute is never set and the form renders exactly
+    // as it was sent. No control is masked, restyled or replaced: the wrapper is
+    // hidden for the duration of the parse and shown by the same pass (INV-10).
+    document.documentElement.dataset.shuffling = "";
+  </script>
 
   <form id="questionnaire" data-api={API} data-results={href(`${lang}/results/`)} data-lang={lang}>
     {
@@ -57,6 +84,39 @@ const items = questions.questions;
     </div>
     {API && <p class="muted consent-help">{t.optoutHelp}</p>}
   </form>
+
+  <script is:inline>
+    // Draw of the display order (DP-14). Inline and synchronous, right after the
+    // questions it moves: it ships with the HTML instead of costing a request,
+    // and it runs before the browser is free to paint what it has parsed.
+    (() => {
+      const form = document.getElementById("questionnaire");
+      try {
+        const drawn = [...form.querySelectorAll("fieldset.question")];
+
+        // Fisher-Yates: every permutation equally likely. The counter loop uses a
+        // random comparator for a different purpose; a comparator does not give a
+        // uniform distribution and is not what draws the order here.
+        for (let i = drawn.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [drawn[i], drawn[j]] = [drawn[j], drawn[i]];
+        }
+
+        // The nodes are moved, never reordered by a layout property: document
+        // order stays the order on screen, and so does the tab order (INV-17).
+        // Markers are rewritten after the move, so what is shown as "n / 30" is
+        // the position on screen (DP-14). The draw stays in this tab: it is not
+        // stored and never reaches the API (INV-03).
+        const anchor = document.getElementById("warning");
+        drawn.forEach((question, index) => {
+          form.insertBefore(question, anchor);
+          question.querySelector(".position").textContent = `${index + 1} / ${drawn.length}`;
+        });
+      } finally {
+        delete document.documentElement.dataset.shuffling;
+      }
+    })();
+  </script>
 </Base>
 
 <script>

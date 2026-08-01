@@ -326,3 +326,24 @@ nav.langs a {
 .question:not(:nth-of-type(5n + 1)) .poles {
   display: none;
 }
+
+/* --- PR-07 — questionnaire header and order draw ----------------------------
+   Appended at the end of the file, no block above reorganised (DT-15). */
+
+/* The header (DP-27). Five statements read as one block, not as five loose
+   paragraphs, hence the tighter gap between them and the full step before the
+   first question. */
+.preamble {
+  margin-bottom: var(--space-4);
+}
+.preamble p {
+  margin-bottom: var(--space-2);
+}
+
+/* Set on <html> just above the form and removed by the draw, which runs inline
+   right below it. The questions therefore never become paintable in file order.
+   Visibility rather than display: the space is already reserved, so nothing
+   shifts when they appear. Without JavaScript the attribute is never set. */
+[data-shuffling] #questionnaire {
+  visibility: hidden;
+}
