@@ -1,6 +1,9 @@
 ---
-// The five-position scale and the non-answer for one question. Props only: it
-// imports nothing, so no program data can reach the questionnaire through it.
+// The five-position scale and the non-answer for one question. It imports the
+// interface strings and nothing else, so no program data can reach the
+// questionnaire through it.
+import { SHORT_LABEL } from "../lib/ui.js";
+
 const { id, labels, skipLabel } = Astro.props;
 ---
 
@@ -8,12 +11,23 @@ const { id, labels, skipLabel } = Astro.props;
   {
     labels.map((label, choice) => (
       <label>
-        <input type="radio" name={id} value={choice} />
-        <span>{label}</span>
+        {/* The displayed label is abbreviated (DP-26); the accessible name stays
+            the full formulation. aria-label wins over the wrapping label element,
+            so a screen reader restores "Plutôt pas d'accord" exactly once. The
+            control itself is the native radio, visible and unstyled (INV-10). */}
+        <input type="radio" name={id} value={choice} aria-label={label} />
+        <span>{SHORT_LABEL.get(label) ?? label}</span>
       </label>
     ))
   }
 </div>
+{/* The two poles of the axis, in full, on screen and not only in the accessible
+    name. Shown at a regular interval: this component has no index of its own, so
+    styles.css picks every fifth question. */}
+<p class="poles">
+  <span>{labels[0]}</span>
+  <span>{labels.at(-1)}</span>
+</p>
 {/* Out of the five-position group, inside the fieldset: still bound to
     its question, no longer a sixth position, and never preselected. */}
 <label class="skip">

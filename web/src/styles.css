@@ -278,3 +278,51 @@ nav.langs a {
 .consent-help {
   font-size: var(--text-secondary);
 }
+
+/* --- PR-06 — five-column answer scale --------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   A wrapped scale is a measurement defect, not a layout defect: positions 4 and
+   5 land underneath positions 1 and 2, the axis stops reading as a continuum,
+   and the options pushed to the end of a row are mechanically less chosen. Five
+   equal columns, at every width, wrapping at none of them (System §5.3). */
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+/* Each option is a column: the native radio above its label, the whole cell
+   clickable. 32 + 16 = 48px, the spacing scale holding no 44 (H2). Apparatus is
+   the smallest step of the type scale and the one the 320px column was measured
+   against; no horizontal cell padding, the column has none to spare. */
+.choices label {
+  flex-direction: column;
+  justify-content: center;
+  border-radius: var(--radius);
+  padding: var(--space-1) 0;
+  min-height: calc(var(--space-4) + var(--space-3));
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
+  text-align: center;
+}
+
+/* The poles of the axis, spelled out. The interval lives here rather than in the
+   component because the scale receives no index: one reminder every fifth
+   question, the same at every width — labels that varied with the viewport would
+   be a variation of the instrument between users (INV-18). */
+.poles {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
+  color: var(--ink-quiet);
+}
+.poles > span:last-child {
+  text-align: right;
+}
+.question:not(:nth-of-type(5n + 1)) .poles {
+  display: none;
+}

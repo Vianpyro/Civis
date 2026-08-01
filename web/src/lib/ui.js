@@ -1,9 +1,26 @@
 export const LANGS = ["fr", "en"];
 
+// The full formulations. They are the accessible name of every scale control and
+// the label used on the results page; they are no longer what the scale displays.
 export const CHOICE_LABELS = {
   fr: ["Pas du tout d'accord", "Plutôt pas d'accord", "Neutre", "Plutôt d'accord", "Tout à fait d'accord"],
   en: ["Strongly disagree", "Somewhat disagree", "Neutral", "Somewhat agree", "Strongly agree"],
 };
+
+// What the scale displays: one single set at every viewport width (DP-26), sized
+// for the 320px column, 7 characters per word at most. Labels that changed with
+// the viewport would give two users different anchors, which is a difference of
+// instrument between subjects (INV-18) — there is no long form above any width.
+export const CHOICE_LABELS_SHORT = {
+  fr: ["Pas du tout", "Plutôt pas", "Neutre", "Plutôt oui", "Tout à fait"],
+  en: ["Not at all", "Rather not", "Neutral", "Rather yes", "Fully agree"],
+};
+
+// Keyed by the full formulation, because the scale component is handed the
+// accessible labels and has no language of its own.
+export const SHORT_LABEL = new Map(
+  LANGS.flatMap((lang) => CHOICE_LABELS[lang].map((full, i) => [full, CHOICE_LABELS_SHORT[lang][i]])),
+);
 
 export const THEMES = {
   fr: {
