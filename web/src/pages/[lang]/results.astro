@@ -10,18 +10,24 @@
 // rank for them. Nothing is assembled from strings any more, so escaping is
 // Astro's and the page is readable without JavaScript.
 import Base from "../../layouts/Base.astro";
+import Impact from "../../components/Impact.astro";
 import Quote from "../../components/Quote.astro";
 import Result from "../../components/Result.astro";
 import Source from "../../components/Source.astro";
 import Statistic from "../../components/Statistic.astro";
 import questions from "../../../../content/questions/fr-2027.json";
 import positions from "../../../../content/questions/fr-2027.positions.json";
+// The analyses are loaded here and only here, as the programmes are. Importing
+// them into a component the questionnaire also reaches is the one vector INV-20
+// names, and there is no second reader of this file anywhere in web/.
+import impacts from "../../../../content/impacts/fr-2027.json";
 import sources from "../../../../content/sources/fr-2027/sources.json";
 import ensemble from "../../../../content/programs/fr-2027/ensemble.json";
 import lr from "../../../../content/programs/fr-2027/lr.json";
 import nfp from "../../../../content/programs/fr-2027/nfp.json";
 import rn from "../../../../content/programs/fr-2027/rn.json";
 import { API, href } from "../../lib/paths.js";
+import { fullyAnalysed } from "../../lib/impacts.js";
 import { confidence, coverage } from "../../lib/score.js";
 import {
   CHOICE_LABELS,
@@ -66,6 +72,15 @@ const byQuestion = Object.fromEntries(
       positions: (positions[question.id] ?? []).map((entry) => ({
         ...entry,
         ...points[entry.point],
+        // All or nothing, decided per question and applied to every position of
+        // it (DP-34, INV-22). The rule and its cases live in lib/impacts.js;
+        // what is left here is where it is asked: once per question, never per
+        // point. `check` reports a partially covered question as W-01 and does
+        // not fail — partial coverage is the normal state of a corpus in
+        // progress, not a defect.
+        impact: fullyAnalysed(positions[question.id] ?? [], impacts.impacts)
+          ? impacts.impacts[entry.point].items
+          : null,
       })),
     },
   ]),
@@ -197,6 +212,10 @@ const provenance = sources.map((source) => {
                 {position.stance === 1 ? t.supports : t.opposes}
                 <Quote text={position.quote} />
                 <Source source={position.source} label={t.sourceLabel} />
+                {/* After the quotation and its document, never before: the
+                    quotation is the proof everything else rests on and it does
+                    not pass under a commentary on it (§11.1, INV-06). */}
+                {position.impact && <Impact items={position.impact} lang={lang} />}
               </li>
             ))}
           </ul>

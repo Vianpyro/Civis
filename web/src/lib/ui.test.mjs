@@ -8,12 +8,14 @@
 // PR that can be caught without a browser.
 
 import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 import {
   CHOICE_LABELS,
   CHOICE_LABELS_SHORT,
   CONFIDENCE_LABELS,
   CORPUS_LANG,
+  GROUPS,
   LANGS,
   T,
   THEMES,
@@ -21,7 +23,10 @@ import {
 } from "./ui.js";
 
 // Every table below is indexed by language code and must answer for all of them.
-const TABLES = { T, THEMES, CONFIDENCE_LABELS, CHOICE_LABELS, CHOICE_LABELS_SHORT };
+// GROUPS joins them rather than getting checks of its own: the three generic
+// tests are exactly what DT-27 asks of it on the web side, and a table that has
+// to declare itself here is a table nobody forgets to cover.
+const TABLES = { T, THEMES, CONFIDENCE_LABELS, CHOICE_LABELS, CHOICE_LABELS_SHORT, GROUPS };
 
 for (const [name, table] of Object.entries(TABLES)) {
   test(`${name} covers every language`, () => {
@@ -64,6 +69,37 @@ test("the questionnaire header stays within the cap in every language", () => {
         statement.length <= 120,
         `${lang}: "${statement}" is ${statement.length} characters, 120 allowed`,
       );
+    }
+  }
+});
+
+// The vocabulary of affected groups is declared twice — the enumeration in
+// pipeline/check.py, the labels above — and the two halves are five PRs apart
+// (DT-27). Key parity says the two languages agree with each other; it says
+// nothing about whether either agrees with the content. A `who` chosen by the
+// pipeline, accepted by the linter and missing a label here renders an empty
+// <strong> on the results page, and nothing else in the product reports it.
+//
+// The files are read from the directory rather than named: a second election
+// added without a line here would be a green check over content nobody covers.
+test("every group used by the content has a label in every language", () => {
+  const directory = new URL("../../../content/impacts/", import.meta.url);
+  const files = readdirSync(directory).filter((name) => name.endsWith(".json"));
+  assert.ok(files.length > 0, "no analysis file found under content/impacts/");
+
+  const used = new Set();
+  for (const file of files) {
+    const { impacts } = JSON.parse(readFileSync(new URL(file, directory), "utf8"));
+    for (const entry of Object.values(impacts)) {
+      for (const item of entry.items) {
+        if (item.who) used.add(item.who);
+      }
+    }
+  }
+
+  for (const lang of LANGS) {
+    for (const who of used) {
+      assert.ok(GROUPS[lang][who], `GROUPS.${lang} holds no label for "${who}"`);
     }
   }
 });

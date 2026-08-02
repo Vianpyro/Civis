@@ -1,0 +1,100 @@
+---
+// The consequences of one measure, folded away. Props only, and used by the
+// results page alone: it carries data derived from a formation's programme, so
+// the questionnaire must never reach it, directly or through another component
+// — a shared component is the vector INV-01 and INV-20 both name.
+//
+// The block sits under the quotation and the document reference, never above
+// them: the quotation is the evidence the whole page rests on, and it does not
+// pass beneath a commentary on it (§11.1, INV-06).
+//
+// Nothing here distinguishes a statement written in the document from one
+// deduced from it by a badge, a colour or a pictogram (U-06, INV-12, DP-22).
+// The distinction is carried by the evidence: a supported statement shows the
+// fragment it rests on, which the CI checks word for word in the source
+// document (INV-19); a deduced one has nothing to show. The reader sees a
+// presence or an absence rather than reads a claim about one (DP-31).
+//
+// Zero bytes of JavaScript, zero requests: the block is a native <details>, so
+// it opens and closes with JavaScript disabled and everything it holds is known
+// at build time (U-01, U-13, A-10, A-11, DT-07).
+import Quote from "./Quote.astro";
+import { GROUPS, T } from "../lib/ui.js";
+
+const { items, lang } = Astro.props;
+const t = T[lang];
+
+// Grouping by kind is a rendering operation and never a shape in the JSON: the
+// file holds one flat `items` array, and three typed sections in it would be a
+// schema regression (DT-22). The order of the three sections is the canonical
+// order of the file itself (DT-25).
+const KINDS = [
+  ["implication", t.impactImplications],
+  ["affected", t.impactAffected],
+  ["effect", t.impactEffects],
+];
+
+// A section is two lists rather than one: the notice of U-05 sits between the
+// supported statements and the deduced ones, and a <p> is not a child a <ul>
+// admits. Splitting on the basis also puts the evidence before the deduction by
+// construction (U-04) instead of by an ordering a later edit could undo, and it
+// leaves the notice attached to the only list it can describe.
+//
+// An empty list is dropped, and a section with no list left is not rendered at
+// all — not even its heading. An absence is an absence, never a heading over
+// nothing (U-02, INV-14).
+const sections = KINDS.map(([kind, title]) => {
+  const of = (basis) => items.filter((item) => item.kind === kind && item.basis === basis);
+  return {
+    title,
+    lists: [
+      { notice: null, items: of("text") },
+      { notice: t.impactInferredNotice, items: of("inferred") },
+    ].filter((list) => list.items.length > 0),
+  };
+}).filter((section) => section.lists.length > 0);
+---
+
+<details class="impact">
+  <summary>{t.impactSummary}</summary>
+  {/* <h3> is the level under the <h2> of the detail block, which is where this
+      block lives (U-03). */}
+  {
+    sections.map((section) => (
+      <>
+        <h3>{section.title}</h3>
+        {section.lists.map((list) => (
+          <>
+            {/* Once per section, before the first deduced statement, and only
+                where there is one (U-05): a mark on every statement is the
+                repetition that stops being read (C6). */}
+            {list.notice && <p class="impact-inferred">{list.notice}</p>}
+            <ul>
+              {list.items.map((item) => (
+                <li>
+                  {/* The group is a value of the closed vocabulary and the
+                      directness a field beside it: data, not a sentence (U-08,
+                      DP-32). The label is translated here; the fragment below
+                      is not, and never is (DP-37). */}
+                  {item.kind === "affected" && (
+                    <p>
+                      <strong>{GROUPS[lang][item.who]}</strong> —
+                      {item.directness === "direct" ? t.impactDirect : t.impactIndirect}
+                    </p>
+                  )}
+                  <p>{item[lang]}</p>
+                  {/* Only a supported statement has a fragment, and the CI
+                      holds that: `span` is required if and only if the basis is
+                      "text" (L-04). <Quote> is reused unmodified — the serif of
+                      provenance, the vertical rule and lang="fr" it already
+                      carries (U-07, DP-37, INV-06). */}
+                  {item.span && <Quote text={item.span} />}
+                </li>
+              ))}
+            </ul>
+          </>
+        ))}
+      </>
+    ))
+  }
+</details>

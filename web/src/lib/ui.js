@@ -95,6 +95,69 @@ export const THEMES = {
   },
 };
 
+// The closed vocabulary of affected groups (DP-32, §6). The enumeration lives in
+// pipeline/check.py, the labels here, and ui.test.mjs checks that both sides
+// hold the same keys — the same arrangement as THEMES, for the same reason
+// (DT-27). A group is chosen from this list and never written: characterising a
+// group ("les familles qui souffrent") is a political act before it is a
+// description, and a closed list makes that act structurally impossible.
+//
+// Two labels are wordings rather than translations, and neither is negotiable:
+// `citizens` is "Particuliers", not "Citoyens", which excludes foreign
+// residents by construction and is a rhetorical marker besides;
+// `foreign_nationals` is the neutral legal term and no other designation is
+// admitted for that group.
+export const GROUPS = {
+  fr: {
+    associations: "Associations et organismes à but non lucratif",
+    businesses: "Entreprises",
+    citizens: "Particuliers",
+    departments: "Départements",
+    employees: "Salariés",
+    farmers: "Exploitations agricoles",
+    foreign_nationals: "Ressortissants étrangers",
+    healthcare: "Professionnels et établissements de santé",
+    judiciary: "Juridictions",
+    law_enforcement: "Forces de l'ordre",
+    local_authorities: "Collectivités territoriales",
+    municipalities: "Communes",
+    owners: "Propriétaires",
+    public_bodies: "Organismes publics et opérateurs de l'État",
+    regions: "Régions",
+    retirees: "Retraités",
+    schools: "Établissements d'enseignement",
+    self_employed: "Indépendants et professions libérales",
+    state_services: "Services de l'État et ministères",
+    students: "Élèves et étudiants",
+    taxpayers: "Contribuables",
+    tenants: "Locataires",
+  },
+  en: {
+    associations: "Nonprofits and associations",
+    businesses: "Businesses",
+    citizens: "Individuals",
+    departments: "Departments",
+    employees: "Employees",
+    farmers: "Farms",
+    foreign_nationals: "Foreign nationals",
+    healthcare: "Healthcare providers",
+    judiciary: "Courts",
+    law_enforcement: "Law enforcement",
+    local_authorities: "Local authorities",
+    municipalities: "Municipalities",
+    owners: "Owners",
+    public_bodies: "Public bodies and state operators",
+    regions: "Regions",
+    retirees: "Retirees",
+    schools: "Educational institutions",
+    self_employed: "Self-employed and professionals",
+    state_services: "State services and ministries",
+    students: "Students",
+    taxpayers: "Taxpayers",
+    tenants: "Tenants",
+  },
+};
+
 export const T = {
   fr: {
     title: "Civis",
@@ -160,8 +223,15 @@ export const T = {
     // from the head of the page to the head of the block that mixes them —
     // once for the section, not once per question, which is the repetition
     // that stops being read (C6).
+    //
+    // Extended to the register the analyses add (U-11): a page that announced
+    // three registers and displayed four would be understating what it mixes,
+    // on the one sentence whose whole job is to say what is mixed. The clause
+    // is conditional because the register is: two questions of the corpus carry
+    // an analysis and twenty-eight do not (DP-40), and a block without one holds
+    // no deduction to declare.
     detailRegisters:
-      "Chaque bloc réunit notre reformulation de la proposition, puis la citation exacte du document officiel, reproduite dans la langue du document.",
+      "Chaque bloc réunit notre reformulation de la proposition, puis la citation exacte du document officiel, reproduite dans la langue du document, et, lorsque la question porte une analyse, nos déductions sur ce que la mesure implique.",
     sourceLabel: "Document officiel",
     // Provenance of the corpus, before the first figure (DP-28).
     sources: "Documents sources du corpus",
@@ -195,6 +265,33 @@ export const T = {
     supports: "Défend cette mesure",
     opposes: "S'y oppose",
     backToTop: "Retour en haut",
+
+    // --- Consequences of a measure (PR-21) -----------------------------------
+    //
+    // Chrome of the folded block, and nothing else: the statements themselves
+    // are content and are read from content/impacts/, in the language of the
+    // interface (DP-37). The block sits under the quotation and never above it —
+    // the quotation is the evidence everything here rests on (§11.1, INV-06).
+    //
+    // No label says whether a statement is written in the document or deduced
+    // from it. A supported statement shows the fragment it rests on and a
+    // deduced one has nothing to show: the reader sees a presence or an absence,
+    // which the CI verifies word for word, rather than reads a claim about one
+    // (DP-31, U-06). The notice below is the one sentence that names the
+    // difference, once per section and only where a deduction follows (U-05) —
+    // a mark on every statement is the repetition that stops being read (C6).
+    impactSummary: "Ce que cette mesure implique",
+    impactImplications: "Ce que le texte prévoit",
+    impactAffected: "Qui est concerné",
+    impactEffects: "Effets attendus",
+    impactInferredNotice: "Déduit du texte, non écrit dans le document.",
+    // The group is a value of the closed vocabulary and the directness a field
+    // beside it, so both are rendered as data rather than folded into a sentence
+    // (U-08, DP-32). The agreement is parenthesised because the vocabulary
+    // carries no grammatical gender: giving each of the 22 entries one would be
+    // a second editorial artefact, kept in step by hand, for a typographic gain.
+    impactDirect: "directement concerné(e)s",
+    impactIndirect: "indirectement concerné(e)s",
 
     // --- Methodology page (PR-13) --------------------------------------------
     //
@@ -340,7 +437,7 @@ export const T = {
     resultCoverage: (n, total) => `Corpus coverage: ${n} of the ${total} proposals in the questionnaire.`,
     detail: "Question by question",
     detailRegisters:
-      "Each block holds our reformulation of the proposal, our English translation of it, then the exact quotation of the official document, kept in French, the language of the document.",
+      "Each block holds our reformulation of the proposal, our English translation of it, then the exact quotation of the official document, kept in French, the language of the document, and, where the question carries an analysis, our deductions about what the measure involves.",
     sourceLabel: "Official document",
     sources: "Source documents of the corpus",
     published: (date) => `published on ${date}`,
@@ -359,6 +456,15 @@ export const T = {
     supports: "Supports this measure",
     opposes: "Opposes it",
     backToTop: "Back to top",
+
+    // --- Consequences of a measure (PR-21) -----------------------------------
+    impactSummary: "What this measure involves",
+    impactImplications: "What the text provides for",
+    impactAffected: "Who is concerned",
+    impactEffects: "Expected effects",
+    impactInferredNotice: "Inferred from the text, not written in the document.",
+    impactDirect: "directly concerned",
+    impactIndirect: "indirectly concerned",
 
     // --- Methodology page (PR-13) --------------------------------------------
     methodology: "Methodology",

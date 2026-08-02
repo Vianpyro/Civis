@@ -505,6 +505,15 @@ rien du tout sinon. Zéro octet de JavaScript ajouté.
 
 **Nouveaux fichiers**
 - `web/src/components/Impact.astro` — le bloc replié, U-01 à U-09.
+- `web/src/lib/impacts.js` — la règle tout-ou-rien, `fullyAnalysed(entries,
+  impacts)`. *Ajouté à la livraison :* la règle décide ce que trente questions
+  affichent et ses deux modes de défaillance sont silencieux ; écrite en lambda
+  dans `results.astro` elle n'était exécutable ni sans navigateur ni sans build.
+  Un module d'une fonction, à côté de `score.js`, la rend testable sans rien
+  changer d'autre — ce n'est pas une abstraction, c'est le même précédent que
+  `score.js` pour la même raison.
+- `web/src/lib/impacts.test.mjs` — cas de la règle, plus la propriété vérifiée
+  sur le corpus livré.
 
 **Dépendances.** PR-16 (le fichier importé doit exister) et PR-20 (du contenu
 réel à rendre — c'est la raison du nouvel ordre, §2).
@@ -540,6 +549,13 @@ réel à rendre — c'est la raison du nouvel ordre, §2).
   libellé dans les deux langues (DT-27).
 - Les tests de jetons et de contraste existants passent **sans modification**
   (**A-12**).
+- **Règle tout-ou-rien** — *ajouté à la livraison.* Cas de la règle : question
+  entièrement couverte, partiellement couverte, non couverte, sans position,
+  et la bascule que PR-23 produit vague après vague. Plus deux propriétés
+  vérifiées sur le corpus livré, sans nommer aucune question — une question
+  affichée a **toutes** ses positions analysées, une question partiellement
+  analysée est **muette** — de sorte que les vagues de PR-23 n'aient jamais à
+  retoucher le test.
 
 **Revue manuelle**
 - **M1** — parcours clavier complet, bloc ouvert et fermé (**A-13**).
@@ -667,8 +683,9 @@ vague. Aucun raccourci n'est prévu et aucun ne sera ajouté.
 | A-7 | 21 | A-16 | 18 |
 | A-8 | 21 | A-17 | 18 |
 | A-9 | 18 | A-18 | 16 |
+| — | — | A-19 *(ajouté DT-32)* | 16 |
 
-Les dix-huit critères sont couverts. Les deux critères portés par deux PR le sont
+Les dix-neuf critères sont couverts. Les deux critères portés par deux PR le sont
 parce que la seconde les vérifie sur un corpus réel plutôt que sur une fixture.
 
 ---
@@ -681,6 +698,7 @@ parce que la seconde les vérifie sur un corpus réel plutôt que sur une fixtur
 | `pipeline/impacts.py` | 18, 19 | Sérialisées par construction. |
 | `pipeline/tests/` | toutes | Un fichier par domaine, jamais un fichier commun. |
 | `web/src/lib/ui.js` | 21, 22 | Ajouts de clés dans des tables distinctes. |
+| `web/src/lib/impacts.js` | 21 | Une fonction, un appelant. Aucune PR ultérieure ne la touche. |
 | `web/src/styles.css` | 21 | Un bloc ajouté en fin de fichier (DT-15). |
 | `content/impacts/fr-2027.json` | 16, 20, 23 | 16 crée le fichier vide ; 20 et 23 le remplissent. |
 

@@ -599,3 +599,83 @@ summary > .translation {
 .registers {
   font-size: var(--text-secondary);
 }
+
+/* --- PR-21 — consequences of a measure --------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   A <details> inside the <details> of a question. The `details` rule above gives
+   every disclosure a top rule and vertical padding: the rule separates the
+   thirty blocks of the detail list from one another, and inside a position it
+   would draw a line across the middle of a list item, so it is dropped. The
+   padding is kept — it is what gives this summary the same pointer target as the
+   question summary above it, 8 + 24 + 8 = 40px, rather than a bare line of text
+   (H2). The nesting is then carried by indentation and position alone.
+
+   Everything in this block sits at the secondary step, under the reading size of
+   the quotation above it. That is the whole visual hierarchy of the position:
+   the quotation is the evidence and stays the largest thing in the item, and our
+   commentary on it never grows to the same size (§11.1, INV-06, C2).
+
+   Nothing below carries a tint, a mark or a weight that means anything. A
+   supported statement and a deduced one are styled identically: the difference
+   between them is the fragment one of them shows, which is a presence in the
+   markup and not a property of it (U-06, INV-12, DP-22). No animation either —
+   the disclosure is the browser's own (U-09, DP-21). */
+
+.impact {
+  border-top: 0;
+  margin-top: var(--space-1);
+  font-size: var(--text-secondary);
+}
+
+/* The summary of a question is the statement of the questionnaire and takes the
+   600 of the `summary` rule; this one is a control label over a commentary. At
+   the same weight the two would read as the same kind of thing, and the heavier
+   of them would be the one under the quotation rather than the one that is the
+   proposal. Weight by register, never by state (G3). */
+.impact > summary {
+  font-weight: 400;
+}
+
+/* The three section headings, at the size of the block they head: <h3> is the
+   correct level under the <h2> of the detail block (U-03), not an instruction to
+   set it in title size inside a folded commentary. */
+.impact h3 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--text-secondary);
+}
+
+/* The browser's own list indent is wider than the page's outer padding at 320px,
+   which would push a statement past the edge it starts from — the same reason
+   the methodology lists carry this (M3). Native markers are kept: they are what
+   separates one statement from the next inside a section. */
+.impact ul {
+  margin: 0;
+  padding-left: var(--space-3);
+}
+.impact li {
+  margin-bottom: var(--space-2);
+}
+.impact p {
+  margin: 0;
+}
+
+/* The notice of U-05, once per section and never once per statement. It carries
+   no treatment of its own beyond the space that detaches it from the list above:
+   not a tint, not a weight, not a mark. Quietening it would put a colour on the
+   one thing in the block that tells a supported statement from a deduced one,
+   which is the distinction U-06 forbids carrying that way — the sentence is the
+   whole device, and it reads identically in forced colours. */
+.impact-inferred {
+  margin-top: var(--space-2);
+}
+
+/* The quotation inside the block keeps the `blockquote` rule untouched: the
+   serif, the rule and the reading size are the provenance convention of the
+   whole product, and a fragment set smaller than the statement it supports would
+   be evidence quietened below our own prose (U-07, C2). Only the space around it
+   is tightened, a fragment sitting under its statement rather than between two
+   paragraphs. */
+.impact blockquote {
+  margin: var(--space-1) 0 0;
+}
