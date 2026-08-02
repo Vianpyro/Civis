@@ -42,7 +42,8 @@ api/        Rust + axum + SQLite, deux endpoints de compteurs
 pipeline    python -m pipeline.run --election fr-2027
 web         cd web && npm run dev
 api         cd api && cargo run
-checks      python -m pipeline.check && cd web && npm test && cd ../api && cargo test
+tests       python -m unittest discover -t . -s pipeline   (depuis la racine)
+checks      python -m unittest discover -t . -s pipeline && python -m pipeline.check && cd web && npm test && cd ../api && cargo test
 ```
 
 ## Langues

@@ -44,6 +44,9 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r pipeline/requirements.txt
+      # Pipeline unit tests first: they need no network, so a broken text layer
+      # fails here rather than after a full fetch.
+      - run: python -m unittest discover -t . -s pipeline
       - run: python -m pipeline.run --election fr-2027 --step fetch
       - run: python -m pipeline.check
       - run: npm test

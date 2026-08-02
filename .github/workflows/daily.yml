@@ -65,6 +65,7 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: pip install -r pipeline/requirements.txt
+      - run: python -m unittest discover -t . -s pipeline
       # Structural content checks run without the documents; quote verification is
       # the `sources` job's responsibility and is reported as skipped here.
       - run: python -m pipeline.check
