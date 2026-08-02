@@ -413,3 +413,58 @@ nav.langs a {
   padding: var(--space-2);
   overflow-wrap: anywhere;
 }
+
+/* --- PR-11 — fraction, confidence, coverage, provenance ---------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   A record holds three sentences and they carry the same weight: no size of
+   their own, no --ink-quiet, nothing below anything. The base travels with the
+   measure or the measure is not shown (P4, INV-13). The `.bar` rule above is
+   left where it is — nothing renders it any more, and this file is restructured
+   by PR-03 alone. */
+
+.result p {
+  margin-bottom: var(--space-1);
+}
+.result p:last-child {
+  margin-bottom: 0;
+}
+
+/* The corpus these figures rest on, above them (DP-28). Apparatus register: the
+   heading included, since a block of four documents in title size would be read
+   before the results it qualifies. */
+.provenance {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
+}
+.provenance h2 {
+  margin: 0;
+  font-size: var(--text-apparatus);
+}
+
+/* One document per item: its link on a line of its own, then the date and the
+   fingerprint sharing the next. */
+.provenance li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-1);
+}
+.provenance a {
+  flex-basis: 100%;
+}
+
+/* The fingerprint is abridged on screen and copied whole: the element holds the
+   64 characters read from the file, and only their rendering is cut. Nothing
+   here is a citation, so the truncation rule of the system does not apply — but
+   an unverifiable digest would be worse than none, which is why the value stays
+   intact in the document. */
+.provenance code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

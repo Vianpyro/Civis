@@ -21,7 +21,8 @@ import lr from "../../../../content/programs/fr-2027/lr.json";
 import nfp from "../../../../content/programs/fr-2027/nfp.json";
 import rn from "../../../../content/programs/fr-2027/rn.json";
 import { API, href } from "../../lib/paths.js";
-import { CHOICE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
+import { confidence, coverage } from "../../lib/score.js";
+import { CHOICE_LABELS, CONFIDENCE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -65,23 +66,87 @@ const scoreInput = Object.fromEntries(
   ]),
 );
 
-// One string per possible number of compared questions, written by T: the plural
-// rule lives in ui.js and is read here rather than restated, and the script no
-// longer rewrites a digit inside a sentence to make one of two forms fit.
-const matched = Array.from({ length: questions.questions.length + 1 }, (_, n) => t.matched(n));
+// Coverage, computed here at build: it depends on the corpus alone and on no
+// answer, so no reader's browser has anything to work out (DP-12).
+const total = questions.questions.length;
+const covered = coverage(scoreInput);
+
+// One sentence per possible comparison base, written by T: the plural rule lives
+// in ui.js and is read here rather than restated, and the script rewrites no
+// digit inside a sentence. The confidence sentence is fully determined by the
+// base, so it is written whole; the fraction keeps one slot, `{n}`, for the
+// agreed count. The levels come from score.js, where the bounds live and where
+// the methodology page reads them too — never a second copy (DP-11, D7).
+const fractions = Array.from({ length: total + 1 }, (_, base) => t.resultFraction(base));
+const confidences = Array.from({ length: total + 1 }, (_, base) =>
+  t.resultConfidence(CONFIDENCE_LABELS[lang][confidence(base)], base),
+);
+
+// Fingerprints are read from content/, never copied into web/ (INV-07, DT-12).
+// Each file holds `<digest>  <url>`; the url is paired back against the source
+// record, so a mismatched file fails the build instead of attesting the wrong
+// document.
+const digestFiles = import.meta.glob("../../../../content/sources/fr-2027/*.sha256", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+const digests = Object.fromEntries(
+  Object.entries(digestFiles).map(([path, text]) => [
+    path.split("/").pop().replace(".sha256", ""),
+    text.trim().split(/\s+/),
+  ]),
+);
+const provenance = sources.map((source) => {
+  const [digest, url] = digests[source.id] ?? [];
+  if (url !== source.url) {
+    throw new Error(`fingerprint for ${source.id} attests ${url ?? "nothing"}, not ${source.url}`);
+  }
+  return { source, digest };
+});
 ---
 
 <Base lang={lang} page="results" title={t.results}>
   <h1>{t.results}</h1>
   <p class="muted">{t.tagline}</p>
 
-  {/* Every formation has its record here; the script reveals the comparable ones
-      and moves them into score order. */}
+  {/* What the figures below rest on, before the first of them (DP-28, P4). One
+      line per document: its exact title as the link, its publication date, and
+      the fingerprint of the file that was read. Apparatus register — four
+      documents set in reading size would be a wall before the reveal. Never
+      collapsible, never dismissible, never after the results. */}
+  <section class="provenance">
+    <h2>{t.sources}</h2>
+    <ul>
+      {
+        provenance.map(({ source, digest }) => (
+          <li>
+            <Source source={source} label={t.sourceLabel} />
+            <span>{source.published ? t.published(source.published) : t.publishedUnknown}</span>
+            {/* Shown abridged, copied whole: the element holds the 64 characters
+                read from the file and nothing else — the label sits outside it,
+                so a copy is the digest and not a sentence about it. */}
+            <span>{t.fingerprint}</span>
+            <code>{digest}</code>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* Every formation has its record here, whether anything was compared for it
+      or not; the script fills them and moves them into fraction order. That
+      order carries no rank marking: no numbering, no podium, no emphasis on the
+      first (DP-10). */}
   <div id="ranking" aria-live="polite">
     <p id="no-answers" hidden>{t.noAnswers}</p>
     {
       Object.values(parties).map((party) => (
-        <Result id={party.id} name={party.name} agreement={t.agreement} />
+        <Result
+          id={party.id}
+          name={party.name}
+          coverage={t.resultCoverage(covered[party.id] ?? 0, total)}
+        />
       ))
     }
   </div>
@@ -133,8 +198,9 @@ const matched = Array.from({ length: questions.questions.length + 1 }, (_, n) =>
   <p><a class="button" href={href(`${lang}/`)}>{t.restart}</a></p>
 
   {/* What is left for the script: the positions it scores, the scale labels for
-      the answer given, the counted sentences, and the empty-counter message.
-      Everything else on this page is rendered above and no longer travels. */}
+      the answer given, the sentences indexed by comparison base, and the
+      empty-counter message. Everything else on this page is rendered above and
+      no longer travels. */}
   <script
     type="application/json"
     id="data"
@@ -142,7 +208,8 @@ const matched = Array.from({ length: questions.questions.length + 1 }, (_, n) =>
       api: API,
       scoreInput,
       labels,
-      matched,
+      fractions,
+      confidences,
       aggregateEmpty: t.aggregateEmpty,
     })}></script>
 </Base>
@@ -151,29 +218,31 @@ const matched = Array.from({ length: questions.questions.length + 1 }, (_, n) =>
   import { CHOICES, score } from "../../lib/score.js";
 
   const data = JSON.parse(document.getElementById("data").textContent);
-  const { scoreInput, labels, matched } = data;
+  const { scoreInput, labels, fractions, confidences } = data;
   const answers = JSON.parse(sessionStorage.getItem("civis:answers") ?? "{}");
 
   const ranking = document.getElementById("ranking");
   const rows = score(answers, scoreInput);
 
-  if (rows.length === 0) {
+  // Every formation is revealed, compared or not: one with nothing to compare
+  // states its reason in place of its fraction rather than disappearing
+  // (INV-14). The message below is the passation-level case — no non-neutral
+  // answer anywhere — and it withholds no result, since there is none to give.
+  if (rows.every((row) => row.base === 0)) {
     document.getElementById("no-answers").hidden = false;
-  } else {
-    for (const row of rows) {
-      const record = ranking.querySelector(`[data-party="${CSS.escape(row.party)}"]`);
-      const percent = Math.round(row.agreement * 100);
-      record.querySelector(".agreement").textContent = String(percent);
-      record.querySelector(".matched").textContent = matched[row.matched];
-      // The one figure no class can carry: the fill is the measure itself. It is
-      // written here rather than as an attribute in the markup, which the token
-      // test forbids; the bar and the percentage both go away with PR-11.
-      record.querySelector(".bar > span").style.width = `${percent}%`;
-      record.hidden = false;
-      // Moved, not reordered by a layout property: document order stays the
-      // order on screen, and so does the tab order (INV-17).
-      ranking.append(record);
-    }
+  }
+
+  for (const row of rows) {
+    const record = ranking.querySelector(`[data-party="${CSS.escape(row.party)}"]`);
+    // The base decides the wording, so both sentences are read by base; the
+    // agreed count is the only slot left to fill. No plural rule is restated
+    // here, and no percentage is derived from the pair.
+    record.querySelector(".fraction").textContent = fractions[row.base].replace("{n}", row.agreed);
+    record.querySelector(".confidence").textContent = confidences[row.base];
+    record.hidden = false;
+    // Moved, not reordered by a layout property: document order stays the
+    // order on screen, and so does the tab order (INV-17).
+    ranking.append(record);
   }
 
   for (const item of document.querySelectorAll("#detail > details")) {

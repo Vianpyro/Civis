@@ -22,6 +22,24 @@ export const SHORT_LABEL = new Map(
   LANGS.flatMap((lang) => CHOICE_LABELS[lang].map((full, i) => [full, CHOICE_LABELS_SHORT[lang][i]])),
 );
 
+// The confidence scale, in words. The bounds live in score.js and only there
+// (DP-11); these are the labels its level identifiers map to. A level is a word
+// and never a shade, a tint or a graphic position (INV-12).
+export const CONFIDENCE_LABELS = {
+  fr: {
+    none: "aucune comparaison",
+    "very-low": "très faible",
+    low: "faible",
+    partial: "partielle",
+  },
+  en: {
+    none: "no comparison",
+    "very-low": "very low",
+    low: "low",
+    partial: "partial",
+  },
+};
+
 export const THEMES = {
   fr: {
     economy: "Économie",
@@ -84,12 +102,30 @@ export const T = {
       "Les réponses enregistrées dans cet onglet ont été restaurées, avec l'ordre des questions. Elles disparaissent à la fermeture de l'onglet.",
     draftClear: "Effacer mes réponses",
     results: "Vos résultats",
-    noAnswers: "Aucune réponse enregistrée.",
+    // No result is withheld for want of answers (DP-19); this states the case
+    // where nothing was compared, and names the action rather than the lack.
+    noAnswers: "Aucune réponse non neutre enregistrée. Recommencer pour se positionner sur au moins une proposition.",
     restart: "Recommencer",
-    agreement: "d'accord",
-    matched: (n) => `sur ${n} question${n > 1 ? "s" : ""} comparable${n > 1 ? "s" : ""}`,
+    // The result, as a fraction whose denominator sits inside the sentence
+    // (DP-10, INV-13). The base decides the wording, so the sentence is written
+    // whole here and read by its base; `{n}` is the agreed count, the one figure
+    // the base does not determine. The plural rule stays in this file.
+    resultFraction: (base) =>
+      base === 0
+        ? "Aucune réponse non neutre ne porte sur les propositions de ce programme."
+        : `D'accord avec {n} sur ${base} proposition${base > 1 ? "s" : ""} comparée${base > 1 ? "s" : ""} dans ce programme.`,
+    resultConfidence: (label, base) =>
+      `Niveau de confiance : ${label}, sur ${base} proposition${base > 1 ? "s" : ""} comparée${base > 1 ? "s" : ""}.`,
+    // Coverage is a property of the corpus, not of this passation (DP-12): it is
+    // the same figure for every reader, and never the comparison base above.
+    resultCoverage: (n, total) => `Couverture du corpus : ${n} des ${total} propositions du questionnaire.`,
     detail: "Le détail, question par question",
     sourceLabel: "Document officiel",
+    // Provenance of the corpus, before the first figure (DP-28).
+    sources: "Documents sources du corpus",
+    published: (date) => `publié le ${date}`,
+    publishedUnknown: "date de publication non indiquée",
+    fingerprint: "SHA-256",
     aggregate: "Réponses des autres participants",
     aggregateEmpty: "Pas encore de statistiques agrégées.",
     yourAnswer: "Votre réponse",
@@ -129,12 +165,21 @@ export const T = {
       "The answers stored in this tab have been restored, with the question order. They are dropped when the tab is closed.",
     draftClear: "Erase my answers",
     results: "Your results",
-    noAnswers: "No answers recorded.",
+    noAnswers: "No non-neutral answer recorded. Start over to take a position on at least one proposal.",
     restart: "Start over",
-    agreement: "agreement",
-    matched: (n) => `across ${n} comparable question${n > 1 ? "s" : ""}`,
+    resultFraction: (base) =>
+      base === 0
+        ? "No non-neutral answer covers a proposal in this programme."
+        : `Agreement with {n} of ${base} compared proposal${base > 1 ? "s" : ""} in this programme.`,
+    resultConfidence: (label, base) =>
+      `Confidence: ${label}, across ${base} compared proposal${base > 1 ? "s" : ""}.`,
+    resultCoverage: (n, total) => `Corpus coverage: ${n} of the ${total} proposals in the questionnaire.`,
     detail: "Question by question",
     sourceLabel: "Official document",
+    sources: "Source documents of the corpus",
+    published: (date) => `published on ${date}`,
+    publishedUnknown: "publication date not stated",
+    fingerprint: "SHA-256",
     aggregate: "How others answered",
     aggregateEmpty: "No aggregate statistics yet.",
     yourAnswer: "Your answer",

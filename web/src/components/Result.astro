@@ -3,20 +3,24 @@
 // alone: it carries program data, so the questionnaire must never reach it,
 // directly or through another component (INV-01).
 //
-// The name is rendered at build. The figures are the only part of the record a
-// passation decides, so they are the only part the script writes — into elements
-// that already exist, never into markup it builds from strings.
+// Three sentences, all at the same size and in the same colour: the base travels
+// with the measure, never in a note, never below it and never quietened (P4,
+// INV-13). No percentage, no bar, and no rank marking of any kind — the order of
+// the records is a reading convenience, not a verdict (DP-10).
 //
-// Hidden until the script has a figure to put in it: a record is revealed when
-// the formation is comparable, and stays hidden when it is not, which is what
-// the previous rendering expressed by not emitting it at all.
-const { id, name, agreement } = Astro.props;
+// The coverage is a property of the corpus, so it is known at build and written
+// here. The fraction and the confidence are what a passation decides, so they
+// are the only parts the script writes, into elements that already exist.
+//
+// Hidden until the script has filled it: a record whose two sentences are empty
+// would state nothing at all. A formation with nothing compared is revealed like
+// the others, with the reason in place of the fraction (INV-14).
+const { id, name, coverage } = Astro.props;
 ---
 
 <div class="result" data-party={id} hidden>
   <h3>{name}</h3>
-  <p class="muted">
-    <strong><span class="agreement"></span>%</strong> {agreement} — <span class="matched"></span>
-  </p>
-  <div class="bar"><span></span></div>
+  <p class="fraction"></p>
+  <p class="confidence"></p>
+  <p class="coverage">{coverage}</p>
 </div>
