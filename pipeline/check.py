@@ -70,6 +70,8 @@ TOTAL_BOUNDS = (3, 10)
 MAX_STATEMENT = 200
 MAX_SPAN = 300
 BASES = {"text", "inferred"}
+# `model` of an entry written by hand (§5.2). A provenance, not a model name.
+MANUAL = "manual"
 DIRECTNESS = {"direct", "indirect"}
 TOP_KEYS = {"election", "impacts"}
 ENTRY_KEYS = {"of", "model", "reviewed", "items"}
@@ -323,7 +325,9 @@ def check_impact_entry(
     # W-03. llm.MODEL is the current model of the pipeline (DT-31), and a drift
     # is a warning rather than a failure: an entry produced by another model is
     # still valid content, it is a batch to read again rather than to reject.
-    if model and model != llm.MODEL:
+    # A hand-written entry is not a drift: it has no model to drift from, and it
+    # is already what a flagged entry is re-read into (DT-33).
+    if model and model not in (llm.MODEL, MANUAL):
         report.warnings.append(f"W-03 {label}: produced by {model!r}, current model is {llm.MODEL!r}")
     report.require(
         is_iso_date(entry.get("reviewed")),

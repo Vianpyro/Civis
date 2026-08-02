@@ -137,6 +137,12 @@ class Corpus(unittest.TestCase):
         )
         patch.start()
         self.addCleanup(patch.stop)
+        # Nothing committed, so the fixture is the whole referenced corpus however
+        # much of it PR-20 and PR-23 fill in. What the committed file actually
+        # holds is exercised by its own test, where the coupling is the subject.
+        empty = mock.patch.object(impacts, "committed", return_value={})
+        empty.start()
+        self.addCleanup(empty.stop)
         self.units = impacts.units(ELECTION)
         self.requests = impacts.build_requests(self.units)
 
@@ -289,10 +295,22 @@ class Incremental(Corpus):
         # random samples of the same corpus.
         self.assertEqual(capped, self.units[:3])
 
-    def test_the_committed_file_of_the_repository_reads_as_empty(self):
-        # The shipped state: no analysis is not a defect, and it is not a crash.
-        self.assertEqual(impacts.committed(ELECTION), {})
+
+class CommittedFile(unittest.TestCase):
+    """The shipped state, read on the file itself — no mock, no fixture."""
+
+    def test_an_absent_analyses_file_reads_as_empty(self):
+        # No analysis is not a defect, and it is not a crash.
         self.assertEqual(impacts.committed("fr-2032"), {})
+
+    def test_every_committed_entry_is_current(self):
+        # A-15 in real conditions (DP-40, condition 4): each entry carries the
+        # digest of the quote it analyses, so a second run asks for nothing.
+        points = impacts.program_points(ELECTION)
+        entries = impacts.committed(ELECTION)
+        self.assertTrue(entries, "the pilot must be committed, or this proves nothing")
+        for point_id, entry in entries.items():
+            self.assertEqual(entry["of"], quote_digest(points[point_id]["quote"]), point_id)
 
 
 class Fingerprint(unittest.TestCase):

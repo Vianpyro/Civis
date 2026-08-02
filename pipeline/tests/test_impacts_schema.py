@@ -252,12 +252,11 @@ class ModelDrift(ImpactsCase):
     def test_an_entry_from_the_current_model_warns_about_nothing(self):
         self.assertEqual(self.assertClean(document()).warnings, [])
 
-    def test_a_hand_written_entry_is_reported_as_a_drift(self):
-        # `model: "manual"` is a legitimate value (§5.2) and it does differ from
-        # the current model, so it warns. Literal reading of W-03; see the note
-        # in the PR-19 report.
-        report = self.assertClean(document({"lr-depense": entry(model="manual")}))
-        self.assertTrue(any(warning.startswith("W-03") for warning in report.warnings))
+    def test_a_hand_written_entry_is_not_a_drift(self):
+        # `model: "manual"` is a provenance, not a model name (DT-33): there is
+        # no model it could have drifted from, and re-reading a flagged entry by
+        # hand is what W-03 asks for — warning on the answer would be a loop.
+        self.assertEqual(self.assertClean(document({"lr-depense": entry(model="manual")})).warnings, [])
 
 
 class Canonical(ImpactsCase):

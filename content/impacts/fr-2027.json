@@ -1,4 +1,137 @@
 {
   "election": "fr-2027",
-  "impacts": {}
+  "impacts": {
+    "ens-regle-or-impots": {
+      "of": "ae42c69cc92367493643855c51b276cebcdf7da343b5e7205f997ed12556d927",
+      "model": "manual",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "une règle d'or anti-hausse d'impôt pour les Français",
+          "fr": "La mesure pose une règle d'or dirigée contre la hausse des impôts.",
+          "en": "The measure sets a golden rule directed against increases in taxes."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "taxpayers",
+          "directness": "direct",
+          "span": "une règle d'or anti-hausse d'impôt pour les Français",
+          "fr": "Les contribuables sont concernés par une règle portant sur la hausse des impôts.",
+          "en": "Taxpayers are concerned by a rule bearing on increases in taxes."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "Le recours à la hausse des impôts serait écarté des instruments budgétaires, selon la portée donnée à la règle.",
+          "en": "Resorting to increases in taxes would be set aside among budget instruments, depending on the scope given to the rule."
+        }
+      ]
+    },
+    "lr-depense-publique": {
+      "of": "475d095b9ec95bfd08887e122ccd4882bc372d7de46237b16863ce5f4a86025f",
+      "model": "manual",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "en réduisant la dépense publique plutôt qu'en augmentant toujours plus la pression fiscale",
+          "fr": "L'ajustement des comptes publics porte sur le niveau de la dépense publique plutôt que sur celui de la pression fiscale.",
+          "en": "The adjustment of public accounts bears on the level of public spending rather than on the level of the tax burden."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "taxpayers",
+          "directness": "direct",
+          "span": "plutôt qu'en augmentant toujours plus la pression fiscale",
+          "fr": "Les contribuables sont concernés : la pression fiscale n'est pas le levier d'ajustement retenu par la mesure.",
+          "en": "Taxpayers are concerned: the tax burden is not the adjustment lever the measure retains."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "Les arbitrages budgétaires annuels pourraient être révisés selon les modalités retenues.",
+          "en": "Annual budget trade-offs could be revised depending on the arrangements chosen."
+        }
+      ]
+    },
+    "nfp-isf": {
+      "of": "74f2c7698bf71eec596fbb53732dea8f951b56db496650b282cd84c6064d5eea",
+      "model": "manual",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "Rétablir un impôt de solidarité sur la fortune (ISF) renforcé",
+          "fr": "La mesure rétablit un impôt de solidarité sur la fortune, sous une forme qualifiée de renforcée.",
+          "en": "The measure reinstates a solidarity tax on wealth, in a form described as strengthened."
+        },
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "renforcé avec un volet climatique",
+          "fr": "L'impôt rétabli comporte un volet climatique.",
+          "en": "The reinstated tax includes a climate component."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "taxpayers",
+          "directness": "direct",
+          "span": "Rétablir un impôt de solidarité sur la fortune (ISF)",
+          "fr": "Les contribuables relevant de cet impôt sur la fortune sont concernés par son rétablissement.",
+          "en": "Taxpayers subject to this tax on wealth are concerned by its reinstatement."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "La composante climatique pourrait faire intervenir des critères environnementaux dans le calcul de l'impôt, selon les modalités retenues.",
+          "en": "The climate component could bring environmental criteria into the calculation of the tax, depending on the arrangements chosen."
+        }
+      ]
+    },
+    "rn-asile-ambassades": {
+      "of": "b1baac362bcb4c549da31584d6fc5ac17d7cc7c23d5af916815a50be58fde981",
+      "model": "manual",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "Instaurer l'obligation de dépôt des demandes d'asile dans les ambassades et consulats",
+          "fr": "La mesure institue une obligation de déposer les demandes d'asile dans les ambassades et les consulats.",
+          "en": "The measure institutes an obligation to file asylum applications in embassies and consulates."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "foreign_nationals",
+          "directness": "direct",
+          "span": "l'obligation de dépôt des demandes d'asile dans les ambassades et consulats",
+          "fr": "Les ressortissants étrangers demandant l'asile sont soumis à cette obligation de dépôt.",
+          "en": "Foreign nationals applying for asylum are subject to this filing obligation."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "state_services",
+          "directness": "direct",
+          "span": "dans les ambassades et consulats",
+          "fr": "Les ambassades et les consulats reçoivent les demandes d'asile déposées.",
+          "en": "Embassies and consulates receive the asylum applications filed."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "Le dépôt d'une demande d'asile depuis le territoire national pourrait ne plus être prévu, selon les modalités retenues.",
+          "en": "Filing an asylum application from national territory could no longer be provided for, depending on the arrangements chosen."
+        }
+      ]
+    }
+  }
 }

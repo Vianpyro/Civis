@@ -9,12 +9,13 @@ cette DP : il s'arrête et la signale, il ne tranche pas.
 en PR ni de plan d'implémentation : ils vivent dans
 `docs/impacts/ROADMAP.md`, approuvé le 2 août 2026.
 
-**Amendements.** Cinq décisions ont été ajoutées après approbation, au §17 :
+**Amendements.** Six décisions ont été ajoutées après approbation, au §17 :
 **DP-40** (corpus pilote), **DT-30** (suite de tests Python), **DT-31**
 (configuration du fournisseur), **DT-32** (rapport agrégé de W-02 et deux
 contrôles de schéma opposables, critère A-19), **DP-41** (portée exacte de
-l'aveuglement du générateur). Elles amendent DT-24, DT-26,
-DT-29, DP-35, W-02 et les critères A-4 et A-9, qui portent chacun un renvoi à
+l'aveuglement du générateur), **DT-33** (W-03 ne s'applique pas à une entrée
+manuelle). Elles amendent DT-24, DT-26,
+DT-29, DP-35, W-02, W-03 et les critères A-4 et A-9, qui portent chacun un renvoi à
 l'endroit concerné. Le corps du
 document n'a pas été réécrit : un amendement daté se lit, une réécriture
 silencieuse se subit.
@@ -46,7 +47,7 @@ s'arrête.
 14. [Non-objectifs](#14--non-objectifs)
 15. [Risques résiduels assumés](#15--risques-résiduels-assumés)
 16. [Matrice décision → invariant → vérification](#16--matrice-décision--invariant--vérification)
-17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31, DT-32, DP-41](#17--amendements-postérieurs-à-lapprobation)
+17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31, DT-32, DP-41, DT-33](#17--amendements-postérieurs-à-lapprobation)
 
 ---
 
@@ -1082,7 +1083,7 @@ partir de 0, chacun avec son `kind`, son `basis` et son `span` s'il en a un.
 |---|---|
 | W-01 | Question dont certaines positions seulement ont une analyse (DP-34 : rien ne s'affiche) |
 | W-02 | Point référencé par `positions.json` sans entrée d'analyse — **rapporté agrégé**, voir DT-32 |
-| W-03 | Entrée dont `model` diffère du modèle courant du pipeline |
+| W-03 | Entrée dont `model` diffère du modèle courant du pipeline — **sauf `model: "manual"`**, voir **DT-33** |
 | W-04 | Vérification de `span` ignorée faute de documents en cache |
 
 ### 10.3 Lexiques
@@ -1392,9 +1393,11 @@ Normatif (DP-39). Chacun de ces points est **refusé sans réexamen**.
 
 ## 17 — Amendements postérieurs à l'approbation
 
-**Statut.** Ces trois décisions ont été arrêtées le **2 août 2026**, entre
+**Statut.** Les trois premières ont été arrêtées le **2 août 2026**, entre
 l'approbation de la DP et l'ouverture de la première PR, pour clore les trois
-points que le découpage avait laissés ouverts (`ROADMAP.md`, ancienne §5). Elles
+points que le découpage avait laissés ouverts (`ROADMAP.md`, ancienne §5). Les
+suivantes — DT-32, DP-41, DT-33 — ont été arrêtées à la validation d'une PR, sur
+ce que l'implémentation a rencontré. Toutes
 sont normatives au même titre que celles du corps du document et ne se
 réinterprètent pas davantage.
 
@@ -1677,6 +1680,44 @@ rejeté, cela retire silencieusement du contenu et fait dépendre la couverture 
 corpus de la prose des documents. Réduire la fenêtre jusqu'à éviter le nom :
 rejeté, la taille de la fenêtre cesserait d'être une constante et deviendrait le
 résultat d'une recherche par essais.
+
+---
+
+### DT-33 — W-03 ne s'applique pas à une entrée manuelle
+
+**Statut.** Arrêtée le 2 août 2026, à l'ouverture de PR-20, par décision du
+responsable, sur ce que le pilote a rendu visible.
+
+---
+
+**Ce que le comportement littéral produisait.** W-03 compare `model` au modèle
+courant du pipeline (`llm.MODEL`, DT-31). Une entrée écrite à la main porte
+`model: "manual"` (§5.2), valeur qui diffère de tout identifiant de modèle : le
+pilote de quatre entrées manuelles produisait donc **quatre avertissements
+W-03**, dans un dépôt où rien n'a dérivé.
+
+**Décision.** `model: "manual"` est exempté de W-03. Une entrée manuelle a une
+**provenance différente** d'une entrée de modèle ; elle n'est pas une entrée de
+modèle périmée.
+
+**Justification.** W-03 signale une dérive de modèle : une vague produite par un
+autre modèle que le modèle courant est une vague à relire entièrement (PR-23).
+Une entrée manuelle n'a aucun modèle dont elle puisse dériver — et elle est
+précisément ce en quoi une entrée signalée se transforme après relecture. Avertir
+sur elle, c'est avertir sur la réponse à l'avertissement, boucle qui ne
+s'éteint jamais. C'est aussi le motif de DT-32 : un avertissement qui se répète
+dans l'état normal du dépôt cesse d'être lu, et noie W-01, qui est rare et
+actionnable.
+
+**Ce que la décision ne fait pas.** Elle ne touche ni à la règle pour les
+entrées de modèle — un identifiant différent de `llm.MODEL` avertit toujours —
+ni au champ `model`, qui reste obligatoire et écrit par le producteur, jamais
+déduit à la relecture. Une entrée manuelle reste visible comme telle dans le
+diff, ce qui est la fonction du champ.
+
+**Alternative rejetée.** Faire porter au pilote le modèle courant pour éteindre
+l'avertissement : ce serait attester une production de modèle qui n'a pas eu
+lieu, sur le champ dont l'objet est la traçabilité.
 
 ---
 
