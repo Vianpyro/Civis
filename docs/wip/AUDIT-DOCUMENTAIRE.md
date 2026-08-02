@@ -14,6 +14,61 @@ workflows CI.
 
 ---
 
+## Mise à jour du 2 août 2026, à la livraison de PR-21
+
+**Ce que cette mise à jour est.** Une remise en conformité factuelle, rien
+d'autre. Les PR-15 à PR-21 du chantier Impacts ont rendu fausses plusieurs
+constatations de cet audit, écrites avant elles. Les affirmations concernées sont
+corrigées **à leur place**, chacune datée. **Aucune proposition n'est modifiée,
+aucune des huit questions ouvertes du §10 n'est tranchée ici** : elles restent
+l'objet de cet audit et attendent l'arbitrage du responsable.
+
+**Ce qui a bougé, en résumé.**
+
+| Point | Au moment de l'audit | Aujourd'hui |
+|---|---|---|
+| Versionnement de `docs/` | **Constat bloquant** : `.gitignore` ignorait `*.md` | **Résolu.** `docs/` et `CLAUDE.md` sont suivis depuis `7d21243` |
+| Suppression de `docs/migration/` | Perte définitive de 2 415 lignes | **Récupérable** par git. R-1 est clos |
+| `docs/impacts/DECISION.md` | 1 333 lignes, « non implémentée » | 1 725 lignes, implémentée de PR-15 à PR-21 |
+| Feuille de route du chantier Impacts | N'existait pas | `docs/impacts/ROADMAP.md`, 723 lignes |
+| Fournisseur de modèle | Passage à Gemini **annoncé** | **Livré** par DT-31 : `pipeline/llm.py` |
+| Volume documentaire | 8 fichiers, 4 039 lignes | 11 fichiers suivis, 6 233 lignes |
+
+**Sort de ce document — verdict explicite, demandé le 2 août 2026.**
+
+**Conservé jusqu'à la PR de réorganisation, supprimé par elle.** C'est déjà ce
+qu'énoncent le statut ci-dessus, R-2 et le §5.2 ; ce qui change est que la
+condition qui l'empêchait est levée.
+
+Trois raisons, par ordre de force.
+
+1. **Il porte des décisions non prises.** Les huit questions du §10 attendent un
+   arbitrage, et Q-8 mise à part elles sont toutes ouvertes. Supprimer maintenant
+   ne clôt pas ces questions : cela efface leur énoncé et le raisonnement qui les
+   motive, et elles se reposeront à la première PR documentaire.
+2. **Il porte la table de sauvetage du §7**, seul inventaire exhaustif de ce qui
+   doit quitter `docs/migration/` avant que le dossier disparaisse. Le supprimer
+   avant la réorganisation ferait perdre l'inventaire au moment précis où il
+   sert, ce qui est exactement le risque R-2.
+3. **Il ne doit pas non plus survivre à cette PR.** R-4 fixe une péremption à six
+   mois et R-2 assigne la suppression à la PR qui livre. La suppression est
+   désormais **récupérable** — `docs/` est versionné, et `.gitignore` déclare
+   explicitement que les notes de `docs/wip/` sont commitées pour cette raison :
+   *une note de travail dont la suppression n'est pas récupérable est une note
+   qu'on garde indéfiniment par précaution.*
+
+**Ce que la PR de réorganisation doit faire avant de le supprimer :** exécuter la
+table de sauvetage du §7, et consigner dans sa description la réponse donnée à
+chacune des questions Q-1 à Q-8. Un document de travail se supprime avec ses
+conclusions transférées, jamais avec ses questions en suspens.
+
+**Ce qui n'est pas fait ici, et pourquoi.** PR-21 ne livre rien de ce que cet
+audit propose — elle livre le rendu des analyses. Elle n'est donc pas la PR qui
+supprime, et elle ne réécrit ni les propositions du §3, ni l'architecture cible
+du §4, ni les plans de contenu du §6.
+
+---
+
 ## Sommaire
 
 0. [Constat bloquant : la documentation n'est pas versionnée](#0--constat-bloquant--la-documentation-nest-pas-versionnée)
@@ -78,6 +133,18 @@ est retirée de l'arborescence cible du §4.
 2. Commiter `docs/` **et `CLAUDE.md`** dans leur état actuel, sans rien modifier.
 3. Seulement ensuite, la PR de réorganisation.
 
+> **Résolu le 2 août 2026, constaté à la livraison de PR-21.** Les points 1 et 2
+> sont faits : `git ls-files docs` renvoie les sept documents, et `CLAUDE.md` est
+> suivi depuis le commit `7d21243`. Q-8 a été tranchée par l'acte plutôt que par
+> une réponse écrite — commiter `docs/` l'a rendu public avec le dépôt, ce qui
+> est la décision que la question posait ; le §10 le consigne.
+>
+> **Conséquence sur tout ce qui suit.** Le prérequis absolu énoncé ci-dessus est
+> levé : supprimer un fichier de `docs/migration/` est désormais une suppression
+> git récupérable, et non plus une perte définitive. Le point 3 — la PR de
+> réorganisation — est le seul qui reste, et il n'est bloqué que par l'arbitrage
+> de Q-2 à Q-7.
+
 ---
 
 ## 1 — Inventaire et verdict par fichier
@@ -92,6 +159,22 @@ est retirée de l'arborescence cible du §4.
 | `docs/migration/INVARIANTS.md` | 304 | INV-01→18 | Invariants valides ; **rédaction au futur**, protections décrites comme à venir | **Déplacer + réécrire au présent** |
 | `docs/migration/REVIEW_CHECKLIST.md` | 220 | Checklist de revue, 37 points | Contenu majoritairement valide, **inopposable en l'état** (A1 rejette toute PR) | **Réécrire + renommer** |
 | `docs/impacts/DECISION.md` | 1 333 | DP Impacts | Exacte, non implémentée | **Déplacer + renommer** |
+| `docs/impacts/ROADMAP.md` | — | Découpage en PR | **N'existait pas à l'audit** | **Temporaire** — voir ci-dessous |
+
+> **Mis à jour le 2 août 2026, à la livraison de PR-21.** Deux lignes de ce
+> tableau ont bougé.
+>
+> `docs/impacts/DECISION.md` fait **1 725 lignes** et non 1 333 : le §17 s'est
+> allongé de six amendements datés — DP-40, DT-30, DT-31, DT-32, DP-41, DT-33 —
+> arrêtés pendant l'implémentation. Elle n'est plus « non implémentée » : PR-15 à
+> PR-21 sont livrées, seule PR-23 reste. Le verdict *déplacer + renommer* est
+> **inchangé** et la scission décrite au §3.8 reste à faire.
+>
+> `docs/impacts/ROADMAP.md` (723 lignes) est né après l'audit. C'est un document
+> de chantier au sens du §5 : il décrit un plan en cours d'exécution, pas un état
+> permanent. Il **suit le sort de la DP** — ni permanent, ni historique — et sa
+> place dans l'architecture cible du §4 reste à trancher. Le §7 ne le mentionne
+> pas et n'a pas à le mentionner : rien n'en sort, il meurt avec le chantier.
 
 ---
 
@@ -167,7 +250,7 @@ DP Impacts, qui limite la génération aux points référencés.
 | Référence | Emplacements | État |
 |---|---|---|
 | `docs/migration/PR-XX.md` | `MIGRATION.md:7`, `REVIEW_CHECKLIST.md:14`, `:211` | **Ces 14 fichiers n'existent pas** |
-| `ROADMAP.md` | `MIGRATION.md:714` | **N'existe pas** |
+| `ROADMAP.md` | `MIGRATION.md:714` | **N'existe pas** — et n'existera pas : `docs/impacts/ROADMAP.md`, créé depuis, est la feuille de route du chantier *Impacts*, pas celle du chantier d'interface que ce renvoi désigne. Le renvoi reste cassé, et il résout désormais **vers le mauvais document** pour un lecteur pressé |
 | « la feuille de route » | `REVIEW_CHECKLIST.md:18`, `:166` | **N'existe pas** |
 | **« Système §x.y » — le système d'interface** | `REVIEW_CHECKLIST.md`, **17 occurrences** (§1.3, §3.1, §3.2, §3.3, §3.5, §3.7, §5.2, §5.3, §7.3, §7.8, §8.1×2, §8.2×3, §8.3, §8.4) + 5 renvois en prose dans `MIGRATION.md` | **Ce document n'a jamais existé dans le dépôt** |
 
@@ -704,6 +787,23 @@ mesure au lieu de se deviner.
 **Cinq points.** C'est le coût réel d'un changement de fournisseur, et c'est
 l'argument concret de DT-29 contre une couche d'abstraction.
 
+> **Mesuré le 2 août 2026, à la livraison de PR-21.** La prévision se vérifie, à
+> une nuance près qui la renforce. `pipeline/impacts.py` et `pipeline/llm.py`
+> existent ; le second concentre à lui seul trois des cinq points — client,
+> `MODEL`, variable d'environnement — derrière `run_batch()`, et
+> `requirements.txt` est **inchangé**, l'appel passant par `requests` déjà
+> présent. `generate.py` **n'a pas été migré** et continue d'appeler Anthropic
+> pour les questions : c'est une décision explicite de DT-31, pas un oubli.
+>
+> **Deux fournisseurs cohabitent donc dans le dépôt**, ce que ni l'audit ni la DP
+> n'anticipaient. La conséquence documentaire est réelle : `README.md:61`
+> (« Python + API Claude (batch) »), `:125` (`ANTHROPIC_API_KEY`) et `:129`
+> restent **exacts pour la génération des questions** et **muets sur celle des
+> analyses**. Ce n'est pas une erreur à corriger dans PR-21 — `README.md`
+> appartient à PR-22 — mais la table ci-dessus devra le refléter : le coût d'un
+> changement de fournisseur est désormais à compter **par chaîne**, pas pour le
+> dépôt entier.
+
 ### 6.4 `docs/DESIGN.md` — permanent
 
 Le « système d'interface » cité 17 fois et jamais écrit. **Il n'est pas rédigé
@@ -800,6 +900,14 @@ L'annonce du passage à Gemini a des effets que la DP, écrite sans cette
 information, ne couvre pas. Aucun n'invalide la conception ; trois demandent une
 retouche.
 
+> **Mis à jour le 2 août 2026, à la livraison de PR-21.** Le passage à Gemini
+> n'est plus une annonce : il est livré. **DT-31** (§17 de la DP) le formalise —
+> `pipeline/llm.py`, `PROVIDER` et `MODEL` surchargeables par l'environnement,
+> dictionnaire `PROVIDERS`, appel HTTP direct par `requests`, aucune dépendance
+> ajoutée. Les trois retouches du §8.2 sont **closes ou requalifiées** ; leur
+> statut est porté dans le tableau ci-dessous. Les trois risques du §8.3 restent
+> ouverts et aucun n'a encore été rencontré, le pilote ayant été écrit à la main.
+
 **8.1 — Ce qui ne bouge pas.** DT-29 (aucune abstraction de fournisseur, un
 point d'appel unique `run_batch()`) et INV-21 (le linter porte la garantie, pas
 le prompt) ont été écrits exactement pour cette situation. La conception résiste
@@ -807,11 +915,11 @@ au changement de fournisseur, ce qui était l'objectif.
 
 **8.2 — Trois retouches nécessaires.**
 
-| # | Point | Retouche |
-|---|---|---|
-| 1 | DP §5.4/§5.5 emploie `additionalProperties: false` et un schéma JSON strict, propre à l'API actuelle. Les schémas de sortie structurée diffèrent d'un fournisseur à l'autre — plusieurs n'acceptent qu'un sous-ensemble d'OpenAPI | Énoncer le schéma comme **contrat logique**, et poser que sa traduction dans le dialecte du fournisseur est une affaire d'implémentation. **Le linter reste la couche opposable** — ce que la DP dit déjà pour les conditionnalités ; l'étendre à tout le schéma |
-| 2 | L'exemple de contenu du §5.1 porte `"model": "claude-opus-5"` | Remplacer par une valeur générique dans l'exemple. Le champ reste, sa valeur est celle du modèle réellement employé |
-| 3 | La DP suppose une API de traitement par lots avec récupération asynchrone | `run_batch()` absorbe déjà un fournisseur sans lots par une boucle synchrone. **À écrire explicitement** dans DT-29 plutôt qu'à déduire |
+| # | Point | Retouche | Statut au 2 août 2026 |
+|---|---|---|---|
+| 1 | DP §5.4/§5.5 emploie `additionalProperties: false` et un schéma JSON strict, propre à l'API actuelle. Les schémas de sortie structurée diffèrent d'un fournisseur à l'autre — plusieurs n'acceptent qu'un sous-ensemble d'OpenAPI | Énoncer le schéma comme **contrat logique**, et poser que sa traduction dans le dialecte du fournisseur est une affaire d'implémentation. **Le linter reste la couche opposable** — ce que la DP dit déjà pour les conditionnalités ; l'étendre à tout le schéma | **Ouvert.** L'implémentation de PR-18 traduit le schéma pour Gemini sans que la DP l'énonce ; le linter porte bien la garantie, mais le §5.4 se lit toujours comme un schéma d'API |
+| 2 | L'exemple de contenu du §5.1 porte `"model": "claude-opus-5"` | Remplacer par une valeur générique dans l'exemple. Le champ reste, sa valeur est celle du modèle réellement employé | **Ouvert, et devenu trompeur.** Les quatre entrées du pilote portent `"manual"` (DT-33) et le modèle du pipeline est `gemini-2.5-pro` (DT-31) : l'exemple nomme un modèle qu'aucune entrée n'emploie |
+| 3 | La DP suppose une API de traitement par lots avec récupération asynchrone | `run_batch()` absorbe déjà un fournisseur sans lots par une boucle synchrone. **À écrire explicitement** dans DT-29 plutôt qu'à déduire | **Clos.** DT-31 l'écrit : « l'API batch n'est pas employée pour le pilote : DT-29 admet explicitement la boucle synchrone derrière la même signature » |
 
 **8.3 — Trois risques opérationnels à documenter, propres au contexte.**
 
@@ -843,7 +951,7 @@ consigné dans `AI.md` §9.
 
 | # | Risque | Gravité | Atténuation |
 |---|---|---|---|
-| R-1 | **Supprimer `docs/migration/` avant de corriger `.gitignore` détruit définitivement 2 415 lignes**, dont 48 décisions et 18 invariants | **Critique** | Prérequis absolu du §0 : corriger et commiter d'abord. Aucune suppression avant |
+| R-1 | ~~**Supprimer `docs/migration/` avant de corriger `.gitignore` détruit définitivement 2 415 lignes**, dont 48 décisions et 18 invariants~~ | ~~Critique~~ | **Clos le 2 août 2026.** `.gitignore` ne porte plus de règle `*.md` et `docs/` est suivi depuis `7d21243` : la suppression est une opération git récupérable. La ligne est conservée barrée — la numérotation des risques est citée ailleurs et ne se renumérote pas |
 | R-2 | Le sas de sauvetage (§7) perd un fragment en route | Élevée | La table est exhaustive et vérifiable ligne à ligne ; la PR de suppression cite la table dans sa description |
 | R-3 | La réorganisation devient l'occasion de « réécrire un peu » le registre | Élevée | R-6 : le tier historique est en écriture seule. Le toilettage du §3.5 est **limité à trois opérations nommées** |
 | R-4 | `DESIGN.md` promeut au rang de norme un extrait qui n'était qu'un extrait, et fige des règles jamais complètement écrites | Moyenne | Assumé : **une norme incomplète mais lisible vaut mieux que 17 renvois vers rien**. Ce qui manque se constate en revue et s'ajoute |
@@ -856,9 +964,12 @@ consigné dans `AI.md` §9.
 
 ## 10 — Questions restantes
 
-**Q-1 — `.gitignore`. Résolue.** La règle `*.md` est retirée. Reste à commiter
-`docs/` et `CLAUDE.md` avant toute suppression — mais après avoir répondu à Q-8,
-qui est le vrai point de non-retour.
+**Q-1 — `.gitignore`. Close.** La règle `*.md` est retirée, et `docs/` comme
+`CLAUDE.md` sont commités depuis `7d21243` (constaté le 2 août 2026). Plus rien
+n'en dépend. `.gitignore` porte désormais l'exclusion `docs/scratch/` et son
+motif, qui est aussi celui du verdict de conservation en tête de ce document :
+*une note de travail dont la suppression n'est pas récupérable est une note qu'on
+garde indéfiniment par précaution.*
 
 **Q-2 — ADR.** Ma recommandation est de **ne pas introduire les ADR** : le genre
 DP/DT existe, il est éprouvé sur 48 entrées, et un second genre poserait à
@@ -890,13 +1001,21 @@ consulter alors que son contenu est faux.
 (R-7) ? Il est court — il relit `content/` et compare à quatre chiffres — et il
 protège trois décisions. Il déborde du périmètre documentaire, d'où la question.
 
-**Q-8 — Publication.** Une fois `docs/` versionné, il devient public avec le
-dépôt. Le registre contient des formulations franches sur les défauts du produit
-(déséquilibre du corpus, score sensible à la couverture, échantillon
-auto-sélectionné). C'est cohérent avec P5 et P10, et je le recommande. Mais
-c'est une décision de publication, et elle t'appartient.
+**Q-8 — Publication. Tranchée par l'acte, le 2 août 2026.** `docs/` a été commité
+(`7d21243`) : les sept documents, registre compris, sont publics avec le dépôt.
+La décision que posait la question est prise, et dans le sens recommandé — ce qui
+est cohérent avec P5 et P10. Aucune formulation n'a été adoucie avant
+publication ; c'était l'enjeu réel de la question et il est réglé.
 
 ---
 
-**Fin de l'audit.** Aucune modification n'a été apportée. La suite attend ton
-arbitrage sur Q-1 à Q-8, et en particulier sur Q-1, qui bloque tout le reste.
+**Fin de l'audit.** Aucune modification n'avait été apportée à sa rédaction. La
+suite attend ton arbitrage sur **Q-2 à Q-7** ; Q-1 et Q-8, qui bloquaient tout le
+reste, sont closes.
+
+> **État au 2 août 2026, à la livraison de PR-21.** Ce document a été remis en
+> conformité factuelle — voir la mise à jour en tête. Les corrections sont datées
+> et portent uniquement sur des constats devenus faux ; aucune proposition n'a
+> été réécrite et aucune question ouverte n'a été tranchée par ce passage. Le
+> document est **conservé jusqu'à la PR de réorganisation, qui le supprime** une
+> fois la table de sauvetage du §7 exécutée et Q-2 à Q-7 consignées.

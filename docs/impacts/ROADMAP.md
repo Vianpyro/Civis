@@ -569,6 +569,33 @@ réel à rendre — c'est la raison du nouvel ordre, §2).
 1. **A-7** : le HTML compilé de `<lang>/index.html` est identique **octet à
    octet** avant et après. Protocole DT-20 ; la référence est construite sur la
    base avant fusion et son empreinte consignée dans la description de la PR.
+
+   > **Précision du protocole, arrêtée à la livraison de PR-21.** La comparaison
+   > **normalise l'empreinte de contenu des avoirs compilés** — le fragment
+   > qu'Astro insère dans le nom de fichier d'un bundle, `index.<empreinte>.css`
+   > — avant de comparer. Elle ne tolère **aucune autre différence**.
+   >
+   > **Pourquoi.** `styles.css` est la feuille unique du produit, importée par
+   > toutes les pages, et cette PR doit y ajouter un bloc (DT-15, §12 de la DP).
+   > Le nom du bundle dérive de son contenu : **toute** règle CSS ajoutée pour la
+   > page de résultats change le `href` de la balise `<link>` du questionnaire.
+   > Sans cette précision, A-7 et la prescription d'ajouter du CSS à la feuille
+   > partagée ne peuvent pas être vraies ensemble, et le critère devient
+   > inatteignable par construction plutôt qu'exigeant.
+   >
+   > **Ce que la précision ne fait pas.** Elle n'ouvre aucune échappatoire
+   > subjective, ce que DT-20 refuse à juste titre : la normalisation porte sur
+   > un motif nommé, mécanique et vérifiable, et le reste de la comparaison
+   > demeure octet à octet. Elle ne touche pas non plus à ce que A-7 protège —
+   > INV-20 — qui reste vérifié par deux contrôles indépendants du protocole :
+   > l'ensemble des avoirs JavaScript compilés doit rester **byte-identique**,
+   > et `check:blindness` doit passer.
+   >
+   > **Mesure à la livraison de PR-21.** Différence unique dans les deux langues,
+   > un seul jeton — `index.D6Qdpuir.css` → `index.Bqom1V_c.css` ; fichiers
+   > identiques octet à octet une fois l'empreinte normalisée ; avoirs JS
+   > byte-identiques. **`DECISION.md` n'est pas modifié : A-7 y garde sa
+   > rédaction, cette précision porte sur la façon de le mesurer.**
 2. **A-8**, **A-10**, **A-11** (zéro octet de JS ajouté, zéro requête), **A-12**,
    **A-13**, **A-14**.
 3. Les questions du pilote affichent leur analyse ; les vingt-huit autres
