@@ -35,6 +35,13 @@ const t = T[lang];
       <span>
         {COMMIT && BUILD_DATE ? t.version(COMMIT.slice(0, 7), BUILD_DATE) : t.versionLocal}
       </span>
+      {/* The methodology, reachable from every page including the questionnaire.
+          The label names no formation and the link opens nothing on hover: what
+          the page holds stays on the page, and the questionnaire's bundle is
+          untouched by it (INV-01). */}
+      <a href={href(`${lang}/method/`)} aria-current={page === "method" ? "page" : undefined}>
+        {t.methodology}
+      </a>
       <a href={REPO_URL}>{t.repository}</a>
       {CI_RUN_URL && <a href={CI_RUN_URL}>{t.quoteCheck}</a>}
     </footer>

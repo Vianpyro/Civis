@@ -522,3 +522,50 @@ nav.langs a {
 .aggregate-sample {
   margin-bottom: 0;
 }
+
+/* --- PR-13 — methodology page -----------------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   Three tables — coverage, scale labels, confidence — and two lists. They are
+   the page: nothing here is decoration, and no rule below carries a state, a
+   tint or an emphasis. The documents of the corpus reuse `.provenance`, which
+   already sets the apparatus register the results page shows them in. */
+
+/* Two narrow columns rather than a scrolling region: the widest cell is a
+   formation name and the second column never holds more than a short phrase, so
+   the table wraps inside a 320px viewport instead of overflowing it (M3, H10).
+   The row rule is `--rule`: it separates, it affords nothing. */
+.method table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-3);
+}
+.method caption {
+  text-align: left;
+  padding-bottom: var(--space-1);
+}
+.method th,
+.method td {
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  border-bottom: var(--stroke) solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+}
+.method td:last-child,
+.method th:last-child {
+  padding-right: 0;
+}
+
+/* The browser's own list indent is wider than the page's outer padding at
+   320px, which would push the text of a limit past the edge it starts from. */
+.method ul,
+.method ol {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-3);
+}
+.method li {
+  margin-bottom: var(--space-2);
+}
+.method .provenance li {
+  margin-bottom: var(--space-1);
+}

@@ -153,6 +153,99 @@ export const T = {
     supports: "Défend cette mesure",
     opposes: "S'y oppose",
     backToTop: "Retour en haut",
+
+    // --- Methodology page (PR-13) --------------------------------------------
+    //
+    // Documentation, not a landing (DP-07): no lead, no action button, no claim
+    // about the project's own qualities. Every sentence that states a property
+    // names the gesture that would contradict it (P1).
+    //
+    // No figure of the corpus and no threshold is written here. Coverage counts
+    // arrive as arguments, confidence bounds and the percentage threshold come
+    // from score.js: a value restated in this file would diverge from the code
+    // silently, and this is the page that would then be asserting a rule the
+    // product does not apply (K9, D7).
+    methodology: "Méthodologie",
+    methodIntro:
+      "Cette page est notre commentaire sur l'instrument : ce qu'il contient, comment il a été fabriqué, et ce qu'il ne permet pas de conclure. Elle ne cite aucun document officiel ; les citations sont sur la page de résultats, chacune avec son document et son empreinte.",
+
+    // The limits come first, not last: a defect stated by the instrument is a
+    // documented characteristic, the same defect found by a reader is a proof of
+    // duplicity (P5, DP-13). Two of the sentences below already exist in this
+    // file, next to the counters and the consent, and are read from there rather
+    // than written a second time.
+    methodLimits: "Limites connues",
+    methodLimitsDating:
+      "Les documents du corpus ont été publiés en 2024, pour les élections législatives ; le questionnaire porte sur le scrutin de 2027, dont les programmes ne sont pas parus.",
+    methodLimitsFetchDate:
+      "La date à laquelle chaque document a été téléchargé n'est enregistrée nulle part : le dépôt ne conserve que la date de publication annoncée par le document lui-même.",
+    methodLimitsVersioning:
+      "Les énoncés ne portent ni numéro de version ni date. Une reformulation ne laisse de trace que dans l'historique git, et des compteurs peuvent donc porter sur deux formulations sous un même identifiant.",
+    methodCoverageTitle: "Propositions retenues par formation",
+    methodCoverageColumn: "Formation",
+    methodCoverageCount: "Propositions retenues",
+    methodCoverageValue: (n, total) => `${n} sur ${total}`,
+    methodCoverageNote:
+      "Une formation peu couverte et une formation très couverte ne sont pas comparées sur la même base. C'est pourquoi chaque résultat porte le nombre de propositions comparées dans sa phrase, et non un pourcentage.",
+    methodSingleParty: (n, total) =>
+      `${n} des ${total} questions ne concernent qu'une seule formation : y répondre fait monter cette formation sans rien retirer aux autres. Le résultat dépend donc de la composition du corpus, pas seulement des réponses.`,
+
+    methodCorpus: "Le corpus",
+    methodCorpusIntro: (proposals, formations) =>
+      `Le questionnaire porte ${proposals} énoncés, tirés de documents publiés par ${formations} formations. Les documents lus sont ceux-ci, avec leur date de publication et l'empreinte SHA-256 du fichier récupéré :`,
+    methodCorpusCheck:
+      "Chaque citation est cherchée mot pour mot dans le document que sa source déclare, à chaque construction du site ; la construction échoue si elle ne s'y trouve pas. Hors ligne, la vérification est signalée comme sautée, jamais tenue pour faite. Télécharger un document ci-dessus et calculer son SHA-256 redonne l'empreinte affichée, ou la contredit.",
+
+    methodStatements: "Les énoncés",
+    methodStatementsEditorial:
+      "Les énoncés du questionnaire sont nos reformulations des propositions, écrites en questions fermées et parfois traduites. Ce ne sont pas des citations. La citation d'origine et son document figurent sous chaque question, sur la page de résultats : les comparer est ce qui met une reformulation en défaut.",
+
+    // The four facts, in this order and no other (DP-17). The most alarming one
+    // comes first, which is what makes the three that follow credible; the
+    // reverse order would read as a justification. No mitigating formula.
+    methodModel: "Rôle du modèle de langage",
+    methodModelFacts: [
+      "Les brouillons des énoncés sont générés par un modèle de langage, hors ligne et en lot, avant toute entrée dans le dépôt.",
+      "Chaque brouillon est relu par une personne avant d'entrer dans le contenu. Rien n'entre sans cette relecture.",
+      "Aucun appel à un modèle de langage n'a lieu pendant l'exécution du site : ni au chargement, ni pendant le questionnaire, ni au calcul du résultat. L'onglet réseau du navigateur montre ce qui sort.",
+      "Les citations rattachées aux propositions sont vérifiées mot pour mot par un programme, à chaque construction du site.",
+    ],
+
+    methodPassation: "La passation",
+    methodOrder:
+      "L'ordre des questions est tiré au hasard dans le navigateur, à chaque ouverture. Le tirage n'est envoyé nulle part ; il est conservé avec le brouillon dans l'onglet, pour qu'une restauration retrouve l'ordre affiché, et disparaît à la fermeture de l'onglet. Recharger la page change l'ordre.",
+    methodLabels:
+      "L'échelle porte cinq positions, avec les mêmes libellés à toutes les largeurs d'écran : des libellés qui changeraient avec la largeur donneraient des repères différents selon l'appareil. Le libellé affiché est abrégé pour tenir dans une colonne à 320 px ; le nom restitué par un lecteur d'écran reste la formulation complète.",
+    methodLabelDisplayed: "Libellé affiché",
+    methodLabelAccessible: "Nom accessible",
+    methodNeutral:
+      "« Neutre » et « Passer » sont traités à l'identique par le calcul : dans les deux cas la question sort de la base de comparaison. La distinction ne porte que sur les compteurs publics — une réponse « Neutre » y est enregistrée, une question passée n'envoie rien — parce que n'avoir pas d'avis et se situer au milieu de l'axe ne sont pas la même réponse.",
+
+    methodCalculation: "Le calcul",
+    methodFraction:
+      "Le résultat d'une formation est une fraction : le nombre de propositions sur lesquelles la réponse va dans le même sens que la formation, sur le nombre de propositions comparées. Ni pourcentage, ni barre, ni rang. L'intensité n'est pas pondérée : « Tout à fait » et « Plutôt oui » comptent l'un et l'autre pour un accord.",
+    methodBase:
+      "La base de comparaison est le nombre de propositions sur lesquelles la réponse n'est pas neutre et sur lesquelles la formation a une position identifiée. Les réponses neutres et les questions passées la réduisent, ce qui est exactement leur sens.",
+    methodCoverageDefinition:
+      "La couverture est autre chose : c'est une propriété du corpus, le nombre de propositions du questionnaire sur lesquelles une formation a une position, indépendamment des réponses. C'est le tableau donné plus haut, et il est le même pour tout le monde.",
+    methodConfidence:
+      "Le niveau de confiance se lit sur la base de comparaison, selon cette table. C'est un mot, jamais une nuance ni une position graphique. L'échelle est plafonnée : aucun palier n'existe au-dessus du dernier, quelle que soit la base — un corpus aussi déséquilibré n'en soutient pas.",
+    methodConfidenceBase: "Base de comparaison",
+    methodConfidenceLevel: "Niveau affiché",
+    methodConfidenceRange: (min, max) =>
+      max === null ? `${min} ou plus` : min === max ? `${min}` : `${min} à ${max}`,
+    methodPercent: (n) =>
+      `Les compteurs d'une proposition sont affichés en pourcentages à partir de ${n} réponses enregistrées pour cette proposition, et en effectifs bruts en deçà. Les pourcentages sont arrondis à l'unité, ce qui annonce une précision d'un point ; sous ${n} réponses, une réponse de plus en déplace la valeur de davantage.`,
+
+    // A named person, dated. Admissible against P1 because it is falsifiable by
+    // contradiction: it commits someone who can be shown to be wrong (P6).
+    methodEditorial: "Responsable éditorial et déclaration d'intérêts",
+    methodEditorialWho:
+      "Le dépôt est écrit et maintenu par une seule personne, Vianpyro (github.com/Vianpyro). Le choix des propositions retenues, la rédaction des énoncés et la relecture des brouillons lui incombent.",
+    methodEditorialInterests:
+      "Le projet ne reçoit aucun financement et n'a été commandé par personne. Son responsable éditorial n'adhère à aucune formation politique et n'est rémunéré par aucune. Cette déclaration nomme quelqu'un : elle se contredit par la production d'un fait contraire.",
+    methodEditorialDate: "Déclaration du 1er août 2026.",
+
     version: (commit, date) => `Version ${commit}, construite le ${date}`,
     versionLocal: "Build local : ni identifiant de commit, ni date de construction",
     repository: "Dépôt",
@@ -214,6 +307,79 @@ export const T = {
     supports: "Supports this measure",
     opposes: "Opposes it",
     backToTop: "Back to top",
+
+    // --- Methodology page (PR-13) --------------------------------------------
+    methodology: "Methodology",
+    methodIntro:
+      "This page is our commentary on the instrument: what it holds, how it was made, and what it does not let anyone conclude. It quotes no official document; the quotations are on the results page, each with its document and its fingerprint.",
+
+    methodLimits: "Known limits",
+    methodLimitsDating:
+      "The documents of the corpus were published in 2024, for the legislative elections; the questionnaire covers the 2027 election, whose manifestos are not out.",
+    methodLimitsFetchDate:
+      "The date each document was downloaded is recorded nowhere: the repository keeps only the publication date the document itself states.",
+    methodLimitsVersioning:
+      "The statements carry neither a version number nor a date. A rewording leaves no trace outside the git history, so counters may cover two formulations under one identifier.",
+    methodCoverageTitle: "Proposals taken from each formation",
+    methodCoverageColumn: "Formation",
+    methodCoverageCount: "Proposals taken",
+    methodCoverageValue: (n, total) => `${n} of ${total}`,
+    methodCoverageNote:
+      "A thinly covered formation and a heavily covered one are not compared on the same base. That is why every result carries the number of compared proposals inside its sentence, and not a percentage.",
+    methodSingleParty: (n, total) =>
+      `${n} of the ${total} questions concern a single formation: answering them raises that formation without taking anything from the others. The result therefore depends on how the corpus is made up, not on the answers alone.`,
+
+    methodCorpus: "The corpus",
+    methodCorpusIntro: (proposals, formations) =>
+      `The questionnaire holds ${proposals} statements, taken from documents published by ${formations} formations. These are the documents read, with their publication date and the SHA-256 fingerprint of the file retrieved:`,
+    methodCorpusCheck:
+      "Every quotation is looked for word for word in the document its source states, at every build of the site; the build fails if it is not there. Offline, the check is reported as skipped, never taken as done. Downloading a document above and computing its SHA-256 gives back the fingerprint shown, or contradicts it.",
+
+    methodStatements: "The statements",
+    methodStatementsEditorial:
+      "The statements of the questionnaire are our reformulations of the proposals, written as closed questions and sometimes translated. They are not quotations. The original quotation and its document sit under each question on the results page: comparing them is what catches a reformulation out.",
+
+    methodModel: "Role of the language model",
+    methodModelFacts: [
+      "Draft statements are generated by a language model, offline and in batches, before anything enters the repository.",
+      "Every draft is read by a person before it enters the content. Nothing enters without that review.",
+      "No language model is called while the site runs: not on load, not during the questionnaire, not when the result is computed. The browser's network tab shows what goes out.",
+      "The quotations attached to the proposals are checked word for word by a program, at every build of the site.",
+    ],
+
+    methodPassation: "Taking the questionnaire",
+    methodOrder:
+      "The order of the questions is drawn at random in the browser, at every opening. The draw is sent nowhere; it is kept with the draft inside the tab, so that a restoration finds the order that was displayed, and it is dropped when the tab is closed. Reloading the page changes the order.",
+    methodLabels:
+      "The scale holds five positions, with the same labels at every screen width: labels that changed with the width would give different anchors depending on the device. The displayed label is abridged to fit a column at 320px; the name a screen reader gives back stays the full formulation.",
+    methodLabelDisplayed: "Displayed label",
+    methodLabelAccessible: "Accessible name",
+    methodNeutral:
+      "“Neutral” and “Skip” are treated the same way by the computation: either one takes the question out of the comparison base. The distinction bears on the public counters alone — a “Neutral” answer is recorded there, a skipped question sends nothing — because holding no view and sitting at the middle of the axis are not the same answer.",
+
+    methodCalculation: "The computation",
+    methodFraction:
+      "The result of a formation is a fraction: the number of proposals where the answer goes the same way as the formation, over the number of proposals compared. No percentage, no bar, no rank. Intensity is not weighted: “Fully agree” and “Rather yes” both count as agreement.",
+    methodBase:
+      "The comparison base is the number of proposals where the answer is not neutral and where the formation holds an identified position. Neutral answers and skipped questions reduce it, which is exactly what they mean.",
+    methodCoverageDefinition:
+      "Coverage is another thing: a property of the corpus, the number of proposals of the questionnaire a formation holds a position on, independently of any answer. That is the table given above, and it is the same for every reader.",
+    methodConfidence:
+      "The confidence level is read from the comparison base, according to this table. It is a word, never a shade or a graphic position. The scale is capped: no step exists above the last one, whatever the base — a corpus this unbalanced supports none.",
+    methodConfidenceBase: "Comparison base",
+    methodConfidenceLevel: "Level displayed",
+    methodConfidenceRange: (min, max) =>
+      max === null ? `${min} or more` : min === max ? `${min}` : `${min} to ${max}`,
+    methodPercent: (n) =>
+      `The counters of a proposal are shown as percentages from ${n} answers recorded for that proposal onwards, and as raw counts below it. Percentages are rounded to the unit, which announces a precision of one point; below ${n} answers, one more answer moves the value by more than that.`,
+
+    methodEditorial: "Editorial responsibility and declaration of interests",
+    methodEditorialWho:
+      "The repository is written and maintained by one person, Vianpyro (github.com/Vianpyro). The choice of the proposals kept, the writing of the statements and the review of the drafts are theirs.",
+    methodEditorialInterests:
+      "The project receives no funding and was commissioned by no one. Its editorial lead belongs to no political formation and is paid by none. This declaration names someone: it is contradicted by producing a fact against it.",
+    methodEditorialDate: "Declared on 1 August 2026.",
+
     version: (commit, date) => `Version ${commit}, built on ${date}`,
     versionLocal: "Local build: no commit identifier, no build date",
     repository: "Repository",
