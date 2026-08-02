@@ -95,6 +95,49 @@ export function confidence(base) {
   return CONFIDENCE_LEVELS.find(({ max }) => max === null || base <= max).level;
 }
 
+/**
+ * The percentage threshold of the aggregates. This constant is the only place it
+ * exists: the methodology page reads it from here rather than restating it, for
+ * the same reason the confidence bounds above are read and not restated (DP-15,
+ * D7).
+ *
+ * It is derived, not chosen. Percentages are displayed rounded to the unit, which
+ * announces a precision of one point. The real granularity of a count `n` is
+ * `100/n` points — one more answer moves the value by at least that much — and a
+ * percentage is honest only where the granularity is at least as fine as the
+ * announced precision: `100/n <= 1`, so `n >= 100`. Below it, "43 %" announces one
+ * point of precision where the data sometimes holds fourteen (n = 7).
+ *
+ * Nothing is hidden below the threshold: the whole distribution is still shown, in
+ * raw counts, with its total. Only the formatting that suggests a precision the
+ * data does not have is dropped.
+ */
+export const PERCENT_MIN_RESPONSES = 100;
+
+/**
+ * The aggregate of one proposal, from the scale-wide row the counter service
+ * returns. The count is a number of **answers recorded for one proposal**, never
+ * a number of people: nothing in the schema relates two answers, so that figure
+ * does not exist and no label may imply it (DT-11, INV-03).
+ *
+ * Counts of different proposals are never summed — that would rebuild a
+ * population that does not exist. The threshold applies proposal by proposal, so
+ * a page mixing raw counts and percentages is correct, not inconsistent.
+ *
+ * `percentages` is null below the threshold, which is what tells a caller to
+ * render the raw counts it already has.
+ */
+export function aggregate(counts = []) {
+  const responses = counts.reduce((sum, n) => sum + n, 0);
+  return {
+    responses,
+    percentages:
+      responses >= PERCENT_MIN_RESPONSES
+        ? counts.map((n) => Math.round((n / responses) * 100))
+        : null,
+  };
+}
+
 /** Answer scale shared by the form and the aggregate counters. */
 export const CHOICES = [-1, -0.5, 0, 0.5, 1];
 

@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CHOICES, CONFIDENCE_LEVELS, choiceIndex, confidence, coverage, score } from "./score.js";
+import {
+  CHOICES,
+  CONFIDENCE_LEVELS,
+  PERCENT_MIN_RESPONSES,
+  aggregate,
+  choiceIndex,
+  confidence,
+  coverage,
+  score,
+} from "./score.js";
 
 const positions = {
   q1: [
@@ -182,6 +191,46 @@ test("every level a row carries comes from the published table", () => {
   for (const row of score({ q1: 1, q2: 1 }, positions)) {
     assert.ok(levels.includes(row.confidence));
   }
+});
+
+// --- the aggregate threshold -------------------------------------------------
+//
+// One test per bound of DP-15, on the bound itself. This is the other place an
+// off-by-one comparison — `>` where `>=` belongs — passes unnoticed, and it would
+// put a percentage under the published threshold (D2).
+
+// A scale-wide row totalling `n`, which is what GET /counts returns per question.
+const rowOf = (n) => [n - Math.floor(n / 2), 0, 0, 0, Math.floor(n / 2)];
+
+test("no answer recorded for a proposal is a count of zero, never a percentage", () => {
+  assert.deepEqual(aggregate([0, 0, 0, 0, 0]), { responses: 0, percentages: null });
+  // A question absent from the response, and the row the service returns for a
+  // question nobody answered, are the same state and neither divides by zero.
+  assert.deepEqual(aggregate([]), { responses: 0, percentages: null });
+  assert.deepEqual(aggregate(), { responses: 0, percentages: null });
+});
+
+test("just under the threshold, the distribution is raw counts only", () => {
+  const { responses, percentages } = aggregate(rowOf(PERCENT_MIN_RESPONSES - 1));
+  assert.equal(responses, 99);
+  assert.equal(percentages, null, "99 answers announce a point of precision the data has not");
+});
+
+test("at the threshold, percentages are allowed", () => {
+  const row = rowOf(PERCENT_MIN_RESPONSES);
+  const { responses, percentages } = aggregate(row);
+  assert.equal(responses, 100);
+  assert.deepEqual(percentages, [50, 0, 0, 0, 50]);
+  // Whatever the shape of the row, a percentage is its count over the total.
+  const uneven = [43, 12, 5, 20, 20];
+  assert.deepEqual(aggregate(uneven).percentages, [43, 12, 5, 20, 20]);
+});
+
+test("the published threshold is 100 answers per proposal", () => {
+  assert.equal(PERCENT_MIN_RESPONSES, 100, "the value the methodology page reads from here");
+  // `100/n <= 1` is where the displayed precision stops exceeding the real one.
+  assert.ok(100 / PERCENT_MIN_RESPONSES <= 1);
+  assert.ok(100 / (PERCENT_MIN_RESPONSES - 1) > 1);
 });
 
 // --- the answer scale --------------------------------------------------------

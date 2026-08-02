@@ -126,8 +126,29 @@ export const T = {
     published: (date) => `publié le ${date}`,
     publishedUnknown: "date de publication non indiquée",
     fingerprint: "SHA-256",
-    aggregate: "Réponses des autres participants",
-    aggregateEmpty: "Pas encore de statistiques agrégées.",
+    // The aggregates. Every count here is a number of answers recorded for one
+    // proposal — never a number of people, which the schema makes structurally
+    // unknowable, and which a label claiming it would contradict in the very
+    // words meant to illustrate it (DT-11, D6). Hence no "participants" and no
+    // "personnes" anywhere below, heading included.
+    //
+    // Four messages, and they are not interchangeable: no service configured,
+    // service that did not answer, no answer recorded, and the wait. A silent
+    // disappearance is none of them (INV-14, P8).
+    //
+    // `{n}` is the one slot the script fills. The sentence takes no plural
+    // agreement, so no plural rule travels to the client (D2).
+    aggregate: "Compteurs de cette proposition",
+    aggregateResponses: "Nombre de réponses enregistrées pour cette proposition : {n}",
+    aggregatePercent: "{n} %",
+    // The qualification, next to the figures and never elsewhere: it is what
+    // makes the section admissible rather than an ornament on it (DP-15, P7).
+    aggregateSample:
+      "Échantillon auto-sélectionné, limité aux réponses laissées au comptage : ce n'est pas un sondage représentatif.",
+    aggregatePending: "Compteurs en cours de chargement.",
+    aggregateNoService: "Aucun service de compteurs n'est configuré pour ce déploiement.",
+    aggregateUnavailable: "Le service de compteurs n'a pas répondu.",
+    aggregateEmpty: "Aucune réponse enregistrée pour cette proposition.",
     yourAnswer: "Votre réponse",
     supports: "Défend cette mesure",
     opposes: "S'y oppose",
@@ -180,8 +201,15 @@ export const T = {
     published: (date) => `published on ${date}`,
     publishedUnknown: "publication date not stated",
     fingerprint: "SHA-256",
-    aggregate: "How others answered",
-    aggregateEmpty: "No aggregate statistics yet.",
+    aggregate: "Counters for this proposal",
+    aggregateResponses: "Answers recorded for this proposal: {n}",
+    aggregatePercent: "{n}%",
+    aggregateSample:
+      "Self-selected sample, limited to the answers left to be counted: this is not a representative poll.",
+    aggregatePending: "Counters loading.",
+    aggregateNoService: "No counter service is configured for this deployment.",
+    aggregateUnavailable: "The counter service did not answer.",
+    aggregateEmpty: "No answer recorded for this proposal.",
     yourAnswer: "Your answer",
     supports: "Supports this measure",
     opposes: "Opposes it",

@@ -13,6 +13,7 @@ import Base from "../../layouts/Base.astro";
 import Quote from "../../components/Quote.astro";
 import Result from "../../components/Result.astro";
 import Source from "../../components/Source.astro";
+import Statistic from "../../components/Statistic.astro";
 import questions from "../../../../content/questions/fr-2027.json";
 import positions from "../../../../content/questions/fr-2027.positions.json";
 import sources from "../../../../content/sources/fr-2027/sources.json";
@@ -175,21 +176,18 @@ const provenance = sources.map((source) => {
             ))}
           </ul>
           {/* The counters are the one thing on this page that is not known at
-              build time. Their labels are; only the figures wait, in elements
-              that already exist. Hidden until they arrive, so nothing shows a
-              row without its number. */}
-          <div class="aggregate muted" data-question={id} hidden>
-            <p>
-              <strong>{t.aggregate}</strong>
-            </p>
-            {
-              labels.map((label, choice) => (
-                <p>
-                  {label} — <span data-choice={choice} />%
-                </p>
-              ))
-            }
-          </div>
+              build time. Their labels are, and so is the qualification that makes
+              them admissible; only the figures wait, in elements that already
+              exist. The section is never removed and never hidden: whichever of
+              the three states holds — no service, no answer from it, no answer
+              recorded — it is the section itself that says so (INV-14, P8). */}
+          <Statistic
+            question={id}
+            labels={labels}
+            title={t.aggregate}
+            pending={t.aggregatePending}
+            sample={t.aggregateSample}
+          />
         </details>
       ))
     }
@@ -198,9 +196,12 @@ const provenance = sources.map((source) => {
   <p><a class="button" href={href(`${lang}/`)}>{t.restart}</a></p>
 
   {/* What is left for the script: the positions it scores, the scale labels for
-      the answer given, the sentences indexed by comparison base, and the
-      empty-counter message. Everything else on this page is rendered above and
-      no longer travels. */}
+      the answer given, the sentences indexed by comparison base, and the four
+      counter messages with the two figure formats. Everything else on this page
+      is rendered above and no longer travels.
+
+      The messages travel written, `{n}` aside: no sentence is assembled in the
+      client and no plural rule leaves ui.js (D2). */}
   <script
     type="application/json"
     id="data"
@@ -210,12 +211,18 @@ const provenance = sources.map((source) => {
       labels,
       fractions,
       confidences,
-      aggregateEmpty: t.aggregateEmpty,
+      aggregate: {
+        responses: t.aggregateResponses,
+        percent: t.aggregatePercent,
+        noService: t.aggregateNoService,
+        unavailable: t.aggregateUnavailable,
+        empty: t.aggregateEmpty,
+      },
     })}></script>
 </Base>
 
 <script>
-  import { CHOICES, score } from "../../lib/score.js";
+  import { CHOICES, aggregate, score } from "../../lib/score.js";
 
   const data = JSON.parse(document.getElementById("data").textContent);
   const { scoreInput, labels, fractions, confidences } = data;
@@ -256,28 +263,52 @@ const provenance = sources.map((source) => {
     item.querySelector(".answer").textContent = labels[CHOICES.indexOf(answer)] ?? "";
   }
 
-  // Aggregates arrive after the reveal, never before. A failure here is silent:
-  // the questionnaire result does not depend on the counter service being up —
-  // and a deployment without one simply has no aggregate section.
+  // Aggregates arrive after the reveal, never before. The result of the
+  // questionnaire does not depend on the counter service being up — but its
+  // absence is a state of the world the reader is entitled to, not a section that
+  // quietly goes away. Three states, three sentences, none of them a
+  // disappearance (INV-14, P8, J7):
+  //
+  //   no service configured for this deployment — a supported deployment, not a
+  //   misconfiguration; the service did not answer; no answer recorded yet for
+  //   this proposal.
+  //
+  // The fourth message, the wait, is already in the document from the build.
+  const aggregates = document.querySelectorAll(".aggregate");
+  const say = (node, sentence) => {
+    node.querySelector(".aggregate-state").textContent = sentence;
+  };
+
   if (!data.api) {
-    for (const node of document.querySelectorAll(".aggregate")) node.remove();
+    for (const node of aggregates) say(node, data.aggregate.noService);
   } else {
     fetch(`${data.api}/counts`)
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((counts) => {
-        for (const node of document.querySelectorAll(".aggregate")) {
-          const row = counts[node.dataset.question];
-          const total = row?.reduce((sum, n) => sum + n, 0) ?? 0;
-          if (!total) {
-            node.textContent = data.aggregateEmpty;
-          } else {
-            for (const cell of node.querySelectorAll("[data-choice]")) {
-              cell.textContent = String(Math.round((row[cell.dataset.choice] / total) * 100));
-            }
+        for (const node of aggregates) {
+          const row = counts[node.dataset.question] ?? [];
+          // The count of one proposal, and the threshold applied to that
+          // proposal alone: counts are never summed across proposals, and two
+          // proposals of this page may well be displayed differently (DP-15).
+          const { responses, percentages } = aggregate(row);
+          if (responses === 0) {
+            say(node, data.aggregate.empty);
+            continue;
           }
-          node.hidden = false;
+          say(node, data.aggregate.responses.replace("{n}", responses));
+          for (const cell of node.querySelectorAll("[data-choice]")) {
+            const choice = cell.dataset.choice;
+            // Under the threshold, the raw counts — the whole distribution is
+            // still shown, only the rounding that announces a precision the data
+            // has not is withheld (DP-15, D2).
+            cell.textContent = percentages
+              ? data.aggregate.percent.replace("{n}", percentages[choice])
+              : String(row[choice] ?? 0);
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        for (const node of aggregates) say(node, data.aggregate.unavailable);
+      });
   }
 </script>

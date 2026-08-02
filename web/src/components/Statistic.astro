@@ -1,0 +1,40 @@
+---
+// The counters of one proposal. Props only, and no program data of any kind: the
+// figures below say how a scale was answered, never by whom or for which
+// formation.
+//
+// The block is rendered whole at build and never hidden. What a build cannot know
+// is the figures alone, so the labels, the qualification and the five rows are
+// here from the start and only the value cells wait. Three consequences, all
+// intended: the slot has a stable size, so the page does not jump when the
+// counters arrive (System §5.9); a reader without JavaScript sees the section
+// state that its figures are pending rather than see nothing; and no failure can
+// make the section disappear, because nothing removes it (INV-14, P8).
+//
+// The five modalities are in scale order, each with its full formulation. No data
+// mark is drawn: a bar would add nothing to the figure beside it, and under the
+// threshold it would restate in a length the precision the threshold exists to
+// withhold. Nothing here is a value scale and nothing carries a tint (INV-12,
+// DP-22, G5).
+//
+// `state` is the one line that changes: it holds the count, or the reason there
+// is none. The qualification below it does not change — an aggregate is a
+// self-selected sample whatever its size (DP-15).
+const { question, labels, title, pending, sample } = Astro.props;
+---
+
+<div class="aggregate" data-question={question}>
+  <p class="aggregate-title"><strong>{title}</strong></p>
+  <p class="aggregate-state">{pending}</p>
+  <ul class="aggregate-rows">
+    {
+      labels.map((label, choice) => (
+        <li>
+          <span>{label}</span>
+          <span class="aggregate-value" data-choice={choice} />
+        </li>
+      ))
+    }
+  </ul>
+  <p class="aggregate-sample">{sample}</p>
+</div>

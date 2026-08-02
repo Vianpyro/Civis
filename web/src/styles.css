@@ -468,3 +468,57 @@ nav.langs a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* --- PR-12 — qualified statistics -------------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   Apparatus register: these are figures about the corpus of answers, structurally
+   tied to the proposal above them and never separable from it, but quieter than
+   the personal result — the two objects must not be read as one another (P7).
+   Every line of the block is the same size and the same colour, the count
+   included: the base travels with the measure and at its weight (P4, INV-13). */
+
+.aggregate {
+  margin-top: var(--space-3);
+  font-size: var(--text-apparatus);
+  line-height: var(--leading-apparatus);
+  color: var(--ink-quiet);
+}
+.aggregate p {
+  margin: 0 0 var(--space-1);
+}
+
+/* The one line the counters change. Two apparatus lines are reserved for it —
+   32 + 8 = 40px, against 2 × 13px × 1.4 — so the block keeps its size from the
+   first paint to the arrival of the figures, whichever of the four sentences it
+   ends up holding. No animated skeleton: a reserved slot and a sentence are the
+   whole treatment (DP-21, System §5.9). */
+.aggregate-state {
+  min-height: calc(var(--space-4) + var(--space-2));
+}
+
+/* Five rows in scale order, each its full formulation and its value. The value
+   column is a fixed width, so the labels do not move when the figures land, and
+   the figures line up under one another rather than after a ragged edge. No
+   mark, no bar, no fill: nothing here encodes a quantity as a length or a
+   shade (INV-12, DP-22). */
+.aggregate-rows {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+}
+.aggregate-rows li {
+  display: grid;
+  grid-template-columns: 1fr var(--space-5);
+  gap: var(--space-2);
+}
+.aggregate-value {
+  text-align: right;
+}
+
+/* The qualification sits with the figures it qualifies, in every block, and is
+   never deferred to a note elsewhere on the page: it is what makes the section
+   admissible rather than a comment on it (DP-15). */
+.aggregate-sample {
+  margin-bottom: 0;
+}
