@@ -59,6 +59,68 @@
         }
       ]
     },
+    "nfp-fonctionnaires": {
+      "of": "4bb364377062df0d7bc06b0484d603177390c4e85aa79e87893796fbb13266d9",
+      "model": "gemini-3.6-flash",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "Lancer le rattrapage des postes manquants de fonctionnaires à l'hôpital public, dans le soin et le médico-social, à l'école publique, dans la justice, dans les services et les agences de l'État",
+          "fr": "La mesure engage le rattrapage des postes de fonctionnaires manquants dans la santé, l'école, la justice et les services de l'État.",
+          "en": "The measure launches a catch-up on unfilled civil service posts in healthcare, schools, justice and state services."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "healthcare",
+          "directness": "direct",
+          "span": "à l'hôpital public, dans le soin et le médico-social",
+          "fr": "L'hôpital public et le secteur du soin et du médico-social figurent parmi les destinataires du rattrapage de postes.",
+          "en": "Public hospitals and the care and medico-social sector are among the recipients of the post catch-up."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "schools",
+          "directness": "direct",
+          "span": "à l'école publique",
+          "fr": "L'école publique figure parmi les destinataires du rattrapage de postes.",
+          "en": "Public schools are among the recipients of the post catch-up."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "judiciary",
+          "directness": "direct",
+          "span": "dans la justice",
+          "fr": "La justice figure parmi les destinataires du rattrapage de postes.",
+          "en": "The justice system is among the recipients of the post catch-up."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "state_services",
+          "directness": "direct",
+          "span": "dans les services et les agences de l'État",
+          "fr": "Les services et les agences de l'État figurent parmi les destinataires du rattrapage de postes.",
+          "en": "State services and agencies are among the recipients of the post catch-up."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "Le recrutement de fonctionnaires supplémentaires pourrait porter la masse salariale publique à un niveau plus élevé.",
+          "en": "Recruiting additional civil servants could raise the public payroll to a higher level."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "La création de ces postes pourrait modifier la charge de travail des équipes en place.",
+          "en": "The creation of these posts could alter the workload of existing teams."
+        }
+      ]
+    },
     "nfp-isf": {
       "of": "74f2c7698bf71eec596fbb53732dea8f951b56db496650b282cd84c6064d5eea",
       "model": "manual",
@@ -92,6 +154,116 @@
           "basis": "inferred",
           "fr": "La composante climatique pourrait faire intervenir des critères environnementaux dans le calcul de l'impôt, selon les modalités retenues.",
           "en": "The climate component could bring environmental criteria into the calculation of the tax, depending on the arrangements chosen."
+        }
+      ]
+    },
+    "nfp-superprofits": {
+      "of": "0a210fb9d18265ad806d603441784722bc89b74e2a208c53e19f44f4df7968ed",
+      "model": "gemini-3.6-flash",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "Généraliser de la taxation des superprofits au niveau européen",
+          "fr": "La mesure porte la taxation des superprofits à l'échelle européenne plutôt qu'au seul cadre national.",
+          "en": "The measure takes the taxation of excess profits to European scale rather than to the national frame alone."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "businesses",
+          "directness": "direct",
+          "span": "Généraliser de la taxation des superprofits au niveau européen",
+          "fr": "Les entreprises réalisant des superprofits relèvent de la taxation décrite.",
+          "en": "Businesses making excess profits fall under the described taxation."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "La taxation décrite pourrait donner lieu à des recettes fiscales supplémentaires selon les modalités retenues.",
+          "en": "The described taxation could give rise to additional tax revenue depending on the arrangements chosen."
+        }
+      ]
+    },
+    "rn-agences-rationalisation": {
+      "of": "647bafa27c257b19d3f10cf8f768d857d05fee62f249494c633d8342aab7eb35",
+      "model": "gemini-3.6-flash",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "un plan de rationalisation des agences publiques de l'Etat (suppression notamment des ARS, réduction des dépenses de fonctionnement)",
+          "fr": "La mesure institue un plan de rationalisation des agences publiques de l'État, comportant la suppression des ARS.",
+          "en": "The measure sets up a rationalisation plan for state public agencies, including the abolition of the ARS."
+        },
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "un plan de rationalisation des agences publiques de l'Etat (suppression notamment des ARS, réduction des dépenses de fonctionnement)",
+          "fr": "Le plan comporte une réduction des dépenses de fonctionnement des agences publiques de l'État.",
+          "en": "The plan includes a reduction in the operating expenditure of state public agencies."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "public_bodies",
+          "directness": "direct",
+          "span": "un plan de rationalisation des agences publiques de l'Etat (suppression notamment des ARS, réduction des dépenses de fonctionnement)",
+          "fr": "Les agences publiques de l'État, dont les ARS, relèvent du plan de rationalisation décrit.",
+          "en": "State public agencies, including the ARS, fall under the described rationalisation plan."
+        },
+        {
+          "kind": "affected",
+          "basis": "inferred",
+          "who": "employees",
+          "directness": "indirect",
+          "fr": "Les agents en poste dans les agences supprimées ou réorganisées pourraient voir leur affectation modifiée.",
+          "en": "Staff working in abolished or reorganised agencies could see their assignment changed."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "La suppression des ARS pourrait conduire à une réorganisation du pilotage territorial du système de santé.",
+          "en": "The abolition of the ARS could lead to a reorganisation of the territorial governance of the health system."
+        }
+      ]
+    },
+    "rn-ars-suppression": {
+      "of": "3c697c7c14e3c0a6aee756509340644f8e61cda0e71588970cf5f2a7f772e2c1",
+      "model": "gemini-3.6-flash",
+      "reviewed": "2026-08-02",
+      "items": [
+        {
+          "kind": "implication",
+          "basis": "text",
+          "span": "Supprimer les Agences Régionales de Santé",
+          "fr": "La mesure prévoit la suppression des Agences Régionales de Santé.",
+          "en": "The measure provides for the abolition of the Regional Health Agencies."
+        },
+        {
+          "kind": "affected",
+          "basis": "text",
+          "who": "public_bodies",
+          "directness": "direct",
+          "span": "Supprimer les Agences Régionales de Santé",
+          "fr": "Les Agences Régionales de Santé sont l'objet de la suppression décrite.",
+          "en": "The Regional Health Agencies are the object of the described abolition."
+        },
+        {
+          "kind": "affected",
+          "basis": "inferred",
+          "who": "healthcare",
+          "directness": "indirect",
+          "fr": "Les professionnels et établissements de santé pourraient relever d'une autre autorité régionale que celle décrite.",
+          "en": "Healthcare providers and facilities could come under a regional authority other than the one described."
+        },
+        {
+          "kind": "effect",
+          "basis": "inferred",
+          "fr": "Les missions de régulation régionale de la santé pourraient être réattribuées à d'autres services selon les modalités retenues.",
+          "en": "Regional health regulation duties could be reassigned to other services depending on the arrangements chosen."
         }
       ]
     },
