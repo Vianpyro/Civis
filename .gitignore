@@ -27,6 +27,12 @@ target
 # LLM question drafts, awaiting human review
 review/
 
+# Personal drafts. The only unversioned place under docs/ — every other
+# document there is committed, including the temporary ones in docs/wip/:
+# a working note whose deletion is not recoverable is a note that gets kept
+# forever out of caution.
+docs/scratch/
+
 # Python
 __pycache__/
 *.pyc
