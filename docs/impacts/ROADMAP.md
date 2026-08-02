@@ -214,7 +214,10 @@ canonique, cohérence avec `programs/` et `positions.json`.
    avertissements W-02.
 2. Chacune des douze règles portées échoue avec un message la nommant (**A-2**,
    part PR-16).
-3. **A-18** et **A-6** vérifiés.
+3. **A-18**, **A-6** et **A-19** vérifiés — ce dernier couvre les deux contrôles
+   de schéma formalisés par DT-32 : `election` doit valoir le nom du fichier, et
+   un fichier d'analyses absent échoue avec un message le nommant plutôt qu'avec
+   une exception. W-02 est rapporté **agrégé**, pour le motif écrit en DT-32.
 4. `--step all` inchangé ; aucun fichier de `web/` modifié ; sortie compilée
    identique octet à octet.
 5. Aucune dépendance ajoutée.

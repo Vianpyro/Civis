@@ -9,10 +9,11 @@ cette DP : il s'arrête et la signale, il ne tranche pas.
 en PR ni de plan d'implémentation : ils vivent dans
 `docs/impacts/ROADMAP.md`, approuvé le 2 août 2026.
 
-**Amendements.** Trois décisions ont été ajoutées après approbation, au §17 :
+**Amendements.** Quatre décisions ont été ajoutées après approbation, au §17 :
 **DP-40** (corpus pilote), **DT-30** (suite de tests Python), **DT-31**
-(configuration du fournisseur). Elles amendent DT-24, DT-26, DT-29 et le
-critère A-4, qui portent chacun un renvoi à l'endroit concerné. Le corps du
+(configuration du fournisseur), **DT-32** (rapport agrégé de W-02 et deux
+contrôles de schéma opposables, critère A-19). Elles amendent DT-24, DT-26,
+DT-29, W-02 et le critère A-4, qui portent chacun un renvoi à l'endroit concerné. Le corps du
 document n'a pas été réécrit : un amendement daté se lit, une réécriture
 silencieuse se subit.
 
@@ -43,7 +44,7 @@ s'arrête.
 14. [Non-objectifs](#14--non-objectifs)
 15. [Risques résiduels assumés](#15--risques-résiduels-assumés)
 16. [Matrice décision → invariant → vérification](#16--matrice-décision--invariant--vérification)
-17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31](#17--amendements-postérieurs-à-lapprobation)
+17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31, DT-32](#17--amendements-postérieurs-à-lapprobation)
 
 ---
 
@@ -1072,7 +1073,7 @@ partir de 0, chacun avec son `kind`, son `basis` et son `span` s'il en a un.
 | # | Règle |
 |---|---|
 | W-01 | Question dont certaines positions seulement ont une analyse (DP-34 : rien ne s'affiche) |
-| W-02 | Point référencé par `positions.json` sans entrée d'analyse |
+| W-02 | Point référencé par `positions.json` sans entrée d'analyse — **rapporté agrégé**, voir DT-32 |
 | W-03 | Entrée dont `model` diffère du modèle courant du pipeline |
 | W-04 | Vérification de `span` ignorée faute de documents en cache |
 
@@ -1231,6 +1232,11 @@ La fonctionnalité est acceptée quand **tous** les points suivants sont vérifi
   **aucune** analyse, et `check` émet W-01 sans échouer.
 - **A-6** Hors ligne, la vérification des `span` est **rapportée comme ignorée**,
   jamais silencieusement passée, et `check` sort avec le code 0.
+- **A-19** *(ajouté par DT-32)* `python -m pipeline.check` **échoue**, avec un
+  message nommant la cause, lorsque `election` ne vaut pas le nom du fichier
+  d'analyses, et lorsque le fichier d'analyses attendu pour un scrutin est
+  absent. Ces deux contrôles sont des garanties, pas des détails
+  d'implémentation.
 
 ### Cécité et neutralité
 
@@ -1486,6 +1492,84 @@ point, pas contourné.
 et l'affirmation « aucune nouvelle dépendance » du §12 aurait cessé d'être vraie.
 Protocole `Provider` : déjà rejeté par DT-29, et rien ici ne le rouvre. Modèle en
 dur dans `impacts.py` : rejeté, c'est exactement ce que cet amendement corrige.
+
+---
+
+---
+
+### DT-32 — Rapport agrégé de W-02, et deux contrôles de schéma rendus opposables
+
+**Statut.** Arrêtée le 2 août 2026, à la validation de PR-16, à partir de ce que
+l'implémentation a rencontré. Elle précise le §10 et le §13 ; elle ne change
+aucune règle.
+
+---
+
+**1. W-02 est rapporté agrégé, non point par point.**
+
+**Décision.** L'avertissement W-02 est émis **une fois**, portant le **nombre**
+de points référencés par `positions.json` sans entrée d'analyse. L'énumération
+des identifiants n'est pas produite.
+
+**Pourquoi l'implémentation diffère de la formulation initiale.** Le §10.2
+définit W-02 comme portant sur un point, ce qui se lit naturellement comme une
+ligne par point. Sur le corpus réel, cela produit **48 lignes d'avertissement à
+chaque exécution de la CI**, dans l'état normal du dépôt — un état qui durera
+jusqu'à la fin de PR-23. Un avertissement qui se répète par dizaines à chaque
+exécution cesse d'être lu, et c'est précisément W-01, qui est rare et
+actionnable, qui se retrouverait noyé. La doctrine du §10 est *échouer sur ce qui
+est faux, avertir sur ce qui manque* : elle suppose qu'un avertissement soit
+encore un signal.
+
+**Ce que la décision préserve.** Le décompte est exact et l'information n'est pas
+perdue : la liste des points sans analyse se reconstitue exactement par
+différence entre `positions.json` et `content/impacts/`, sans nous croire sur
+parole. Ce qui est retiré est la répétition, pas la donnée.
+
+**Ce qu'elle n'autorise pas.** W-01 reste **une ligne par question** : il est
+rare, il désigne une question précise, et il annonce que du contenu relu ne
+s'affichera pas. L'agrégation ne s'étend pas à lui.
+
+**Alternative rejetée.** Énumérer les identifiants sous un seuil (par exemple dix
+points) : le seuil aurait été une préférence, et le comportement aurait changé
+silencieusement au franchissement de ce seuil.
+
+---
+
+**2. `election` doit valoir le nom du fichier — contrôle opposable.**
+
+**Décision.** `pipeline.check` échoue si le champ `election` du fichier
+d'analyses ne vaut pas le nom du fichier sans extension.
+
+**Justification.** Le §5.2 l'exige déjà dans le tableau des contraintes, sans
+qu'aucune règle L ne le porte. Un fichier `fr-2032.json` déclarant
+`"election": "fr-2027"` passerait donc tous les contrôles tout en attestant le
+mauvais scrutin. Le contrôle existait dans l'implémentation de PR-16 ; il est ici
+énoncé comme garantie plutôt que laissé au hasard d'une relecture de code.
+
+---
+
+**3. Un fichier d'analyses absent est une erreur nommée, jamais un traceback.**
+
+**Décision.** Si `content/impacts/<élection>.json` n'existe pas, `pipeline.check`
+échoue avec un message le nommant, et non par une exception non rattrapée.
+
+**Justification.** L'absence du fichier est un **état du contenu**, pas une panne
+d'outil : le §5.1 en fait une des quatre familles de fichiers du dépôt. Une
+exception non rattrapée en CI n'indique ni ce qui manque ni quoi faire, et se lit
+comme un bug du pipeline plutôt que comme un défaut de contenu. C'est la même
+doctrine que P8 côté produit : une absence s'affiche comme absence.
+
+**Ce que la décision ne fait pas.** Elle n'introduit **aucun état intermédiaire**
+— un fichier absent n'est pas traité comme un fichier vide. Un fichier vide est
+un état légitime et déclaré ; un fichier manquant est une erreur.
+
+---
+
+**Numérotation.** Ces trois contrôles ne reçoivent **pas** de numéro dans la
+série L : celle-ci reste identique aux dix-neuf règles du §10.1, afin que les
+tests, les messages et le document continuent de se répondre un pour un. Les
+deux contrôles de schéma sont couverts par le critère **A-19**.
 
 ---
 

@@ -6,6 +6,7 @@ sources/fr-2027/<id>.sha256      « <empreinte>  <url> » — généré, commit�
 programs/fr-2027/<parti>.json    identité du parti + points de programme (citation)
 questions/fr-2027.json           questions aveugles : id, thème, texte fr/en
 questions/fr-2027.positions.json question → [{ point, stance }]
+impacts/fr-2027.json             point → analyse de conséquences (relue)
 ```
 
 ## Pourquoi ce découpage
@@ -27,6 +28,32 @@ qu'un champ parce que c'est exactement la frontière de chargement.
 s'appuyer sur plusieurs points, un point peut servir plusieurs questions, et une
 citation dupliquée finirait par diverger de sa source.
 
+## Les analyses de conséquences
+
+`impacts/<élection>.json` décrit ce qu'une mesure prévoit, qui elle concerne et
+quels effets sont attendus. **Un fichier satellite, pas un champ de
+`programs/`** : `programs/` porte un invariant d'une phrase — toute chaîne
+éditoriale qu'il contient figure mot pour mot dans le document source — et y
+mêler de la prose déduite le détruirait. Les cadences diffèrent aussi : une
+citation est stable des années, une analyse est régénérée à chaque changement de
+modèle ou de consigne.
+
+Chaque énoncé porte un `basis`. `text` signifie *soutenu par le document* et
+**exige un `span`**, fragment copié à l'identique et vérifié en CI ; `inferred`
+signifie *déduit*, et n'a pas de fragment à montrer. La distinction n'est pas
+une étiquette : c'est la présence ou l'absence de la preuve. Le lecteur constate,
+il ne nous croit pas.
+
+`of` est l'empreinte **de la citation**, jamais du document : un PDF réexporté
+change d'empreinte sans que son texte bouge, et indexer sur le document
+périmerait tout à chaque republication cosmétique.
+
+Le fichier a une **forme canonique** — clés de points triées, énoncés dans
+l'ordre `implication`, `affected`, `effect`, indentation de deux espaces, saut de
+ligne final. La CI resérialise et compare octet à octet : une régénération
+machine et une correction à la main produisent le même fichier, donc des diffs
+lisibles pour la relecture, qui est le filtre qui compte.
+
 ## Les empreintes plutôt qu'une base
 
 `<id>.sha256` tient sur une ligne : `<empreinte>  <url>`. Quand un parti
@@ -46,10 +73,20 @@ vérification.
 - une empreinte ne correspond pas à l'URL déclarée ;
 - un identifiant de parti, un nom ou un sigle apparaît dans le fichier aveugle ;
 - une question n'a aucune position, ou une position pointe un point inexistant ;
-- deux positions du même parti répondent à la même question.
+- deux positions du même parti répondent à la même question ;
+- une analyse porte une clé inconnue, un point inexistant, une empreinte `of`
+  qui n'est pas celle de la citation, un `span` introuvable dans le document,
+  un groupe hors vocabulaire, un nombre d'énoncés hors des bornes, une date de
+  relecture absente, ou une mise en forme non canonique.
 
 La première est la seule qui compte vraiment : c'est elle qui rend la neutralité
 vérifiable par une machine plutôt qu'affirmée dans un README.
+
+**Elle échoue sur ce qui est faux, elle avertit sur ce qui manque.** Un point
+sans analyse, ou une question dont seules certaines positions en ont une, sont
+des états normaux d'un corpus en cours : la CI les signale et passe. Une question
+partiellement couverte n'affiche simplement rien — comparer quatre positions dont
+une seule est documentée avantagerait celle-là.
 
 Conséquence à connaître : le sigle d'un parti qui est aussi un mot courant
 (« Ensemble ») fait échouer la vérification s'il apparaît dans une question.
