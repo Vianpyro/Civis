@@ -31,6 +31,8 @@ DOCUMENT = haystack(f"Nous tiendrons l'ordre dans nos comptes en {QUOTE}.")
 POINTS = {"lr-depense": {"quote": QUOTE, "party": "lr", "source_id": "lr-doc"}}
 TEXTS = {"lr-doc": DOCUMENT}
 POSITIONS = {"q-depense": [{"point": "lr-depense", "stance": 1}]}
+# No formation here: L-11 is a lexical rule and is exercised in test_neutrality.
+PARTIES: list[dict] = []
 
 
 def implication(**overrides):
@@ -85,7 +87,9 @@ class ImpactsCase(unittest.TestCase):
     def run_check(self, data, raw=None, texts=TEXTS, positions=POSITIONS):
         """Raw defaults to the canonical form, so only the rule under test fires."""
         report = Report()
-        check_impacts(data, raw if raw is not None else canonical(data), ELECTION, POINTS, positions, texts, report)
+        check_impacts(
+            data, raw if raw is not None else canonical(data), ELECTION, POINTS, positions, texts, PARTIES, report
+        )
         return report
 
     def assertRule(self, data, rule, raw=None, texts=TEXTS):
@@ -266,7 +270,9 @@ class Coverage(ImpactsCase):
     def test_a_partly_covered_question_warns_without_failing(self):
         # A-5 on the CI side: DP-34 hides the question, check only says so.
         report = Report()
-        check_impacts(document(), canonical(document()), ELECTION, self.POINTS, self.POSITIONS, TEXTS, report)
+        check_impacts(
+            document(), canonical(document()), ELECTION, self.POINTS, self.POSITIONS, TEXTS, PARTIES, report
+        )
         self.assertEqual(report.errors, [])
         self.assertTrue(any(warning.startswith("W-01") for warning in report.warnings))
 

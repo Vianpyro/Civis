@@ -17,6 +17,7 @@ import re
 import sys
 from pathlib import Path
 
+from . import neutrality
 from .extract import cached_text, haystack
 from .fetch import ROOT, digest_file, load_sources
 
@@ -141,7 +142,9 @@ def check_election(election: str, report: Report) -> None:
     impacts_path = ROOT / "content" / "impacts" / f"{election}.json"
     if report.require(impacts_path.exists(), f"missing {impacts_path.name}: the file is part of the schema"):
         raw = impacts_path.read_text(encoding="utf-8")
-        check_impacts(json.loads(raw), raw, election, points, positions, texts, report)
+        check_impacts(
+            json.loads(raw), raw, election, points, positions, texts, [p["party"] for p in programs], report
+        )
 
 
 def document_texts(election: str, sources: dict) -> dict[str, str | None]:
@@ -273,12 +276,13 @@ def check_impacts(
     points: dict,
     positions: dict,
     texts: dict,
+    parties: list[dict],
     report: Report,
 ) -> None:
     """Structural rules of content/impacts/<election>.json — L-01 to L-10, L-18, L-19.
 
-    The lexical rules (L-11 to L-17) live in pipeline/neutrality.py and are
-    called from here once that module exists.
+    The lexical rules (L-11 to L-17) live in pipeline/neutrality.py, which is
+    called per statement from check_impact_item.
     """
     report.require(data.get("election") == election, f"impacts: election is not {election!r}")
     unknown = sorted(set(data) - TOP_KEYS)
@@ -289,13 +293,15 @@ def check_impacts(
         return
 
     for point_id, entry in entries.items():
-        check_impact_entry(point_id, entry, points, texts, report)
+        check_impact_entry(point_id, entry, points, texts, parties, report)
 
     report.require(canonical(data) == raw, "impacts: file is not in canonical form (L-19)")
     check_impact_coverage(entries, positions, points, report)
 
 
-def check_impact_entry(point_id: str, entry: dict, points: dict, texts: dict, report: Report) -> None:
+def check_impact_entry(
+    point_id: str, entry: dict, points: dict, texts: dict, parties: list[dict], report: Report
+) -> None:
     label = f"impacts[{point_id}]"
     if not report.require(isinstance(entry, dict), f"{label}: entry must be an object"):
         return
@@ -324,14 +330,19 @@ def check_impact_entry(point_id: str, entry: dict, points: dict, texts: dict, re
 
     text = texts.get(point["source_id"])
     for index, item in enumerate(items):
-        check_impact_item(f"{label}.items[{index}]", item, text, report)
+        check_impact_item(f"{label}.items[{index}]", item, text, parties, report)
 
     check_impact_bounds(label, items, report)
 
 
-def check_impact_item(label: str, item: dict, text: str | None, report: Report) -> None:
+def check_impact_item(label: str, item: dict, text: str | None, parties: list[dict], report: Report) -> None:
     if not report.require(isinstance(item, dict), f"{label}: item must be an object"):
         return
+
+    # The lexical rules, on the statements alone: the span and the quote are the
+    # document speaking, and the lexicon is never applied to them (L-11 to L-17).
+    for violation in neutrality.violations(item, parties):
+        report.errors.append(f"{label}: {violation}")
 
     unknown = sorted(set(item) - ITEM_KEYS)
     report.require(not unknown, f"{label}: unknown key(s) {unknown} (L-01)")
