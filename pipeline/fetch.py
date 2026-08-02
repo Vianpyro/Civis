@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import requests
@@ -90,4 +91,13 @@ def main(election: str) -> int:
     moved = [r for r in results if r["status"] in ("new", "changed")]
     if moved:
         print(f"\n{len(moved)} document(s) moved. Re-run extraction and review the questions.")
-    return 1 if any(r["status"] == "error" for r in results) else 0
+
+    # An unreachable host must not bury a real change found on another one: a party
+    # site that times out leaves its committed digest standing, so the run warns and
+    # continues. Only a source we have never fetched is fatal — it has no digest to
+    # stand on, and check would fail on the missing file anyway.
+    errors = [r for r in results if r["status"] == "error"]
+    prefix = "::warning::" if os.environ.get("GITHUB_ACTIONS") else "warning: "
+    for result in errors:
+        print(f"{prefix}{result['id']} unreachable, keeping the committed digest")
+    return 1 if any(read_digest(digest_file(election, r["id"])) is None for r in errors) else 0
