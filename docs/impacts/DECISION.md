@@ -1061,7 +1061,7 @@ partir de 0, chacun avec son `kind`, son `basis` et son `span` s'il en a un.
 | L-11 | Identifiant, nom ou sigle de formation dans `fr` ou `en` (correspondance de mot entier, même mécanique que `check_questions`) |
 | L-12 | Terme du lexique évaluatif, verbe de valeur ou intensificateur |
 | L-13 | Superlatif (`le plus`, `la plus`, `le moins`, `the most`, `the least`) ou point d'exclamation |
-| L-14 | Quantificateur non soutenu — `tous`, `toutes`, `aucun`, `aucune`, `chaque`, `toujours`, `jamais`, `l'ensemble des`, `la totalité`, `all`, `every`, `none`, `always`, `never` — **admis uniquement** si `basis == "text"` **et** si le même quantificateur figure dans le `span` |
+| L-14 | Quantificateur non soutenu — `tous`, `toutes`, `aucun`, `aucune`, `chaque`, `toujours`, `jamais`, `l'ensemble des`, `la totalité`, `all`, `every`, `none`, `always`, `never` — **admis uniquement** si `basis == "text"` **et** si le même quantificateur figure dans le `span`. Conséquence en anglais : voir **R-9** |
 | L-15 | `basis == "inferred"` sans marqueur d'incertitude |
 | L-16 | `basis == "inferred"` avec une forme assertive de la liste fermée : `sera`, `seront`, `aura`, `auront`, `devra`, `devront`, `permettra`, `permettront`, `entraînera`, `entraîneront`, `augmentera`, `réduira`, `will `, `shall ` |
 | L-17 | Chiffre (`\d`) dans un énoncé `inferred` ; ou dans un énoncé `text` sans figurer dans son `span` |
@@ -1222,9 +1222,26 @@ La fonctionnalité est acceptée quand **tous** les points suivants sont vérifi
 - **A-2** `python -m pipeline.check` **échoue**, avec un message nommant la règle,
   sur chacune des 19 violations L-01 à L-19, chacune couverte par un cas de test.
 - **A-3** Les six exemples de la demande initiale servent de première fixture du
-  linter : les trois exemples corrects passent ; les trois incorrects
-  (« aidera énormément », « pénalisera », « cette excellente réforme »)
-  échouent, sur les règles L-12, L-16 et L-13/L-12 respectivement.
+  linter : les trois exemples corrects passent ; les trois incorrects échouent,
+  chacun sur la règle que le linter applique réellement.
+
+  | Exemple | Règle | Motif |
+  |---|---|---|
+  | « aidera énormément » | **L-12** | « énormément » figure au lexique des intensificateurs |
+  | « pénalisera » | **L-15** | déduction présentée comme un fait, sans marqueur d'incertitude |
+  | « cette excellente réforme » | **L-12** | « excellente » figure au lexique évaluatif |
+
+  > **Correction du 2 août 2026, à la livraison de PR-17.** La rédaction
+  > initiale attribuait « pénalisera » à **L-16** et « cette excellente
+  > réforme » à « L-13/L-12 ». Ni l'une ni l'autre n'était obtenable : L-16
+  > porte une **liste fermée** de formes assertives qui ne contient pas
+  > « pénalisera », et L-13 ne couvre que le superlatif et le point
+  > d'exclamation. Le lexique apparie des **mots entiers** (mécanique de L-11),
+  > donc « pénalisera » n'est pas apparié à « pénaliser » : c'est **L-15** qui
+  > rejette l'énoncé, et c'est le comportement voulu — une déduction énoncée
+  > comme un fait. **C'est la documentation qui est corrigée, jamais le
+  > comportement.** Décision du responsable ; ni la liste fermée de L-16 ni la
+  > portée de L-13 ne sont ouvertes.
 - **A-4** ~~`pipeline/neutrality.py` exécuté directement passe son
   auto-vérification.~~ **Amendé par DT-30 :** `python -m unittest discover`
   passe, et la suite couvre `neutrality.py` règle par règle.
@@ -1336,6 +1353,7 @@ Normatif (DP-39). Chacun de ces points est **refusé sans réexamen**.
 | R-6 | Une mesure trop vague empêche d'atteindre le plancher, et prive toute la question d'analyse | La relecture humaine peut écrire l'entrée à la main | Traité |
 | R-7 | Le linter anglais est plus faible que le français | Les deux langues sont produites ensemble ; l'audit lit les deux | Déclaré |
 | R-8 | Le fichier `docs/impacts/DECISION.md` n'est pas suivi par git : `.gitignore` ignore `*.md` | À la discrétion du responsable — une exception `!docs/**/*.md` le rendrait versionnable | À trancher hors DP |
+| R-9 | **L-14 est structurellement plus strict en anglais qu'en français.** Les `span` sont français : un quantificateur anglais ne peut jamais être retrouvé dans un `span`, donc jamais soutenu. « Toutes les collectivités… » passe si le `span` porte « toutes » ; « All authorities… » échoue dans le même énoncé, alors que les deux versions doivent dire la même chose | Aucune correction de comportement. Un énoncé dont la version française porte un quantificateur soutenu se reformule **sans quantificateur en anglais**, ou la paire est revue à la relecture. La règle reste appliquée à la lettre : elle refuse une affirmation de couverture que le `span` ne porte pas, ce qui est son objet | **Déclaré à la livraison de PR-17, comportement inchangé.** Aucun contenu ne le rencontre tant que PR-20 n'écrit pas de quantificateur |
 
 ---
 

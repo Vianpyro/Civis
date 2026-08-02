@@ -262,8 +262,10 @@ s'appliquent à des entrées déjà validées structurellement).
 **Tests à ajouter**
 - Un cas par règle : **L-11 à L-17**, avec le fragment fautif dans le message.
 - **A-3** : les six exemples de la demande initiale en première fixture — les
-  trois corrects passent ; « aidera énormément » échoue en L-12 et L-16 ;
-  « pénalisera » en L-12 et L-16 ; « cette excellente réforme » en L-12 et L-13.
+  trois corrects passent ; « aidera énormément » échoue en **L-12**,
+  « pénalisera » en **L-15**, « cette excellente réforme » en **L-12**. La
+  correspondance est celle du §13 de la DP, corrigée à la livraison de PR-17
+  pour décrire le comportement réel des règles.
 - L-14 : quantificateur admis avec `basis: "text"` et un `span` qui le contient,
   refusé sans lui, refusé sur `inferred`.
 - L-15 / L-16 : un énoncé `inferred` au futur de l'indicatif échoue, le même au

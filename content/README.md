@@ -77,10 +77,29 @@ vérification.
 - une analyse porte une clé inconnue, un point inexistant, une empreinte `of`
   qui n'est pas celle de la citation, un `span` introuvable dans le document,
   un groupe hors vocabulaire, un nombre d'énoncés hors des bornes, une date de
-  relecture absente, ou une mise en forme non canonique.
+  relecture absente, ou une mise en forme non canonique ;
+- un énoncé d'analyse contient un nom de formation, un terme évaluatif, un verbe
+  de valeur, un intensificateur, un superlatif, un point d'exclamation, un
+  quantificateur que son `span` ne porte pas, un chiffre absent du document, ou
+  présente une déduction comme un fait.
 
 La première est la seule qui compte vraiment : c'est elle qui rend la neutralité
 vérifiable par une machine plutôt qu'affirmée dans un README.
+
+Le lexique de neutralité (`pipeline/neutrality.py`) ne s'applique **qu'aux
+énoncés que nous écrivons**, jamais à un `span` ni à une citation : un mot
+d'appréciation dans un document officiel est le document qui parle, et le
+bloquer reviendrait à censurer la source. Le lexique est court, en clair, et
+s'étend par relecture — jamais par une exception pour une entrée. Il produit des
+faux positifs : on reformule, la vérification stricte vaut mieux que la
+vérification intelligente.
+
+**Limite connue sur les quantificateurs anglais.** Un quantificateur n'est admis
+que si le `span` le porte, et les `span` sont français. « Toutes les
+collectivités… » passe donc si le document écrit « toutes », alors que « All
+authorities… » échoue dans le même énoncé. La version anglaise se reformule sans
+quantificateur. Le comportement est volontairement inchangé — voir R-9 dans
+`docs/impacts/DECISION.md`.
 
 **Elle échoue sur ce qui est faux, elle avertit sur ce qui manque.** Un point
 sans analyse, ou une question dont seules certaines positions en ont une, sont
