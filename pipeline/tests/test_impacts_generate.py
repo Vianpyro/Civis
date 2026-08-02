@@ -1,10 +1,14 @@
-"""Pass 1: the blind draft, its window of context, and the one call point.
+"""The two passes: the blind draft, the audit, and the one call point.
 
 The load-bearing case is A-9. A leak of party identity into a prompt is silent —
 nothing in the output reveals it, the draft looks exactly the same, and the
 damage only shows up as content aligned with a camp's usual framing. A test is
 the only thing standing there, so it runs over the real corpus and the real point
 ids rather than over a convenient fixture.
+
+A-15 is the second one: incremental regeneration is what makes a steady state
+free, and it fails silently in the expensive direction — a run that redrafts
+everything looks exactly like a run that redrafts what expired.
 
 A-16 and A-17 are one assertion each: they guard a shape that is easy to break by
 accident — an extra step in `all`, a second write path out of review/.
@@ -19,7 +23,8 @@ import re
 import unittest
 from unittest import mock
 
-from pipeline import impacts, llm
+from pipeline import check, impacts, llm, run
+from pipeline.check import Report, quote_digest
 from pipeline.extract import context, haystack
 from pipeline.fetch import ROOT, load_sources
 from pipeline.run import ALL, STEPS
@@ -58,6 +63,25 @@ def fake_documents() -> dict[str, str]:
         source_id: "Introduction du document. " + " ".join(quotes) + " Fin du document."
         for source_id, quotes in documents.items()
     }
+
+
+def statements() -> list[dict]:
+    """Two statements as pass 1 returns them: one clean, one the lexicon rejects."""
+    return [
+        {
+            "kind": "implication",
+            "basis": "text",
+            "span": "réduisant la dépense publique",
+            "fr": "La mesure porte l'ajustement sur le niveau de dépense.",
+            "en": "The measure places the adjustment on spending levels.",
+        },
+        {
+            "kind": "effect",
+            "basis": "inferred",
+            "fr": "Cette excellente réforme réduira la dépense.",
+            "en": "This excellent reform will reduce spending.",
+        },
+    ]
 
 
 class Context(unittest.TestCase):
@@ -103,8 +127,8 @@ class Context(unittest.TestCase):
         self.assertIn(window, haystack(text))
 
 
-class Blindness(unittest.TestCase):
-    """A-9 — no formation identity, no document title, no file name in a request."""
+class Corpus(unittest.TestCase):
+    """The real corpus and the real routing, over synthetic documents."""
 
     def setUp(self):
         documents = fake_documents()
@@ -115,6 +139,23 @@ class Blindness(unittest.TestCase):
         self.addCleanup(patch.stop)
         self.units = impacts.units(ELECTION)
         self.requests = impacts.build_requests(self.units)
+
+    def drafts(self, units_=None) -> dict[str, dict]:
+        """The shape main() hands to pass 2, without calling a model."""
+        return {
+            unit["id"]: {
+                "of": quote_digest(unit["quote"]),
+                "model": llm.MODEL,
+                "quote": unit["quote"],
+                "context": unit["context"],
+                "items": statements(),
+            }
+            for unit in (self.units if units_ is None else units_)
+        }
+
+
+class Blindness(Corpus):
+    """A-9 — no formation identity, no document title, no file name in a request."""
 
     def bodies(self) -> list[str]:
         return [request["system"] + "\n" + request["user"] for request in self.requests]
@@ -208,6 +249,188 @@ class Blindness(unittest.TestCase):
     def test_the_vocabulary_is_offered_to_the_model(self):
         for request in self.requests:
             self.assertIn("local_authorities", request["user"])
+
+
+class Incremental(Corpus):
+    """A-15 — the cache is the committed file (DT-24), so a steady state is free."""
+
+    def entries(self, of=None) -> dict[str, dict]:
+        return {
+            unit["id"]: {"of": of if of is not None else quote_digest(unit["quote"])}
+            for unit in self.units
+        }
+
+    def test_a_second_run_without_a_content_change_produces_no_request(self):
+        self.assertTrue(self.units, "the corpus must be exercised, or this proves nothing")
+        with mock.patch.object(impacts, "committed", return_value=self.entries()):
+            with quiet():
+                again = impacts.units(ELECTION)
+        self.assertEqual(again, [])
+        self.assertEqual(impacts.build_requests(again), [])
+
+    def test_an_entry_whose_quote_changed_is_redrafted(self):
+        # `of` is the expiry signal (DT-23): a stale digest brings the point back.
+        with mock.patch.object(impacts, "committed", return_value=self.entries(of="0" * 64)):
+            self.assertEqual(len(impacts.units(ELECTION)), len(self.units))
+
+    def test_force_redrafts_an_entry_that_is_up_to_date(self):
+        with mock.patch.object(impacts, "committed", return_value=self.entries()):
+            self.assertEqual(len(impacts.units(ELECTION, force=True)), len(self.units))
+
+    def test_force_does_not_even_read_the_committed_file(self):
+        with mock.patch.object(impacts, "committed") as committed:
+            impacts.units(ELECTION, force=True)
+        committed.assert_not_called()
+
+    def test_limit_caps_the_points_of_one_run(self):
+        capped = impacts.units(ELECTION, limit=3)
+        self.assertEqual(len(capped), 3)
+        # The prefix of the full run, so two capped runs in a row are not two
+        # random samples of the same corpus.
+        self.assertEqual(capped, self.units[:3])
+
+    def test_the_committed_file_of_the_repository_reads_as_empty(self):
+        # The shipped state: no analysis is not a defect, and it is not a crash.
+        self.assertEqual(impacts.committed(ELECTION), {})
+        self.assertEqual(impacts.committed("fr-2032"), {})
+
+
+class Fingerprint(unittest.TestCase):
+    """`of` is computed once, in one place, and read by both modules (DT-26)."""
+
+    def test_the_draft_and_the_linter_share_the_function(self):
+        self.assertIs(impacts.quote_digest, check.quote_digest)
+
+    def test_the_digest_the_draft_writes_is_the_one_L_03_expects(self):
+        # On the real corpus rather than on a fixture: L-03 compares against the
+        # quote of a committed point, and that is where a divergence would show.
+        points = impacts.program_points(ELECTION)
+        self.assertTrue(points)
+        report = Report()
+        for point_id, point in points.items():
+            entry = {
+                "of": impacts.quote_digest(point["quote"]),
+                "model": llm.MODEL,
+                "reviewed": "2026-08-02",
+                "items": [],
+            }
+            check.check_impact_entry(point_id, entry, {point_id: point}, {}, [], report)
+        self.assertEqual([error for error in report.errors if "L-03" in error], [])
+
+    def test_a_digest_of_something_else_fails_L_03(self):
+        points = impacts.program_points(ELECTION)
+        point_id, point = next(iter(points.items()))
+        report = Report()
+        entry = {"of": quote_digest("autre chose"), "model": llm.MODEL, "reviewed": "2026-08-02", "items": []}
+        check.check_impact_entry(point_id, entry, {point_id: point}, {}, [], report)
+        self.assertTrue(any("L-03" in error for error in report.errors))
+
+
+class SecondPass(Corpus):
+    """The audit signals, it never rewrites and never drops (DP-36)."""
+
+    @staticmethod
+    def lines(prompt: str) -> set[str]:
+        return {line.strip() for line in prompt.splitlines() if len(line.strip()) >= 20}
+
+    def test_the_two_prompts_share_no_line(self):
+        # An auditor who knows the rule rationalises its violation, and sharing a
+        # constant is the natural way to get there.
+        self.assertEqual(self.lines(impacts.SYSTEM) & self.lines(impacts.AUDIT_SYSTEM), set())
+        self.assertNotIn(impacts.SYSTEM, impacts.AUDIT_SYSTEM)
+        self.assertNotIn(impacts.AUDIT_SYSTEM, impacts.SYSTEM)
+
+    def test_the_audit_does_not_learn_the_rules_of_pass_one(self):
+        for tell in ("Bornes, par mesure", "Interdits absolus", "local_authorities", "énormément"):
+            self.assertNotIn(tell, impacts.AUDIT_SYSTEM)
+
+    def test_one_request_per_drafted_point_with_numbered_statements(self):
+        requests = impacts.audit_requests(self.drafts())
+        self.assertEqual(len(requests), len(self.units))
+        body = requests[0]["user"]
+        self.assertIn("0. [implication / text]", body)
+        self.assertIn("1. [effect / inferred]", body)
+        self.assertIn("span : « réduisant la dépense publique »", body)
+        self.assertIn("en : The measure places", body)
+
+    def test_a_point_without_a_statement_is_not_audited(self):
+        drafts = self.drafts()
+        for draft in drafts.values():
+            draft["items"] = []
+        self.assertEqual(impacts.audit_requests(drafts), [])
+
+    def test_no_point_id_in_an_audit_body(self):
+        drafts = self.drafts()
+        for request in impacts.audit_requests(drafts):
+            self.assertIn(request["custom_id"], drafts)
+            for point_id in drafts:
+                self.assertNotIn(point_id, request["user"])
+
+    def test_every_statement_is_annotated_and_none_is_removed(self):
+        drafts = self.drafts(self.units[:1])
+        point_id = next(iter(drafts))
+        verdicts = {
+            point_id: {"verdicts": [{"index": 1, "verdict": "evaluative", "evidence": "excellente"}]}
+        }
+        impacts.annotate(drafts, verdicts, impacts.party_labels(ELECTION))
+
+        items = drafts[point_id]["items"]
+        self.assertEqual(len(items), 2, "a flagged statement stays in the draft")
+        self.assertEqual([item["kind"] for item in items], ["implication", "effect"])
+        for item in items:
+            self.assertIn("lint", item)
+            self.assertIn("audit", item)
+
+        self.assertEqual(items[0]["lint"], [])
+        self.assertIsNone(items[0]["audit"], "a statement the audit skipped carries no verdict")
+        self.assertEqual(items[1]["audit"]["verdict"], "evaluative")
+        # The linter of CI, called on the draft: same module, never a second copy.
+        self.assertTrue(any("L-12" in violation for violation in items[1]["lint"]))
+        self.assertTrue(any("L-16" in violation for violation in items[1]["lint"]))
+
+    def test_a_verdict_for_an_unknown_index_annotates_nothing(self):
+        drafts = self.drafts(self.units[:1])
+        point_id = next(iter(drafts))
+        impacts.annotate(drafts, {point_id: {"verdicts": [{"index": 9, "verdict": "ok", "evidence": ""}]}}, [])
+        self.assertEqual([item["audit"] for item in drafts[point_id]["items"]], [None, None])
+
+    def test_the_audit_answers_are_keyed_the_way_annotate_reads_them(self):
+        # run_batch keys by custom_id and annotate looks up by point id: one
+        # rename away from silently annotating nothing at all.
+        drafts = self.drafts(self.units[:1])
+        requests = impacts.audit_requests(drafts)
+        self.assertEqual([request["custom_id"] for request in requests], list(drafts))
+
+
+class Flags(unittest.TestCase):
+    """`--limit` and `--force` belong to the impacts step and to no other."""
+
+    def run_cli(self, argv: list[str]) -> dict[str, dict]:
+        seen: dict[str, dict] = {}
+
+        def record(name):
+            def step(election, **flags):
+                seen[name] = flags
+                return 0
+
+            return step
+
+        steps = {name: record(name) for name in ("fetch", "impacts")}
+        with mock.patch.dict(run.STEPS, steps, clear=True):
+            with mock.patch("sys.argv", argv), quiet():
+                self.assertEqual(run.main(), 0)
+        return seen
+
+    def test_limit_and_force_reach_the_impacts_step(self):
+        seen = self.run_cli(["run", "--step", "impacts", "--limit", "2", "--force"])
+        self.assertEqual(seen["impacts"], {"limit": 2, "force": True})
+
+    def test_they_default_to_off(self):
+        seen = self.run_cli(["run", "--step", "impacts"])
+        self.assertEqual(seen["impacts"], {"limit": None, "force": False})
+
+    def test_another_step_is_called_without_them(self):
+        self.assertEqual(self.run_cli(["run", "--step", "fetch"])["fetch"], {})
 
 
 class Steps(unittest.TestCase):

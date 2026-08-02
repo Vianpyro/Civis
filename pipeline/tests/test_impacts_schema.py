@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import unittest
 
+from pipeline import llm
 from pipeline.check import (
     ELECTION,
     Report,
@@ -72,7 +73,8 @@ def effect(**overrides):
 def entry(**overrides):
     return {
         "of": quote_digest(QUOTE),
-        "model": "test",
+        # The current model, so that only the tests about W-03 raise it.
+        "model": llm.MODEL,
         "reviewed": "2026-08-02",
         "items": [implication(), affected(), effect()],
         **overrides,
@@ -237,6 +239,25 @@ class Review(ImpactsCase):
         self.assertTrue(is_iso_date("2026-08-02"))
         self.assertFalse(is_iso_date("2026-08"))
         self.assertFalse(is_iso_date(20260802))
+
+
+class ModelDrift(ImpactsCase):
+    """W-03 — llm.MODEL is the current model of the pipeline (DT-31)."""
+
+    def test_an_entry_from_another_model_warns_without_failing(self):
+        report = self.assertClean(document({"lr-depense": entry(model="un-autre-modele")}))
+        self.assertTrue(any(warning.startswith("W-03") for warning in report.warnings))
+        self.assertIn("un-autre-modele", " ".join(report.warnings))
+
+    def test_an_entry_from_the_current_model_warns_about_nothing(self):
+        self.assertEqual(self.assertClean(document()).warnings, [])
+
+    def test_a_hand_written_entry_is_reported_as_a_drift(self):
+        # `model: "manual"` is a legitimate value (§5.2) and it does differ from
+        # the current model, so it warns. Literal reading of W-03; see the note
+        # in the PR-19 report.
+        report = self.assertClean(document({"lr-depense": entry(model="manual")}))
+        self.assertTrue(any(warning.startswith("W-03") for warning in report.warnings))
 
 
 class Canonical(ImpactsCase):

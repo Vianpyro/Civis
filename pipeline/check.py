@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import neutrality
+from . import llm, neutrality
 from .extract import cached_text, haystack
 from .fetch import ROOT, digest_file, load_sources
 
@@ -318,7 +318,13 @@ def check_impact_entry(
         re.fullmatch(r"[0-9a-f]{64}", of) is not None and of == quote_digest(point["quote"]),
         f"{label}: `of` is not the digest of the point's quote (L-03)",
     )
-    report.require(bool(as_text(entry.get("model")).strip()), f"{label}: missing `model`")
+    model = as_text(entry.get("model")).strip()
+    report.require(bool(model), f"{label}: missing `model`")
+    # W-03. llm.MODEL is the current model of the pipeline (DT-31), and a drift
+    # is a warning rather than a failure: an entry produced by another model is
+    # still valid content, it is a batch to read again rather than to reject.
+    if model and model != llm.MODEL:
+        report.warnings.append(f"W-03 {label}: produced by {model!r}, current model is {llm.MODEL!r}")
     report.require(
         is_iso_date(entry.get("reviewed")),
         f"{label}: `reviewed` is missing or not YYYY-MM-DD (L-18)",
@@ -431,9 +437,6 @@ def check_impact_coverage(entries: dict, positions: dict, points: dict, report: 
         report.warnings.append(
             f"W-02 {len(missing)} point(s) referenced by positions.json have no analysis entry"
         )
-    # W-03 (entry produced by a model other than the current one) needs
-    # llm.MODEL, which DT-31 makes authoritative and which PR-18 creates. It is
-    # implemented there rather than against a temporary constant here.
 
 
 def is_iso_date(value: object) -> bool:
