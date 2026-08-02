@@ -6,7 +6,15 @@ décision de conception à prendre**. S'il en rencontre une, c'est un défaut de
 cette DP : il s'arrête et la signale, il ne tranche pas.
 
 **Portée.** Ce document fixe la conception. Il ne contient **pas** de découpage
-en PR ni de plan d'implémentation : ceux-ci suivront après approbation.
+en PR ni de plan d'implémentation : ils vivent dans
+`docs/impacts/ROADMAP.md`, approuvé le 2 août 2026.
+
+**Amendements.** Trois décisions ont été ajoutées après approbation, au §17 :
+**DP-40** (corpus pilote), **DT-30** (suite de tests Python), **DT-31**
+(configuration du fournisseur). Elles amendent DT-24, DT-26, DT-29 et le
+critère A-4, qui portent chacun un renvoi à l'endroit concerné. Le corps du
+document n'a pas été réécrit : un amendement daté se lit, une réécriture
+silencieuse se subit.
 
 **Format.** Celui de `docs/migration/DECISIONS.md`. La numérotation prolonge le
 registre existant : DP-29…DP-39, DT-21…DT-29, INV-19…INV-23.
@@ -35,6 +43,7 @@ s'arrête.
 14. [Non-objectifs](#14--non-objectifs)
 15. [Risques résiduels assumés](#15--risques-résiduels-assumés)
 16. [Matrice décision → invariant → vérification](#16--matrice-décision--invariant--vérification)
+17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31](#17--amendements-postérieurs-à-lapprobation)
 
 ---
 
@@ -479,6 +488,10 @@ requêtes courtes en batch, hors ligne, sans contrainte de latence. En régime
 stable : zéro appel. Le cache **est** le fichier commité — aucune couche de
 cache à construire, conformément à DP-06.
 
+> **Amendé par DP-40 (§17).** Le premier passage ne porte pas sur les 120 points
+> mais sur un corpus pilote. La décision ci-dessus est inchangée sur le fond :
+> une requête par point, portée limitée aux points affichés.
+
 ---
 
 ### DT-25 — Le fichier est canonique ; la CI échoue sur une réécriture divergente
@@ -504,6 +517,11 @@ importé par `pipeline/check.py` (contrôle du contenu commité) et par
 `pipeline/impacts.py` (annotation du brouillon). Source unique, jamais deux
 copies. Il embarque une auto-vérification par `assert` sous `if __name__ ==
 "__main__"`.
+
+> **Amendé par DT-30 (§17).** L'auto-vérification par `assert` sous `__main__`
+> est remplacée par une suite `unittest` sous `pipeline/tests/`. Le reste de la
+> décision — module unique, importé par les deux appelants, jamais dupliqué —
+> est inchangé.
 
 **Justification.** DT-18 a déjà tranché ce motif pour `CHOICES`. Un lexique
 dupliqué diverge, et la copie qui diverge est toujours celle de la CI.
@@ -565,6 +583,10 @@ tout changement de modèle et trace une régénération partielle.
 **Alternatives rejetées.** Protocole `Provider` + implémentation Anthropic :
 rejeté, DT-01 et le principe d'économie du dépôt. Bibliothèque d'abstraction
 tierce : rejetée, dépendance supplémentaire pour un besoin hypothétique.
+
+> **Amendé par DT-31 (§17).** Le fournisseur et le modèle deviennent des valeurs
+> de configuration, dans `pipeline/llm.py`. L'interdiction d'abstraction est
+> maintenue et resserrée : un dictionnaire de fonctions, jamais un protocole.
 
 ---
 
@@ -1202,7 +1224,9 @@ La fonctionnalité est acceptée quand **tous** les points suivants sont vérifi
   linter : les trois exemples corrects passent ; les trois incorrects
   (« aidera énormément », « pénalisera », « cette excellente réforme »)
   échouent, sur les règles L-12, L-16 et L-13/L-12 respectivement.
-- **A-4** `pipeline/neutrality.py` exécuté directement passe son auto-vérification.
+- **A-4** ~~`pipeline/neutrality.py` exécuté directement passe son
+  auto-vérification.~~ **Amendé par DT-30 :** `python -m unittest discover`
+  passe, et la suite couvre `neutrality.py` règle par règle.
 - **A-5** Une question dont une seule position porte une analyse n'affiche
   **aucune** analyse, et `check` émet W-01 sans échouer.
 - **A-6** Hors ligne, la vérification des `span` est **rapportée comme ignorée**,
@@ -1329,5 +1353,141 @@ Normatif (DP-39). Chacun de ces points est **refusé sans réexamen**.
 
 ---
 
+## 17 — Amendements postérieurs à l'approbation
+
+**Statut.** Ces trois décisions ont été arrêtées le **2 août 2026**, entre
+l'approbation de la DP et l'ouverture de la première PR, pour clore les trois
+points que le découpage avait laissés ouverts (`ROADMAP.md`, ancienne §5). Elles
+sont normatives au même titre que celles du corps du document et ne se
+réinterprètent pas davantage.
+
+---
+
+### DP-40 — Corpus pilote avant génération complète
+
+**Décision.** Les analyses sont produites en **deux temps**. D'abord un **corpus
+pilote** : deux questions entièrement couvertes au sens de DP-34, choisies pour
+maximiser la diversité — une question portant des positions de trois formations,
+une question mono-formation — soit environ quatre points. La génération du reste
+du corpus n'est ouverte qu'ensuite, et seulement si les conditions de stabilité
+ci-dessous sont réunies.
+
+**Contexte.** DT-24 dimensionnait un premier passage à 120 points. Rien n'oblige
+à ce que le premier passage soit complet, et tout invite au contraire à ce qu'il
+ne le soit pas.
+
+**Justification.** Le coût dominant de la fonctionnalité est la relecture humaine
+(R-5), et c'est aussi le seul filtre dont la qualité ne se mesure pas avant de
+l'avoir exercé. Un pilote de quatre points fait tourner la chaîne entière —
+génération aveugle, audit, linter, CI, relecture, forme canonique — pour une
+charge de relecture d'une heure plutôt que d'une semaine. Ce qu'il révèle est
+précisément ce qu'aucune conception ne pouvait prévoir : le taux de rejet réel,
+le taux de faux positifs du lexique, l'ergonomie du brouillon. Générer 120 points
+avant de savoir cela, c'est produire au prix fort une matière qu'il faudra
+peut-être jeter — un prompt corrigé après coup invalide tout le contenu déjà relu
+(§9).
+
+**Conditions de stabilité, à vérifier avant la génération complète.**
+
+1. Aucun lexique de `neutrality.py` n'a été raccourci depuis sa livraison, et
+   aucune exception par entrée n'a été introduite (INV-21).
+2. Aucun prompt de `impacts.py` n'a été modifié depuis le pilote — sinon le
+   contenu déjà relu est invalidé et le pilote est à refaire.
+3. Le taux de rejet en relecture du pilote est mesuré et consigné, et jugé
+   acceptable par le responsable.
+4. A-15 est vérifié en conditions réelles : une seconde exécution sur le pilote
+   ne produit aucune requête.
+
+**Conséquences.** La génération complète est livrée **par vagues de questions**,
+jamais en une PR. Chaque vague est une PR de contenu autonome. Entre le pilote et
+la première vague, le produit affiche des analyses sur deux questions et rien sur
+les vingt-huit autres : c'est l'état normal décrit par DP-34, pas un travail
+inachevé à masquer.
+
+**Alternatives rejetées.** Génération complète immédiate : rejetée ci-dessus.
+Pilote d'une seule question : rejeté, une question mono-formation ne teste pas la
+règle du tout-ou-rien, qui est le mécanisme le plus susceptible d'être mal
+implémenté.
+
+---
+
+### DT-30 — Suite de tests Python `unittest`, sous `pipeline/tests/`
+
+**Décision.** Le dépôt se dote d'une **vraie suite de tests Python**, écrite avec
+`unittest` de la bibliothèque standard, découverte par `python -m unittest
+discover`, exécutée par la commande `checks` et par les deux workflows. Les
+vérifications par `assert` sous `if __name__ == "__main__"` ne sont plus le
+mécanisme de test du pipeline.
+
+**Contexte.** Le dépôt n'avait aucun test Python : `check.py` est lui-même le
+contrôle, et DT-26 prescrivait une auto-vérification par `assert` pour
+`neutrality.py`. Les critères A-2 et A-3 exigent dix-neuf cas de test sur des
+règles dont la moitié porte sur un fichier et un corpus, pas sur une chaîne.
+
+**Justification.** Une auto-vérification sous `__main__` ne s'exécute que si
+quelqu'un lance le module ; elle n'a ni découverte, ni rapport, ni assertion
+lisible en échec, et elle ne peut pas porter de fixture de fichier. À dix-neuf
+règles, elle devient un bloc d'`assert` que personne ne lit. `unittest` est dans
+la bibliothèque standard — la décision **n'ajoute aucune dépendance** et reste
+donc conforme à l'économie du dépôt (DT-01, §19 de `MIGRATION.md`).
+
+**Conséquences.**
+- `pipeline/tests/` est un paquet ; les tests importent le pipeline en relatif
+  depuis la racine du dépôt.
+- La commande `checks` de `CLAUDE.md` s'allonge d'une commande.
+- `daily.yml` (job `checks`) et `pages.yml` exécutent la suite.
+- L'auto-vérification `assert` de DT-26 est retirée de la conception : elle n'est
+  pas écrite puis supprimée, elle n'est jamais écrite.
+- Le critère A-4 est reformulé en conséquence (§13).
+
+**Alternatives rejetées.** `pytest` : dépendance supplémentaire pour un gain nul
+sur dix-neuf cas de test sans fixture complexe. Maintenir les `assert` sous
+`__main__` : rejeté ci-dessus, et rejeté explicitement par le responsable.
+
+---
+
+### DT-31 — Fournisseur et modèle sont des valeurs de configuration
+
+**Décision.** Le fournisseur et l'identifiant du modèle vivent dans
+**`pipeline/llm.py`**, sous forme de deux constantes surchargeables par
+l'environnement, à côté d'un **dictionnaire de fonctions** `PROVIDERS` et de la
+fonction unique `run_batch(requests) -> dict[str, dict]` prescrite par DT-29. Le
+fournisseur retenu est **Gemini**, appelé par **HTTP direct avec `requests`**,
+déjà présent dans `requirements.txt`.
+
+**Contexte.** DT-29 interdisait l'abstraction de fournisseur et isolait l'appel
+dans une fonction unique, mais laissait le modèle en constante de module, comme
+`generate.MODEL`. Le fournisseur effectivement retenu n'est pas celui que la DP
+supposait.
+
+**Justification.** Un dictionnaire de deux entrées possibles n'est pas une
+abstraction : il n'y a ni interface, ni classe, ni inversion de dépendance, et un
+fournisseur supplémentaire coûte une fonction et une ligne. Le passage par
+`requests` plutôt que par un SDK conserve `requirements.txt` inchangé, donc
+l'affirmation du §12 reste vraie. Et **ce qui rend un changement de fournisseur
+sûr reste le linter en CI**, non le point d'appel : DT-29 est confirmé sur ce
+point, pas contourné.
+
+**Conséquences.**
+- `pipeline/llm.py` fait autorité pour **W-03** : le « modèle courant du
+  pipeline » est `llm.MODEL`. Ce point, laissé ouvert par la DP, est clos.
+- Le champ `model` de chaque entrée de contenu porte la valeur effectivement
+  employée, ce qui rend visible dans le diff toute régénération partielle.
+- **`generate.py` n'est pas migré vers `llm.py`.** Il continue d'appeler
+  Anthropic pour les questions. Le migrer serait un changement sans rapport avec
+  l'objet d'une PR de cette feuille de route.
+- La gestion des réponses 429 et 5xx est écrite à la main, une fois, dans
+  `llm.py`. C'est le coût assumé de l'absence de SDK.
+- L'API batch n'est pas employée pour le pilote : DT-29 admet explicitement la
+  boucle synchrone derrière la même signature, et quatre points ne justifient
+  pas davantage.
+
+**Alternatives rejetées.** SDK `google-genai` : une quatrième dépendance Python,
+et l'affirmation « aucune nouvelle dépendance » du §12 aurait cessé d'être vraie.
+Protocole `Provider` : déjà rejeté par DT-29, et rien ici ne le rouvre. Modèle en
+dur dans `impacts.py` : rejeté, c'est exactement ce que cet amendement corrige.
+
+---
+
 **Fin de la DP.** Aucune décision de conception ne reste à prendre.
-Le découpage en PR et le plan d'implémentation suivront après approbation.
+Le découpage en PR est figé dans `docs/impacts/ROADMAP.md`.
