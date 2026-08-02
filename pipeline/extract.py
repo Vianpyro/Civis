@@ -129,6 +129,30 @@ def haystack(text: str) -> str:
     return re.sub(r"\s+", " ", normalise(text))
 
 
+def context(text: str, quote: str, window: int = 1500) -> str:
+    """The document around a quote: ±`window` characters, cut on word boundaries.
+
+    Cut out of haystack() text, which is what check verifies a span against — so
+    any fragment the model copies out of this window is still found verbatim
+    (INV-19). Returns "" when the quote is not in the document: there is nothing
+    honest to send about a measure we cannot locate.
+    """
+    hay = haystack(text)
+    needle = haystack(quote).strip()
+    at = hay.find(needle)
+    if at < 0:
+        return ""
+
+    start, end = max(0, at - window), min(len(hay), at + len(needle) + window)
+    if start:
+        cut = hay.find(" ", start)
+        start = cut + 1 if 0 <= cut < at else start
+    if end < len(hay):
+        cut = hay.rfind(" ", at + len(needle), end)
+        end = cut if cut > 0 else end
+    return hay[start:end].strip()
+
+
 def main(election: str) -> int:
     for source in load_sources(election):
         text = cached_text(election, source["id"])

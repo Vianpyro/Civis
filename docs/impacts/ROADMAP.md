@@ -26,7 +26,7 @@ responsabilité**.
 | **PR-16** | Schéma d'analyses, fichier vide, validation structurelle | 350 | 15 |
 | **PR-17** | `neutrality.py` : lexique et règles lexicales | 400 | 16 |
 | **PR-18** | `llm.py`, `impacts.py` passe 1 aveugle, étape `impacts` | 350 | 16 |
-| **PR-19** | Passe 2, annotations, régénération incrémentale | 250 | 17, 18 |
+| **PR-19** | Passe 2, annotations, régénération incrémentale, **W-03** | 250 | 17, 18 |
 | **PR-20** | **Corpus pilote relu** — quatre points, deux questions | 200–300 | 19 |
 | **PR-21** | Rendu : `Impact.astro`, tout-ou-rien, libellés | 320 | 16, 20 |
 | **PR-22** | Statut épistémique en méthodologie et documentation | 150 | 21 |
@@ -363,16 +363,23 @@ Parallélisable avec PR-17 : aucun fichier commun.
 
 ---
 
-### PR-19 — Passe 2, annotations, régénération incrémentale
+### PR-19 — Passe 2, annotations, régénération incrémentale, W-03
 
 **Objectif.** Ajouter la couche d'audit, les annotations `lint` et `audit` du
-brouillon, et le mécanisme qui rend une régénération gratuite en régime stable.
+brouillon, le mécanisme qui rend une régénération gratuite en régime stable, et
+l'avertissement **W-03** resté sans PR.
 
 **Fichiers modifiés**
 - `pipeline/impacts.py` — prompt du §9.2, schéma du §5.5, fusion des verdicts,
   calcul et comparaison de `of`, drapeaux `--limit N` et `--force`, annotation
   `lint` par appel à `neutrality`.
 - `pipeline/run.py` — les deux drapeaux.
+- `pipeline/check.py` — **W-03** : entrée dont `model` diffère de `llm.MODEL`.
+  La règle est écrite au §10.2 de la DP depuis l'origine ; PR-16 ne pouvait pas
+  la porter, faute de `llm.MODEL`, et a laissé un renvoi vers PR-18 dans le code.
+  PR-18 ne l'a pas reprise : son périmètre ne comprenait pas `check.py`. Elle est
+  rattachée ici, où le champ `model` est de toute façon en jeu — et le renvoi
+  périmé de `check.py` disparaît avec elle.
 - `pipeline/tests/test_impacts_generate.py` — étendu.
 
 **Nouveaux fichiers.** Aucun.
@@ -404,6 +411,9 @@ brouillon, et le mécanisme qui rend une régénération gratuite en régime sta
   sur le corpus réel dans un test partagé par les deux modules.
 - Le brouillon contient **tous** les énoncés produits, y compris ceux dont le
   verdict n'est pas `ok`.
+- **W-03** : une entrée dont `model` diffère de `llm.MODEL` produit un
+  avertissement et un code de sortie 0 ; la même entrée au modèle courant n'en
+  produit aucun.
 
 **Revue manuelle**
 - Lire les verdicts de la passe 2 sur un brouillon réel : signale-t-elle des
@@ -416,6 +426,8 @@ brouillon, et le mécanisme qui rend une régénération gratuite en régime sta
 2. Aucune constante de prompt partagée entre les deux passes.
 3. Le brouillon porte `lint` et `audit` par énoncé ; aucun énoncé retiré.
 4. `python -m pipeline.check` reste vert : rien n'est écrit dans `content/`.
+5. **W-03 est implémentée**, `llm.MODEL` faisant autorité (DT-31), et les quatre
+   avertissements W-01 à W-04 du §10.2 ont désormais chacun leur code.
 
 ---
 
@@ -665,7 +677,7 @@ parce que la seconde les vérifie sur un corpus réel plutôt que sur une fixtur
 
 | Fichier | PR | Nature |
 |---|---|---|
-| `pipeline/check.py` | 16, 17 | **Point de conflit unique.** Jamais simultanées. |
+| `pipeline/check.py` | 16, 17, 19 | **Point de conflit unique.** Jamais simultanées. 19 n'y ajoute que W-03. |
 | `pipeline/impacts.py` | 18, 19 | Sérialisées par construction. |
 | `pipeline/tests/` | toutes | Un fichier par domaine, jamais un fichier commun. |
 | `web/src/lib/ui.js` | 21, 22 | Ajouts de clés dans des tables distinctes. |

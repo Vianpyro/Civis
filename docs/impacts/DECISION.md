@@ -9,11 +9,13 @@ cette DP : il s'arrête et la signale, il ne tranche pas.
 en PR ni de plan d'implémentation : ils vivent dans
 `docs/impacts/ROADMAP.md`, approuvé le 2 août 2026.
 
-**Amendements.** Quatre décisions ont été ajoutées après approbation, au §17 :
+**Amendements.** Cinq décisions ont été ajoutées après approbation, au §17 :
 **DP-40** (corpus pilote), **DT-30** (suite de tests Python), **DT-31**
 (configuration du fournisseur), **DT-32** (rapport agrégé de W-02 et deux
-contrôles de schéma opposables, critère A-19). Elles amendent DT-24, DT-26,
-DT-29, W-02 et le critère A-4, qui portent chacun un renvoi à l'endroit concerné. Le corps du
+contrôles de schéma opposables, critère A-19), **DP-41** (portée exacte de
+l'aveuglement du générateur). Elles amendent DT-24, DT-26,
+DT-29, DP-35, W-02 et les critères A-4 et A-9, qui portent chacun un renvoi à
+l'endroit concerné. Le corps du
 document n'a pas été réécrit : un amendement daté se lit, une réécriture
 silencieuse se subit.
 
@@ -44,7 +46,7 @@ s'arrête.
 14. [Non-objectifs](#14--non-objectifs)
 15. [Risques résiduels assumés](#15--risques-résiduels-assumés)
 16. [Matrice décision → invariant → vérification](#16--matrice-décision--invariant--vérification)
-17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31, DT-32](#17--amendements-postérieurs-à-lapprobation)
+17. [Amendements postérieurs à l'approbation — DP-40, DT-30, DT-31, DT-32, DP-41](#17--amendements-postérieurs-à-lapprobation)
 
 ---
 
@@ -306,6 +308,11 @@ doit s'en assurer explicitement.
 
 **Alternatives rejetées.** Fournir le titre du document « pour le contexte » :
 rejeté, le titre porte le nom de la formation.
+
+> **Précisé par DP-41 (§17).** La fenêtre de contexte est un fragment du
+> document officiel et le reste **verbatim** : un nom de formation qui figure
+> dans le document y demeure. L'interdit porte sur ce que Civis ajoute. La
+> décision ci-dessus est inchangée sur le fond.
 
 ---
 
@@ -1008,7 +1015,8 @@ Catégories admises pour `who` :
 `context` : fenêtre de ±1500 caractères autour de la citation dans le texte
 normalisé du document, découpée sur des frontières de mots.
 **Aucun titre de document, aucun nom de fichier, aucun identifiant de point n'y
-figure** (DP-35).
+figure** (DP-35) — parce que le pipeline ne les y insère pas, jamais parce qu'il
+aurait retouché le document. La fenêtre reste **verbatim** (DP-41, §17).
 
 ### 9.2 Passe 2 — système
 
@@ -1261,9 +1269,14 @@ La fonctionnalité est acceptée quand **tous** les points suivants sont vérifi
   octet** avant et après la fonctionnalité. C'est le protocole de DT-20 appliqué
   ici, et c'est la preuve d'INV-20 la plus forte disponible.
 - **A-8** `npm run build && npm run check:blindness` passe.
-- **A-9** Aucun nom, sigle, identifiant de formation, ni titre de document ne
-  figure dans le corps d'une requête envoyée au modèle (DP-35). Vérifié par un
-  test sur la sortie de `build_requests`.
+- **A-9** ~~Aucun nom, sigle, identifiant de formation, ni titre de document ne
+  figure dans le corps d'une requête envoyée au modèle (DP-35).~~ **Amendé par
+  DP-41 :** aucun élément **ajouté par Civis** — identité de la formation
+  analysée, identifiant de point, nom de fichier, titre de source, métadonnée de
+  pipeline — ne figure dans le corps d'une requête. La citation et la fenêtre de
+  contexte sont du texte de document et ne sont pas soumises à cette règle.
+  Vérifié par un test sur la sortie de `build_requests`, appliqué à la part que
+  le pipeline compose.
 
 ### Interface
 
@@ -1588,6 +1601,82 @@ un état légitime et déclaré ; un fichier manquant est une erreur.
 série L : celle-ci reste identique aux dix-neuf règles du §10.1, afin que les
 tests, les messages et le document continuent de se répondre un pour un. Les
 deux contrôles de schéma sont couverts par le critère **A-19**.
+
+---
+
+### DP-41 — La fenêtre de contexte reste verbatim ; l'interdit porte sur ce que Civis ajoute
+
+**Statut.** Arrêtée le 2 août 2026, à la validation de PR-18, sur une
+incohérence de la spécification que l'implémentation a rendue visible.
+
+---
+
+**L'incohérence.** A-9 exigeait qu'aucun nom de formation ne figure dans le
+corps d'une requête. Le §9.1 prescrit d'y placer une fenêtre de ±1500 caractères
+du document officiel. Sur le corpus réel, les deux ne peuvent pas être vrais
+ensemble : la fenêtre de `ens-regle-or-impots` contient « le RN et la NUPES »,
+celle de `ens-salaires-primes` contient « Ensemble, nous avons vaincu la
+pandémie ». Le premier cas nomme des adversaires, le second nomme la formation
+qui publie le document. Aucune des deux occurrences n'a été écrite par Civis.
+
+---
+
+**Décision.** La fidélité au document l'emporte. La fenêtre de contexte est un
+fragment du document officiel, transmis **à l'identique** : elle n'est ni
+caviardée, ni filtrée, ni raccourcie pour retirer un nom. Un nom de parti, de
+mouvement ou de personnalité qui figure dans le document y demeure.
+
+Restent interdits dans le corps d'une requête **tous les éléments ajoutés par
+Civis** :
+
+- le nom, le sigle ou l'identifiant de la formation dont la mesure est analysée ;
+- l'identifiant du point ;
+- le nom du fichier de programme ;
+- le titre de la source ;
+- toute autre métadonnée propre au pipeline.
+
+La citation est du texte de document au même titre que la fenêtre : elle n'est
+pas soumise à cette règle.
+
+---
+
+**Justification.** Il n'y avait que deux façons de lever l'incohérence.
+
+Caviarder la fenêtre : elle cesse alors d'être le document. Le `span` que le
+modèle en copie cesse d'être retrouvable verbatim, donc cesse d'être une preuve —
+c'est **INV-19 qu'on abîmerait pour protéger DP-35**, en échangeant la garantie
+vérifiable contre la garantie déclarative. Et le filtre lui-même serait un
+artefact éditorial de plus, à relire, avec ses faux positifs : « ensemble » est
+un mot français ordinaire autant qu'un sigle, faux positif que `check.py`
+documente déjà.
+
+Ou resserrer l'interdit sur ce que Civis maîtrise réellement. C'est ce qui est
+retenu, et c'est la lecture exacte de DP-35 : la cécité est une propriété de **ce
+que nous composons**, pas une propriété d'un texte officiel que nous n'avons ni
+le droit ni les moyens de réécrire. La formulation d'A-9 confondait les deux.
+
+---
+
+**Ce que la décision ne fait pas.** Elle n'affaiblit pas DP-35. L'aveuglement
+reste structurel et vérifié : le pipeline ne lit ni le titre du document, ni le
+nom du fichier, ni la formation ; le `custom_id` porte le `point.id` et n'entre
+jamais dans le corps du message. Ce qui change est le périmètre sur lequel le
+test s'applique — la part composée par le pipeline — et non ce qu'il exige
+d'elle, qui reste : rien.
+
+**Risque résiduel, déclaré.** Un document qui se nomme lui-même expose son
+origine au modèle sur les points concernés. Le risque est réel et il est le prix
+de la preuve textuelle. Il est borné par le reste du dispositif, qui ne repose
+pas sur le prompt : le linter s'exécute en CI sur le contenu commité (INV-21,
+DT-29), et la relecture humaine décide (INV-23). C'est la doctrine constante du
+dépôt — *la garantie porte sur le produit, pas sur le producteur*.
+
+**Alternatives rejetées.** Caviarder les noms de formation dans la fenêtre :
+rejeté ci-dessus. Écarter les points dont la fenêtre nomme une formation :
+rejeté, cela retire silencieusement du contenu et fait dépendre la couverture du
+corpus de la prose des documents. Réduire la fenêtre jusqu'à éviter le nom :
+rejeté, la taille de la fenêtre cesserait d'être une constante et deviendrait le
+résultat d'une recherche par essais.
 
 ---
 
