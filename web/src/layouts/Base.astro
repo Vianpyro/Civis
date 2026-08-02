@@ -18,8 +18,11 @@ const t = T[lang];
     <meta name="description" content={t.tagline} />
   </head>
   <body>
-    <a class="skip-link" href="#main">{lang === "fr" ? "Aller au contenu" : "Skip to content"}</a>
-    <nav class="langs" aria-label={lang === "fr" ? "Langue" : "Language"}>
+    {/* Both labels used to be a language test written in the markup (D4). They
+        are chrome like every other string of the frame, so they come from T and
+        the frame no longer holds a translation of its own. */}
+    <a class="skip-link" href="#main">{t.skipToContent}</a>
+    <nav class="langs" aria-label={t.language}>
       {
         LANGS.map((code) => (
           <a href={href(`${code}/${page}`)} aria-current={code === lang ? "page" : undefined}>

@@ -1,9 +1,17 @@
 ---
 // One question of the questionnaire. Props only: it imports nothing but the
-// scale, so no program data can reach the questionnaire through it.
+// scale and the corpus language, so no program data can reach the questionnaire
+// through it.
 import AnswerScale from "./AnswerScale.astro";
+import { CORPUS_LANG } from "../lib/ui.js";
 
-const { id, theme, text, index, total, labels, skipLabel } = Astro.props;
+const { id, theme, text, translation, lang, index, total, labels, skipLabel } = Astro.props;
+
+// The two nodes name the group together, so an English reader who tabs straight
+// into the scale is given the statement and its aid rather than the statement
+// alone. Each node carries its own language, so the two are spoken with two
+// sets of pronunciation rules (DP-18, WCAG 3.1.2).
+const labelledby = translation ? `label-${id} aid-${id}` : `label-${id}`;
 ---
 
 <fieldset class="question">
@@ -12,6 +20,14 @@ const { id, theme, text, index, total, labels, skipLabel } = Astro.props;
   <legend>
     <span class="theme">{theme}</span> · <span class="position">{index + 1} / {total}</span>
   </legend>
-  <p id={`label-${id}`}>{text}</p>
-  <AnswerScale id={id} labels={labels} skipLabel={skipLabel} />
+  {/* The statement is the instrument, so it is French at every interface
+      language and at reading size. The translation sits under it, never in its
+      place: displayed alone it would be a translation of a paraphrase, which is
+      what this page used to ask an English reader to answer (DP-18). Our own
+      text both of them, so the serif is not available to tell them apart (C2)
+      and neither is a colour (INV-12) — size and language are the distinction,
+      and the register is declared once in the header above (C6). */}
+  <p id={`label-${id}`} lang={CORPUS_LANG}>{text}</p>
+  {translation && <p id={`aid-${id}`} class="translation" lang={lang}>{translation}</p>}
+  <AnswerScale id={id} labelledby={labelledby} labels={labels} skipLabel={skipLabel} />
 </fieldset>

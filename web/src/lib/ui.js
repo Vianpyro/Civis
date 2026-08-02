@@ -1,5 +1,35 @@
 export const LANGS = ["fr", "en"];
 
+// The three registers of the product, and where each of them lives (DP-18).
+//
+// `T` at the bottom of this file is the chrome and nothing else: control
+// labels, navigation, and our own commentary on the instrument. It is
+// translated in full, and every key of it exists in both languages —
+// ui.test.mjs holds that, because a missing key is an empty line in one
+// language only and nothing else in the product would report it.
+//
+// Instrument text — the statements of the questionnaire — is French and stays
+// French whatever the interface language. `reading()` pairs a statement with
+// its English translation as an aid beside it, never in its place: an English
+// reader answering a translation of a paraphrase answers an instrument we
+// cannot vouch for, and the quotation shown at the reveal would be in a
+// language they cannot check it against.
+//
+// Quoted text never passes through this file. Quotations, document titles and
+// formation names are read from content/, in the language of their document,
+// and are never translated in substitution — a translated quotation is no
+// longer the quotation the CI verifies word for word (INV-06).
+export const CORPUS_LANG = "fr";
+
+// The statement, plus the reading aid when the interface is not in the language
+// of the corpus. Both come back together so that no caller can render the aid
+// on its own: the translation is a second node beside the first, or it is
+// nothing at all.
+export const reading = (text, lang) => ({
+  text: text[CORPUS_LANG],
+  translation: lang === CORPUS_LANG ? null : (text[lang] ?? null),
+});
+
 // The full formulations. They are the accessible name of every scale control and
 // the label used on the results page; they are no longer what the scale displays.
 export const CHOICE_LABELS = {
@@ -69,6 +99,11 @@ export const T = {
   fr: {
     title: "Civis",
     tagline: "Des propositions issues des programmes officiels. Sans étiquette, jusqu'à la fin.",
+    // Chrome of the document frame. Both strings were written twice in
+    // Base.astro, as a language test inside the markup (D4): a third page
+    // needing them would have carried a third copy.
+    skipToContent: "Aller au contenu",
+    language: "Langue",
     // The questionnaire header (DP-27): five statements, in this order, 120
     // characters each at most — the length of the longest statement of the
     // fr-2027 corpus. The counts are passed in, never written here (K9).
@@ -120,6 +155,13 @@ export const T = {
     // the same figure for every reader, and never the comparison base above.
     resultCoverage: (n, total) => `Couverture du corpus : ${n} des ${total} propositions du questionnaire.`,
     detail: "Le détail, question par question",
+    // The register marking of a mixed context (System §3.7). This page holds
+    // three registers where the questionnaire held one, so the marking moves
+    // from the head of the page to the head of the block that mixes them —
+    // once for the section, not once per question, which is the repetition
+    // that stops being read (C6).
+    detailRegisters:
+      "Chaque bloc réunit notre reformulation de la proposition, puis la citation exacte du document officiel, reproduite dans la langue du document.",
     sourceLabel: "Document officiel",
     // Provenance of the corpus, before the first figure (DP-28).
     sources: "Documents sources du corpus",
@@ -254,10 +296,18 @@ export const T = {
   en: {
     title: "Civis",
     tagline: "Proposals taken from official manifestos. No labels until the end.",
+    skipToContent: "Skip to content",
+    language: "Language",
+    // Statement three carries both registers of the questionnaire at once, and
+    // it is the only place either of them is declared: the thirty statements
+    // are one uniform context, so the marking is stated once here rather than
+    // repeated question after question, where it would stop being read
+    // (System §3.7, C6). It stays one statement of the five DP-27 allows, and
+    // under the 120-character cap (F8).
     header: (proposals, formations) => [
       "Blind questionnaire: take a position on each proposal.",
       `${proposals} proposals taken from documents of ${formations} formations, published in 2024, for a 2027 election.`,
-      "The statements are our reformulations of the proposals, not quotations.",
+      "The statements are our reformulations, not quotations; in French, with our English translation under each.",
       "The order is drawn at random in the browser and is not recorded; no formation is named before the last answer.",
       "The questionnaire needs JavaScript to record the answers and compute the result.",
     ],
@@ -289,6 +339,8 @@ export const T = {
       `Confidence: ${label}, across ${base} compared proposal${base > 1 ? "s" : ""}.`,
     resultCoverage: (n, total) => `Corpus coverage: ${n} of the ${total} proposals in the questionnaire.`,
     detail: "Question by question",
+    detailRegisters:
+      "Each block holds our reformulation of the proposal, our English translation of it, then the exact quotation of the official document, kept in French, the language of the document.",
     sourceLabel: "Official document",
     sources: "Source documents of the corpus",
     published: (date) => `published on ${date}`,

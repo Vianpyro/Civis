@@ -7,7 +7,16 @@
 // quote, and the quote is the evidence the product rests on (INV-06). The serif
 // and the vertical rule come from the blockquote rule of styles.css, where the
 // family is a provenance marker rather than a decoration (C2).
+//
+// The quotation stays in the language of its document at every interface
+// language, and no translation is put in its place: a translated quotation is
+// no longer the text the CI checks word for word, so the evidence would be gone
+// (INV-06, DP-18, C4). The language attribute is what keeps it intelligible to
+// an English reader's screen reader — read with English rules, French is not
+// merely imperfect but unusable (WCAG 3.1.2).
+import { CORPUS_LANG } from "../lib/ui.js";
+
 const { text } = Astro.props;
 ---
 
-<blockquote>« {text} »</blockquote>
+<blockquote lang={CORPUS_LANG}>« {text} »</blockquote>

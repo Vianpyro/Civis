@@ -4,10 +4,14 @@
 // questionnaire through it.
 import { SHORT_LABEL } from "../lib/ui.js";
 
-const { id, labels, skipLabel } = Astro.props;
+// The labels are control labels, so they are chrome and translated in full
+// (DP-18) — never doubled with an adjacent translation the way a statement is,
+// which is why the English interface does not make this grid any denser and the
+// single set of DP-26 still fits the 320px column.
+const { id, labelledby, labels, skipLabel } = Astro.props;
 ---
 
-<div class="choices" role="group" aria-labelledby={`label-${id}`}>
+<div class="choices" role="group" aria-labelledby={labelledby ?? `label-${id}`}>
   {
     labels.map((label, choice) => (
       <label>

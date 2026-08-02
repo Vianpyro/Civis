@@ -8,7 +8,14 @@
 // evidence (INV-06, C3). The whole source record is handed over rather than a
 // url and a title, so a caller listing documents on their own can read the other
 // fields from the same object without this component growing a second shape.
+//
+// The label is chrome and is translated; the title is the document's own and is
+// not. They are two nodes rather than one string so that the title can carry
+// the language it is written in — a document title read with English rules is
+// as unusable as a quotation read that way (DP-18, WCAG 3.1.2).
+import { CORPUS_LANG } from "../lib/ui.js";
+
 const { source, label } = Astro.props;
 ---
 
-<a href={source.url} rel="noopener">{label} : {source.title}</a>
+<a href={source.url} rel="noopener">{label} : <span lang={CORPUS_LANG}>{source.title}</span></a>

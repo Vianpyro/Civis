@@ -569,3 +569,33 @@ nav.langs a {
 .method .provenance li {
   margin-bottom: var(--space-1);
 }
+
+/* --- PR-14 — English as a reading aid ---------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   Three registers have to be told apart without reading them. The quotation
+   already has two marks of its own — the serif and the vertical rule of the
+   `blockquote` block above — and neither is available here: the statement and
+   its translation are both our text, so the serif would destroy the provenance
+   convention for every page (C2). Nor is a grey value: a register readable as a
+   tint is information carried by colour (INV-12, E2). What is left, and what
+   this block uses, is size and position — reading size for the statement, the
+   secondary step for the translation directly under it — plus the language
+   attribute the markup carries and the register declared once per context. */
+
+.question > .translation,
+summary > .translation {
+  display: block;
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-secondary);
+  /* The summary is 600; a translation set at the weight of the statement it
+     translates would read as a second statement. Weight by register, never by
+     state, so nothing reflows on selection (G3). */
+  font-weight: 400;
+}
+
+/* The register marking of the results detail (System §3.7). Secondary size: it
+   is our commentary on the blocks below, not one of the things they hold. */
+.registers {
+  font-size: var(--text-secondary);
+}

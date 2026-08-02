@@ -23,7 +23,15 @@ import nfp from "../../../../content/programs/fr-2027/nfp.json";
 import rn from "../../../../content/programs/fr-2027/rn.json";
 import { API, href } from "../../lib/paths.js";
 import { confidence, coverage } from "../../lib/score.js";
-import { CHOICE_LABELS, CONFIDENCE_LABELS, LANGS, T, THEMES } from "../../lib/ui.js";
+import {
+  CHOICE_LABELS,
+  CONFIDENCE_LABELS,
+  CORPUS_LANG,
+  LANGS,
+  T,
+  THEMES,
+  reading,
+} from "../../lib/ui.js";
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -51,7 +59,9 @@ const byQuestion = Object.fromEntries(
   questions.questions.map((question) => [
     question.id,
     {
-      text: question.text[lang],
+      // The statement is the instrument here too: French, with the English
+      // translation beside it and never in its place (DP-18).
+      ...reading(question.text, lang),
       theme: THEMES[lang][question.theme],
       positions: (positions[question.id] ?? []).map((entry) => ({
         ...entry,
@@ -153,6 +163,14 @@ const provenance = sources.map((source) => {
   </div>
 
   <h2>{t.detail}</h2>
+  {/* This page is a mixed context — our reformulations, our translations and
+      quotations from the documents — so the register is marked at the head of
+      the block that mixes them, and once for the block (System §3.7, C6).
+      Inside it the quotation marks itself the way the system prescribes: serif,
+      vertical rule, language attribute and the document reference right below
+      it, which is a marking by construction rather than a sentence repeated
+      thirty times. */}
+  <p class="registers">{t.detailRegisters}</p>
   {/* Every question is rendered, answered or not. The page already holds the
       whole corpus in order to rank it, so rendering it costs nothing it was not
       already paying — and the proof, quote and document, becomes readable
@@ -161,14 +179,21 @@ const provenance = sources.map((source) => {
     {
       Object.entries(byQuestion).map(([id, question]) => (
         <details data-question={id}>
-          <summary>{question.text}</summary>
+          <summary>
+            <span lang={CORPUS_LANG}>{question.text}</span>
+            {question.translation && (
+              <span class="translation" lang={lang}>
+                {question.translation}
+              </span>
+            )}
+          </summary>
           <p class="muted">
             <span class="theme">{question.theme}</span> · {t.yourAnswer} : <span class="answer" />
           </p>
           <ul>
             {question.positions.map((position) => (
               <li>
-                <strong>{parties[position.party].name}</strong> —
+                <strong lang={CORPUS_LANG}>{parties[position.party].name}</strong> —
                 {position.stance === 1 ? t.supports : t.opposes}
                 <Quote text={position.quote} />
                 <Source source={position.source} label={t.sourceLabel} />

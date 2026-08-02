@@ -15,11 +15,17 @@
 // Hidden until the script has filled it: a record whose two sentences are empty
 // would state nothing at all. A formation with nothing compared is revealed like
 // the others, with the reason in place of the fraction (INV-14).
+//
+// The name of the formation is its own, read from content/ and never
+// translated; it carries its language so that a screen reader in English does
+// not pronounce it with English rules (DP-18, WCAG 3.1.2).
+import { CORPUS_LANG } from "../lib/ui.js";
+
 const { id, name, coverage } = Astro.props;
 ---
 
 <div class="result" data-party={id} hidden>
-  <h3>{name}</h3>
+  <h3 lang={CORPUS_LANG}>{name}</h3>
   <p class="fraction"></p>
   <p class="confidence"></p>
   <p class="coverage">{coverage}</p>

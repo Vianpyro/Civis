@@ -26,7 +26,14 @@ import nfp from "../../../../content/programs/fr-2027/nfp.json";
 import rn from "../../../../content/programs/fr-2027/rn.json";
 import sources from "../../../../content/sources/fr-2027/sources.json";
 import { CONFIDENCE_LEVELS, PERCENT_MIN_RESPONSES, coverage } from "../../lib/score.js";
-import { CHOICE_LABELS, CHOICE_LABELS_SHORT, CONFIDENCE_LABELS, LANGS, T } from "../../lib/ui.js";
+import {
+  CHOICE_LABELS,
+  CHOICE_LABELS_SHORT,
+  CONFIDENCE_LABELS,
+  CORPUS_LANG,
+  LANGS,
+  T,
+} from "../../lib/ui.js";
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -118,7 +125,11 @@ const confidences = CONFIDENCE_LEVELS.map(({ level, min, max }) => ({
         {
           programs.map((program) => (
             <tr>
-              <th scope="row">{program.party.name}</th>
+              {/* The name is the formation's own, never translated, so it
+                  carries the language it is written in (DP-18, WCAG 3.1.2). */}
+              <th scope="row" lang={CORPUS_LANG}>
+                {program.party.name}
+              </th>
               <td>{t.methodCoverageValue(covered[program.party.id] ?? 0, total)}</td>
             </tr>
           ))
