@@ -320,6 +320,20 @@ export const T = {
       "La date à laquelle chaque document a été téléchargé n'est enregistrée nulle part : le dépôt ne conserve que la date de publication annoncée par le document lui-même.",
     methodLimitsVersioning:
       "Les énoncés ne portent ni numéro de version ni date. Une reformulation ne laisse de trace que dans l'historique git, et des compteurs peuvent donc porter sur deux formulations sous un même identifiant.",
+    // The epistemic status of the analyses (DP-38). Three things a reader cannot
+    // find out alone: what is verified and what is not, that the unverifiable
+    // part is bounded by the verified one rather than founded by it, and that
+    // most measures carry no analysis at all — the silence of a question is a
+    // state of the corpus, not a defect of the page (DP-34).
+    //
+    // No bound is written here. The caps of DP-33 live in pipeline/neutrality.py
+    // and pipeline/check.py, and the one relation stated below — never more
+    // deductions than verified statements — is a relation and not a figure. A
+    // number restated in this file would drift from the linter that applies it,
+    // on the page whose whole claim is that it states nothing the code does not
+    // do (INV-13, K9).
+    methodLimitsAnalyses:
+      "Certaines mesures portent une analyse de leurs conséquences. Les énoncés qui citent un fragment du document sont vérifiés mot pour mot ; les autres sont nos déductions, que rien ne vérifie — leur nombre ne dépasse jamais celui des premiers, ce qui les borne sans les fonder. Ces analyses ne sont pas exhaustives : la plupart des mesures n'en portent aucune, et une question dont toutes les positions n'en ont pas n'en affiche aucune.",
     methodCoverageTitle: "Propositions retenues par formation",
     methodCoverageColumn: "Formation",
     methodCoverageCount: "Propositions retenues",
@@ -339,15 +353,24 @@ export const T = {
     methodStatementsEditorial:
       "Les énoncés du questionnaire sont nos reformulations des propositions, écrites en questions fermées et parfois traduites. Ce ne sont pas des citations. La citation d'origine et son document figurent sous chaque question, sur la page de résultats : les comparer est ce qui met une reformulation en défaut.",
 
-    // The four facts, in this order and no other (DP-17). The most alarming one
+    // The four facts of DP-17, in this order and no other. The most alarming one
     // comes first, which is what makes the three that follow credible; the
     // reverse order would read as a justification. No mitigating formula.
+    //
+    // Two facts are added by DP-38, and neither is appended at the end: the
+    // list is ordered by what it costs the reader to learn, so the second
+    // generator goes beside the first one and the second verification beside
+    // the one it extends. Tacking both on at the bottom would have sorted them
+    // by date of writing, which is the softening the order exists to prevent.
+    // The four facts of DP-17 keep their relative order inside the six.
     methodModel: "Rôle du modèle de langage",
     methodModelFacts: [
       "Les brouillons des énoncés sont générés par un modèle de langage, hors ligne et en lot, avant toute entrée dans le dépôt.",
+      "Les analyses de conséquences affichées sous une citation sont produites de la même façon : un modèle de langage en écrit le brouillon, hors ligne, avant toute entrée dans le dépôt.",
       "Chaque brouillon est relu par une personne avant d'entrer dans le contenu. Rien n'entre sans cette relecture.",
       "Aucun appel à un modèle de langage n'a lieu pendant l'exécution du site : ni au chargement, ni pendant le questionnaire, ni au calcul du résultat. L'onglet réseau du navigateur montre ce qui sort.",
       "Les citations rattachées aux propositions sont vérifiées mot pour mot par un programme, à chaque construction du site.",
+      "Dans une analyse, un énoncé donné pour prévu par le texte porte le fragment du document sur lequel il repose, et ce fragment est cherché mot pour mot par le même programme.",
     ],
 
     methodPassation: "La passation",
@@ -478,6 +501,8 @@ export const T = {
       "The date each document was downloaded is recorded nowhere: the repository keeps only the publication date the document itself states.",
     methodLimitsVersioning:
       "The statements carry neither a version number nor a date. A rewording leaves no trace outside the git history, so counters may cover two formulations under one identifier.",
+    methodLimitsAnalyses:
+      "Some measures carry an analysis of their consequences. The statements that quote a fragment of the document are checked word for word; the others are our deductions, and nothing checks them — their number never exceeds that of the first, which bounds them without grounding them. These analyses are not exhaustive: most measures carry none, and a question whose positions do not all have one displays none.",
     methodCoverageTitle: "Proposals taken from each formation",
     methodCoverageColumn: "Formation",
     methodCoverageCount: "Proposals taken",
@@ -500,9 +525,11 @@ export const T = {
     methodModel: "Role of the language model",
     methodModelFacts: [
       "Draft statements are generated by a language model, offline and in batches, before anything enters the repository.",
+      "The analyses of consequences shown under a quotation are produced the same way: a language model writes the draft, offline, before anything enters the repository.",
       "Every draft is read by a person before it enters the content. Nothing enters without that review.",
       "No language model is called while the site runs: not on load, not during the questionnaire, not when the result is computed. The browser's network tab shows what goes out.",
       "The quotations attached to the proposals are checked word for word by a program, at every build of the site.",
+      "In an analysis, a statement given as provided for by the text carries the fragment of the document it rests on, and that fragment is looked for word for word by the same program.",
     ],
 
     methodPassation: "Taking the questionnaire",

@@ -23,7 +23,12 @@ import time
 import requests
 
 PROVIDER = os.environ.get("CIVIS_LLM_PROVIDER", "gemini")
-MODEL = os.environ.get("CIVIS_LLM_MODEL", "gemini-2.5-pro")
+# gemini-2.5-pro until 2026-08-02: it left the free tier, and the daily request
+# quota of a free key for it is now zero — the step failed on 429 without ever
+# being able to succeed. The default is a model a free key can actually call,
+# and it is pinned rather than an alias: `model` is written into every entry to
+# make a drift visible in a diff (DT-31), which a moving alias would defeat.
+MODEL = os.environ.get("CIVIS_LLM_MODEL", "gemini-3.6-flash")
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 

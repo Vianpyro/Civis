@@ -27,6 +27,14 @@ target
 # LLM question drafts, awaiting human review
 review/
 
+# API credentials. The pipeline reads them from the environment and never from
+# a file (pipeline/llm.py), so this rule protects a local convenience rather
+# than a supported mechanism: a .env here has to be sourced into the shell to
+# have any effect.
+.env
+.env.*
+!web/.env.development
+
 # Personal drafts. The only unversioned place under docs/ — every other
 # document there is committed, including the temporary ones in docs/wip/:
 # a working note whose deletion is not recoverable is a note that gets kept

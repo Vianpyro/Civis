@@ -42,6 +42,14 @@ exacte, affichées sur la page de résultats. La CI échoue si une citation
 n'apparaît pas **mot pour mot** dans le document qu'elle cite — la neutralité est
 vérifiée par une machine, pas affirmée dans un README.
 
+Certaines mesures portent en plus une **analyse de leurs conséquences**, dont le
+brouillon est écrit par un modèle de langage hors ligne, puis relu par une
+personne avant d'entrer dans le dépôt. Les énoncés donnés pour prévus par le
+texte citent le fragment du document sur lequel ils reposent, et la CI le cherche
+mot pour mot comme elle le fait des citations ; les autres sont des déductions
+que rien ne vérifie, et leur nombre ne dépasse jamais celui des premiers. Ces
+analyses ne sont pas exhaustives.
+
 Les empreintes SHA-256 des documents sont commitées. Quand un parti republie son
 programme, une ligne change dans un fichier, une pull request s'ouvre, et
 l'historique git montre publiquement ce qui a bougé et quand.
