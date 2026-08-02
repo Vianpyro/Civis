@@ -3,7 +3,16 @@
 // here — after the questionnaire is complete. Aggregate counters are fetched on
 // this page too, for the same reason: showing them earlier is the conformity
 // bias the product exists to remove.
+//
+// Everything displayed is known at build time, so it is rendered at build time
+// (DT-07). What the script still does is what a build cannot know: which
+// questions this reader answered, what they answered, and how the formations
+// rank for them. Nothing is assembled from strings any more, so escaping is
+// Astro's and the page is readable without JavaScript.
 import Base from "../../layouts/Base.astro";
+import Quote from "../../components/Quote.astro";
+import Result from "../../components/Result.astro";
+import Source from "../../components/Source.astro";
 import questions from "../../../../content/questions/fr-2027.json";
 import positions from "../../../../content/questions/fr-2027.positions.json";
 import sources from "../../../../content/sources/fr-2027/sources.json";
@@ -20,11 +29,13 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params;
 const t = T[lang];
+const labels = CHOICE_LABELS[lang];
 
 const programs = [ensemble, lr, nfp, rn];
 const sourceById = Object.fromEntries(sources.map((source) => [source.id, source]));
 
-// Flatten content into the shape the client script needs, once, at build time.
+// Flatten content into the shape the page renders and the client script needs,
+// once, at build time.
 const parties = Object.fromEntries(programs.map((p) => [p.party.id, p.party]));
 const points = Object.fromEntries(
   programs.flatMap((program) =>
@@ -53,108 +64,128 @@ const scoreInput = Object.fromEntries(
     entries.map((entry) => ({ party: points[entry.point].party, stance: entry.stance })),
   ]),
 );
+
+// One string per possible number of compared questions, written by T: the plural
+// rule lives in ui.js and is read here rather than restated, and the script no
+// longer rewrites a digit inside a sentence to make one of two forms fit.
+const matched = Array.from({ length: questions.questions.length + 1 }, (_, n) => t.matched(n));
 ---
 
 <Base lang={lang} page="results" title={t.results}>
   <h1>{t.results}</h1>
   <p class="muted">{t.tagline}</p>
 
-  <div id="ranking" aria-live="polite"></div>
+  {/* Every formation has its record here; the script reveals the comparable ones
+      and moves them into score order. */}
+  <div id="ranking" aria-live="polite">
+    <p id="no-answers" hidden>{t.noAnswers}</p>
+    {
+      Object.values(parties).map((party) => (
+        <Result id={party.id} name={party.name} agreement={t.agreement} />
+      ))
+    }
+  </div>
 
   <h2>{t.detail}</h2>
-  <div id="detail"></div>
+  {/* Every question is rendered, answered or not. The page already holds the
+      whole corpus in order to rank it, so rendering it costs nothing it was not
+      already paying — and the proof, quote and document, becomes readable
+      without JavaScript. The script hides what this reader did not answer. */}
+  <div id="detail">
+    {
+      Object.entries(byQuestion).map(([id, question]) => (
+        <details data-question={id}>
+          <summary>{question.text}</summary>
+          <p class="muted">
+            <span class="theme">{question.theme}</span> · {t.yourAnswer} : <span class="answer" />
+          </p>
+          <ul>
+            {question.positions.map((position) => (
+              <li>
+                <strong>{parties[position.party].name}</strong> —
+                {position.stance === 1 ? t.supports : t.opposes}
+                <Quote text={position.quote} />
+                <Source source={position.source} label={t.sourceLabel} />
+              </li>
+            ))}
+          </ul>
+          {/* The counters are the one thing on this page that is not known at
+              build time. Their labels are; only the figures wait, in elements
+              that already exist. Hidden until they arrive, so nothing shows a
+              row without its number. */}
+          <div class="aggregate muted" data-question={id} hidden>
+            <p>
+              <strong>{t.aggregate}</strong>
+            </p>
+            {
+              labels.map((label, choice) => (
+                <p>
+                  {label} — <span data-choice={choice} />%
+                </p>
+              ))
+            }
+          </div>
+        </details>
+      ))
+    }
+  </div>
 
   <p><a class="button" href={href(`${lang}/`)}>{t.restart}</a></p>
 
+  {/* What is left for the script: the positions it scores, the scale labels for
+      the answer given, the counted sentences, and the empty-counter message.
+      Everything else on this page is rendered above and no longer travels. */}
   <script
     type="application/json"
     id="data"
     set:html={JSON.stringify({
       api: API,
-      lang,
-      parties,
-      byQuestion,
       scoreInput,
-      labels: CHOICE_LABELS[lang],
-      t: {
-        agreement: t.agreement,
-        detail: t.detail,
-        noAnswers: t.noAnswers,
-        sourceLabel: t.sourceLabel,
-        aggregate: t.aggregate,
-        aggregateEmpty: t.aggregateEmpty,
-        yourAnswer: t.yourAnswer,
-        supports: t.supports,
-        opposes: t.opposes,
-        matchedOne: t.matched(1),
-        matchedMany: t.matched(2),
-      },
+      labels,
+      matched,
+      aggregateEmpty: t.aggregateEmpty,
     })}></script>
 </Base>
 
 <script>
-  import { score } from "../../lib/score.js";
+  import { CHOICES, score } from "../../lib/score.js";
 
   const data = JSON.parse(document.getElementById("data").textContent);
-  const { parties, byQuestion, scoreInput, labels, t } = data;
+  const { scoreInput, labels, matched } = data;
   const answers = JSON.parse(sessionStorage.getItem("civis:answers") ?? "{}");
-  const scale = [-1, -0.5, 0, 0.5, 1];
-
-  const escape = (value) =>
-    String(value).replace(
-      /[&<>"]/g,
-      (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char],
-    );
 
   const ranking = document.getElementById("ranking");
   const rows = score(answers, scoreInput);
 
   if (rows.length === 0) {
-    ranking.innerHTML = `<p>${escape(t.noAnswers)}</p>`;
+    document.getElementById("no-answers").hidden = false;
   } else {
-    ranking.innerHTML = rows
-      .map(({ party, agreement, matched }) => {
-        const percent = Math.round(agreement * 100);
-        const matchedLabel = (matched > 1 ? t.matchedMany : t.matchedOne).replace(
-          /\d+/,
-          String(matched),
-        );
-        return `<div class="result">
-          <h3>${escape(parties[party].name)}</h3>
-          <p class="muted" style="margin:.25rem 0 .5rem">
-            <strong>${percent}%</strong> ${escape(t.agreement)} — ${escape(matchedLabel)}
-          </p>
-          <div class="bar"><span style="width:${percent}%"></span></div>
-        </div>`;
-      })
-      .join("");
+    for (const row of rows) {
+      const record = ranking.querySelector(`[data-party="${CSS.escape(row.party)}"]`);
+      const percent = Math.round(row.agreement * 100);
+      record.querySelector(".agreement").textContent = String(percent);
+      record.querySelector(".matched").textContent = matched[row.matched];
+      // The one figure no class can carry: the fill is the measure itself. It is
+      // written here rather than as an attribute in the markup, which the token
+      // test forbids; the bar and the percentage both go away with PR-11.
+      record.querySelector(".bar > span").style.width = `${percent}%`;
+      record.hidden = false;
+      // Moved, not reordered by a layout property: document order stays the
+      // order on screen, and so does the tab order (INV-17).
+      ranking.append(record);
+    }
   }
 
-  const detail = document.getElementById("detail");
-  detail.innerHTML = Object.entries(byQuestion)
-    .filter(([id]) => typeof answers[id] === "number")
-    .map(([id, question]) => {
-      const given = labels[scale.indexOf(answers[id])] ?? "";
-      const stances = question.positions
-        .map(
-          (position) => `<li>
-            <strong>${escape(parties[position.party].name)}</strong> —
-            ${escape(position.stance === 1 ? t.supports : t.opposes)}
-            <blockquote>« ${escape(position.quote)} »</blockquote>
-            <a href="${escape(position.source.url)}" rel="noopener">
-              ${escape(t.sourceLabel)} : ${escape(position.source.title)}</a>
-          </li>`,
-        )
-        .join("");
-      return `<details>
-        <summary>${escape(question.text)}</summary>
-        <p class="muted"><span class="theme">${escape(question.theme)}</span> ·
-          ${escape(t.yourAnswer)} : ${escape(given)}</p>
-        <ul>${stances}</ul>
-        <div class="aggregate muted" data-question="${escape(id)}"></div>
-      </details>`;
-    })
-    .join("");
+  for (const item of document.querySelectorAll("#detail > details")) {
+    const answer = answers[item.dataset.question];
+    // The same rule as before: an answer is a numeric entry. A question without
+    // one has nothing to compare, and is hidden rather than removed.
+    if (typeof answer !== "number") {
+      item.hidden = true;
+      continue;
+    }
+    item.querySelector(".answer").textContent = labels[CHOICES.indexOf(answer)] ?? "";
+  }
 
   // Aggregates arrive after the reveal, never before. A failure here is silent:
   // the questionnaire result does not depend on the counter service being up —
@@ -169,19 +200,13 @@ const scoreInput = Object.fromEntries(
           const row = counts[node.dataset.question];
           const total = row?.reduce((sum, n) => sum + n, 0) ?? 0;
           if (!total) {
-            node.textContent = t.aggregateEmpty;
-            continue;
+            node.textContent = data.aggregateEmpty;
+          } else {
+            for (const cell of node.querySelectorAll("[data-choice]")) {
+              cell.textContent = String(Math.round((row[cell.dataset.choice] / total) * 100));
+            }
           }
-          node.innerHTML =
-            `<p style="margin:.5rem 0 .25rem"><strong>${escape(t.aggregate)}</strong></p>` +
-            row
-              .map(
-                (n, index) =>
-                  `<p style="margin:.15rem 0">${escape(labels[index])} — ${Math.round(
-                    (n / total) * 100,
-                  )}%</p>`,
-              )
-              .join("");
+          node.hidden = false;
         }
       })
       .catch(() => {});

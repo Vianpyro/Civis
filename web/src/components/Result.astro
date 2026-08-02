@@ -1,0 +1,22 @@
+---
+// One formation record of the ranking. Props only, and used by the results page
+// alone: it carries program data, so the questionnaire must never reach it,
+// directly or through another component (INV-01).
+//
+// The name is rendered at build. The figures are the only part of the record a
+// passation decides, so they are the only part the script writes — into elements
+// that already exist, never into markup it builds from strings.
+//
+// Hidden until the script has a figure to put in it: a record is revealed when
+// the formation is comparable, and stays hidden when it is not, which is what
+// the previous rendering expressed by not emitting it at all.
+const { id, name, agreement } = Astro.props;
+---
+
+<div class="result" data-party={id} hidden>
+  <h3>{name}</h3>
+  <p class="muted">
+    <strong><span class="agreement"></span>%</strong> {agreement} — <span class="matched"></span>
+  </p>
+  <div class="bar"><span></span></div>
+</div>

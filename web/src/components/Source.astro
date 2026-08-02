@@ -1,0 +1,14 @@
+---
+// The official document a quotation comes from. Props only, and used by the
+// results page alone: it carries program data, so the questionnaire must never
+// reach it, directly or through another component (INV-01).
+//
+// One line, one document: the label, the exact title, and the link. Kept beside
+// the quote it belongs to — a citation separated from its document is no longer
+// evidence (INV-06, C3). The whole source record is handed over rather than a
+// url and a title, so a caller listing documents on their own can read the other
+// fields from the same object without this component growing a second shape.
+const { source, label } = Astro.props;
+---
+
+<a href={source.url} rel="noopener">{label} : {source.title}</a>

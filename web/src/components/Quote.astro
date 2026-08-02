@@ -1,0 +1,13 @@
+---
+// A quotation from an official document, word for word. Props only, and used by
+// the results page alone: it carries program data, so the questionnaire must
+// never reach it, directly or through another component (INV-01).
+//
+// No maximum height, no ellipsis, no line clamp: a shortened quote is an altered
+// quote, and the quote is the evidence the product rests on (INV-06). The serif
+// and the vertical rule come from the blockquote rule of styles.css, where the
+// family is a provenance marker rather than a decoration (C2).
+const { text } = Astro.props;
+---
+
+<blockquote>« {text} »</blockquote>

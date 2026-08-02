@@ -34,18 +34,15 @@ const styleSheets = cssFiles.filter(([name]) => name !== TOKEN_FILE);
 
 // --- Inline style attributes -------------------------------------------------
 //
-// One named exception left. `inline-styles-questionnaire`, which covered the 3
-// attributes of the questionnaire page, was retired by PR-04 with the attributes
-// themselves; the questionnaire is now held to zero like every other file.
+// No exception left. `inline-styles-questionnaire`, covering the 3 attributes of
+// the questionnaire page, was retired by PR-04; `inline-styles-resultats`,
+// covering the attributes of the results page, was retired by PR-10 when the
+// client-rendered string templates that held them became markup. Every file is
+// now held to zero.
 //
-//   inline-styles-resultats — 4 attributes in the results page, inside the
-//                             client-rendered string templates.
-//                             Retired by PR-10.
-//
-// The count is exact: adding a fifth attribute there fails this test.
-const INLINE_STYLE_EXCEPTIONS = {
-  "pages/[lang]/results.astro": { name: "inline-styles-resultats", count: 4, retiredBy: "PR-10" },
-};
+// The map stays as the place a new exception would have to be declared, in the
+// open, where a list that grows from PR to PR is visible in review (DT-04, G8).
+const INLINE_STYLE_EXCEPTIONS = {};
 
 // --- Value scales ------------------------------------------------------------
 
