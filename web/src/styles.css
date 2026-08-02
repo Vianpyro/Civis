@@ -275,9 +275,6 @@ nav.langs a {
   align-items: center;
   gap: var(--space-2);
 }
-.consent-help {
-  font-size: var(--text-secondary);
-}
 
 /* --- PR-06 — five-column answer scale --------------------------------------
    Appended at the end of the file, no block above reorganised (DT-15).
@@ -376,4 +373,43 @@ nav.langs a {
   border-color: var(--edge);
   min-height: calc(var(--space-4) + var(--space-3));
   font-size: var(--text-secondary);
+}
+
+/* --- PR-09 — closing block and consent --------------------------------------
+   Appended at the end of the file, no block above reorganised (DT-15).
+
+   The contribution choice reads here, in normal flow, with its explanation
+   beside it. No tint, no frame of its own, no padlock: a block that insists on
+   privacy makes it suspect. A separating rule and normal prose are the whole
+   treatment (System §8.2, INV-12). */
+
+.closing {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--stroke) solid var(--rule);
+}
+.closing p {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-secondary);
+}
+.closing button {
+  margin-top: var(--space-2);
+}
+
+/* 32 + 16 = 48px, the spacing scale holding no 44 (H2). */
+.closing .consent {
+  min-height: calc(var(--space-4) + var(--space-3));
+  margin-bottom: var(--space-2);
+}
+
+/* The payload, byte for byte what a request carries. Bordered like a record so
+   it cannot be read as our own prose (C1); its family is the browser's own for
+   <code> — the two families of the system are for what we write and what we
+   quote, and this is neither. Wrapping rather than clipping: a truncated
+   payload would be a payload that no longer matches the request. */
+.payload {
+  border: var(--stroke) solid var(--edge);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  overflow-wrap: anywhere;
 }

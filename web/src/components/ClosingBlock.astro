@@ -1,0 +1,33 @@
+---
+// The closing block (DP-16). Props only: it imports nothing, so nothing can
+// reach the questionnaire through it.
+//
+// The privacy decision used to sit against the submit button, in a floating
+// bar, with its explanation out of frame. It is read here, in normal flow, next
+// to what acts on it — one occurrence, at the actionable moment (System §8.2).
+// The block is rendered only where there is a service to send to; without one
+// there is nothing to consent to (INV-08).
+//
+// The payload below is not an example of a request: it is a request, built by
+// the same JSON.stringify call as the send loop, from a question identifier
+// read from the corpus. An approximate specimen would turn the one component
+// that carries proof into one more claim (P1).
+const { label, refusal, sent, payload, notSent, why, ip, submit } = Astro.props;
+---
+
+<div class="closing">
+  <label class="consent">
+    <input type="checkbox" id="aggregate" checked />
+    <span>{label}</span>
+  </label>
+  <p>{refusal}</p>
+  <p>{sent}</p>
+  <p class="payload"><code>{payload}</code></p>
+  <p>{notSent}</p>
+  <p>{why}</p>
+  <p>{ip}</p>
+  {/* The same submit as the floating bar, in the same form: both buttons run
+      the one submit handler, so the two paths cannot drift apart. This one is
+      what makes the decision actionable where it is read. */}
+  <button type="submit">{submit}</button>
+</div>

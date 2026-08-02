@@ -1,6 +1,7 @@
 ---
 // The blind questionnaire. It imports the questions file and nothing else:
 // no programs, no positions, no party data reaches this page's bundle.
+import ClosingBlock from "../../components/ClosingBlock.astro";
 import DraftNotice from "../../components/DraftNotice.astro";
 import Question from "../../components/Question.astro";
 import Base from "../../layouts/Base.astro";
@@ -25,6 +26,13 @@ const items = questions.questions;
 // content/programs is opened and nothing of a formation — id, name or acronym —
 // can reach this page (INV-01).
 const formations = Object.keys(import.meta.glob("../../../../content/programs/fr-2027/*.json")).length;
+
+// What one request carries, built here by the same expression as the send loop
+// below and from a question identifier read from the corpus, never copied (K9).
+// Answering that question at that rank and watching the network tab is the
+// gesture that takes the exposure in the closing block apart (P1); a specimen
+// written by hand could only be believed.
+const payload = JSON.stringify({ question: items[0].id, choice: 3 });
 ---
 
 <Base lang={lang} page="">
@@ -59,7 +67,6 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
     id="questionnaire"
     data-api={API}
     data-results={href(`${lang}/results/`)}
-    data-lang={lang}
     data-draft={DRAFT_KEY}
     data-order={ORDER_KEY}
   >
@@ -84,22 +91,46 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
     {/* Before the action bar, not after it: an alert the submitting user cannot
         see is an alert only a screen reader gets. */}
     <p class="muted" id="warning" role="alert" tabindex="-1" hidden>{t.incomplete}</p>
+    {/* Two elements, count and action (System §5.10). The contribution choice
+        left this bar for the closing block below: a privacy decision taken at
+        the exact moment of the click, away from its explanation, is the cookie
+        banner pattern applied to the one place where candour is the argument. */}
     <div class="sticky">
       <p aria-live="polite" id="progress" class="muted">
         {t.progress(0, items.length)}
       </p>
-      {
-        API && (
-          <label class="consent">
-            <input type="checkbox" id="aggregate" checked />
-            <span>{t.optout}</span>
-          </label>
-        )
-      }
       <button type="submit">{t.submit}</button>
     </div>
-    {API && <p class="muted consent-help">{t.optoutHelp}</p>}
+
+    {/* After the bar, so the bar comes to rest above it rather than over it.
+        Nothing here without a counter service: no box, no block, no send. */}
+    {
+      API && (
+        <ClosingBlock
+          label={t.optout}
+          refusal={t.optoutRefusal}
+          sent={t.optoutSent}
+          payload={payload}
+          notSent={t.optoutNotSent}
+          why={t.optoutWhy}
+          ip={t.optoutIp}
+          submit={t.submit}
+        />
+      )
+    }
   </form>
+
+  {/* The strings the client script writes, produced by T and handed over as
+      data (DT-17). The counter is one string per possible count, so its
+      pluralisation is stated once, in ui.js, and read here — the script used to
+      rewrite the rule for want of access to the module (D2). */}
+  <script
+    type="application/json"
+    id="strings"
+    set:html={JSON.stringify({
+      progress: Array.from({ length: items.length + 1 }, (_, done) => t.progress(done, items.length)),
+    })}
+  />
 
   <script is:inline>
     // Draw of the display order (DP-14). Inline and synchronous, right after the
@@ -169,7 +200,8 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
   const progress = document.getElementById("progress");
   const warning = document.getElementById("warning");
   const notice = document.getElementById("draft-restored");
-  const { api, results, lang } = form.dataset;
+  const { api, results } = form.dataset;
+  const { progress: counts } = JSON.parse(document.getElementById("strings").textContent);
   const questions = [...form.querySelectorAll("fieldset.question")];
   const total = questions.length;
 
@@ -197,11 +229,10 @@ const formations = Object.keys(import.meta.glob("../../../../content/programs/fr
     }
   };
 
+  // One string per possible count, written by T.progress at build time: the
+  // plural rule lives in ui.js and is no longer restated here (D2).
   const count = (done) => {
-    progress.textContent =
-      lang === "fr"
-        ? `${done} réponse${done > 1 ? "s" : ""} sur ${total}`
-        : `${done} of ${total} answered`;
+    progress.textContent = counts[done];
     if (done > 0) warning.hidden = true;
   };
 

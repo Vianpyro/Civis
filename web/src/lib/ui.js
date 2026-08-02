@@ -65,9 +65,21 @@ export const T = {
     skip: "Passer",
     submit: "Voir mes résultats",
     incomplete: "Répondez à au moins une question pour voir un résultat.",
-    optout: "Ajouter mes réponses aux statistiques publiques",
-    optoutHelp:
-      "Chaque réponse est envoyée séparément, sans identifiant, sans horodatage et sans lien avec les autres. Décocher n'envoie rien du tout.",
+    // The consent states a state, never a proposal (DP-04): the box is ticked,
+    // so "add my answers" would let a hurried reader believe that doing nothing
+    // refuses. The four statements that follow are what is sent, what is not,
+    // why the shape of the exchange protects, and the residue we do not control
+    // (DP-16, P2). No legal wording anywhere in them (I4).
+    optout: "Vos réponses seront ajoutées aux statistiques publiques.",
+    optoutRefusal: "Décocher n'envoie rien du tout.",
+    optoutSent:
+      "Ce qui part, une requête par réponse, avec pour seul contenu l'identifiant de la question et le rang de la réponse sur l'échelle :",
+    optoutNotSent:
+      "Ces deux champs sont tout ce que la requête contient : ni identifiant, ni horodatage, ni cookie, ni champ reliant deux réponses entre elles.",
+    optoutWhy:
+      "Les réponses partent une par une, dans un ordre tiré au hasard ; le serveur incrémente un compteur par question et par choix, et sa table n'a aucune colonne où deux réponses pourraient se rejoindre. L'onglet réseau du navigateur montre ce qui sort.",
+    optoutIp:
+      "Le serveur reçoit l'adresse IP de la requête, comme tout serveur. Son code ne l'enregistre pas ; ce que l'hébergeur en fait ne dépend pas de nous.",
     draftRestored:
       "Les réponses enregistrées dans cet onglet ont été restaurées, avec l'ordre des questions. Elles disparaissent à la fermeture de l'onglet.",
     draftClear: "Effacer mes réponses",
@@ -103,9 +115,16 @@ export const T = {
     skip: "Skip",
     submit: "See my results",
     incomplete: "Answer at least one question to get a result.",
-    optout: "Add my answers to the public statistics",
-    optoutHelp:
-      "Each answer is sent separately, with no identifier, no timestamp and no link to the others. Unchecking sends nothing at all.",
+    optout: "Your answers will be added to the public statistics.",
+    optoutRefusal: "Unchecking sends nothing at all.",
+    optoutSent:
+      "What leaves, one request per answer, holding nothing but the question identifier and the rank of the answer on the scale:",
+    optoutNotSent:
+      "Those two fields are all the request holds: no identifier, no timestamp, no cookie, no field linking two answers together.",
+    optoutWhy:
+      "The answers leave one by one, in a random order; the server increments one counter per question and per choice, and its table has no column where two answers could meet. The browser's network tab shows what goes out.",
+    optoutIp:
+      "The server receives the request's IP address, as any server does. Its code does not record it; what the host does with it is not up to us.",
     draftRestored:
       "The answers stored in this tab have been restored, with the question order. They are dropped when the tab is closed.",
     draftClear: "Erase my answers",
