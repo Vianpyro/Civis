@@ -29,8 +29,8 @@ jobs:
       PUBLIC_CIVIS_COMMIT: ${{ github.sha }}
       PUBLIC_CIVIS_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -39,7 +39,7 @@ jobs:
         working-directory: web
       # The site ships questions and quotes, so the content check gates the
       # deploy exactly like it gates a pull request.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -57,7 +57,7 @@ jobs:
       # it must run after the build and never as part of `npm test`.
       - run: npm run check:blindness
         working-directory: web
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: web/dist
 
@@ -69,4 +69,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
