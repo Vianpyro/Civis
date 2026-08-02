@@ -37,14 +37,19 @@ jobs:
           branch="sources/$(date -u +%Y-%m-%d)"
           git config user.name  "civis-bot"
           git config user.email "civis-bot@users.noreply.github.com"
-          git checkout -b "$branch"
+          git checkout -B "$branch"
           git add content/sources
           git commit -m "content: official documents changed upstream"
-          git push -u origin "$branch"
+          # ponytail: force-push, this branch is bot-owned and disposable — a
+          # rerun the same day (cron + dispatch, or a still-open PR) replaces
+          # it rather than colliding with the previous run's commit.
+          git push --force -u origin "$branch"
           # A changed fingerprint means the programme itself may have changed, so
           # the questions derived from it need re-reading. That is a human's call.
+          # Already-open PR on this branch (previous run today) is fine, not an error.
           gh pr create --fill --title "Un document officiel a changé" --body \
-            "Une ou plusieurs empreintes ont changé. Relire les questions qui citent ces documents avant de fusionner."
+            "Une ou plusieurs empreintes ont changé. Relire les questions qui citent ces documents avant de fusionner." \
+            || true
 
   checks:
     runs-on: ubuntu-latest
