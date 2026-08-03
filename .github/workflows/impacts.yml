@@ -1,0 +1,73 @@
+name: impacts
+
+# Manual only, deliberately. A schedule would produce drafts nobody asked to
+# read, and the reading is the load-bearing filter (DP-36, R-5): generating
+# faster than one reviews only grows a backlog. Adding `schedule:` here is a
+# decision, not a convenience.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Points to draft in this run — 2 requests each, free tier allows 20 a day"
+        required: true
+        default: "8"
+
+# Read-only, and this is the point of the workflow. INV-23 names a CI action
+# that writes generated content as the way it gets broken; a job without write
+# permission cannot commit, push or open a pull request whatever it is later
+# asked to do.
+permissions:
+  contents: read
+
+# Two runs would draft the same points and produce two artefacts of which one is
+# stale. Not cancelled in flight: a half-finished run still holds answers already
+# paid for, and the draft it writes is the only place they survive.
+concurrency:
+  group: impacts-fr-2027
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+
+      # Before anything is sent to a model: A-9 is the test standing between a
+      # party name and a prompt, and a leak through that path is silent.
+      - run: python -m unittest discover -t . -s pipeline
+
+      # The official documents are not committed. Without the cache no quote can
+      # be located in its document and the step would draft nothing at all. This
+      # also refreshes content/sources/*.sha256 in the working tree; a document
+      # that moved upstream is `daily.yml`'s business, not this workflow's, and
+      # nothing here commits either way.
+      - run: python -m pipeline.run --election fr-2027 --step fetch
+
+      # Through the environment rather than interpolated into the command line:
+      # a workflow input is text a human typed.
+      - name: Draft a capped number of points
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: python -m pipeline.run --election fr-2027 --step impacts --limit "$LIMIT"
+
+      # INV-23, asserted rather than trusted: the generated content file is
+      # exactly what was checked out. Fails the run if the pipeline ever grew a
+      # second write path.
+      - run: git diff --exit-code -- content/impacts
+
+      # The draft leaves by this path and by no other. review/ is gitignored, so
+      # downloading the artefact and transferring it point by point stays a human
+      # gesture — which is the whole of INV-23.
+      - uses: actions/upload-artifact@v5
+        with:
+          name: impacts-draft-fr-2027
+          path: review/
+          # A run that drafts nothing is the normal steady state (A-15), not a
+          # failure.
+          if-no-files-found: warn

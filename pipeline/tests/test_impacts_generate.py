@@ -20,7 +20,9 @@ import contextlib
 import io
 import json
 import re
+import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from pipeline import check, impacts, llm, run
@@ -143,6 +145,16 @@ class Corpus(unittest.TestCase):
         empty = mock.patch.object(impacts, "committed", return_value={})
         empty.start()
         self.addCleanup(empty.stop)
+        # review/ is the second cache since PR-B, so a draft left on the machine
+        # running the tests would change what the corpus contains. The draft path
+        # points at a file that does not exist yet; the tests that need a real one
+        # write to it.
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.draft = Path(directory.name) / "draft.json"
+        path = mock.patch.object(impacts, "draft_path", lambda election: self.draft)
+        path.start()
+        self.addCleanup(path.stop)
         self.units = impacts.units(ELECTION)
         self.requests = impacts.build_requests(self.units)
 
@@ -296,6 +308,115 @@ class Incremental(Corpus):
         self.assertEqual(capped, self.units[:3])
 
 
+class DraftCache(Corpus):
+    """review/ is the second cache (PR-B): a point already drafted and awaiting a
+    human is not drafted again. Same field, same comparison, no new format — and
+    no step closer to content/, which review/ still never reaches (INV-23)."""
+
+    def pending(self, of=None) -> dict[str, dict]:
+        return {
+            unit["id"]: {"of": of if of is not None else quote_digest(unit["quote"])}
+            for unit in self.units
+        }
+
+    def test_a_point_absent_from_the_draft_is_drafted(self):
+        with mock.patch.object(impacts, "drafted", return_value={}):
+            with quiet():
+                self.assertEqual(len(impacts.units(ELECTION)), len(self.units))
+
+    def test_a_point_already_drafted_with_the_same_of_is_skipped(self):
+        self.assertTrue(self.units, "the corpus must be exercised, or this proves nothing")
+        with mock.patch.object(impacts, "drafted", return_value=self.pending()):
+            with quiet():
+                self.assertEqual(impacts.units(ELECTION), [])
+
+    def test_a_drafted_point_whose_quote_changed_is_redrafted(self):
+        # `of` is the expiry signal in review/ exactly as it is in content/.
+        with mock.patch.object(impacts, "drafted", return_value=self.pending(of="0" * 64)):
+            with quiet():
+                self.assertEqual(len(impacts.units(ELECTION)), len(self.units))
+
+    def test_force_ignores_the_draft_as_it_ignores_the_content(self):
+        with mock.patch.object(impacts, "drafted") as drafted:
+            with quiet():
+                self.assertEqual(len(impacts.units(ELECTION, force=True)), len(self.units))
+        drafted.assert_not_called()
+
+    def test_a_committed_entry_wins_over_a_stale_draft(self):
+        # content/ is the source of truth: a reviewed entry ends the point's life
+        # in the queue whatever review/ still holds for it.
+        with mock.patch.object(impacts, "committed", return_value=self.pending()):
+            with mock.patch.object(impacts, "drafted", return_value=self.pending(of="0" * 64)):
+                with quiet():
+                    self.assertEqual(impacts.units(ELECTION), [])
+
+    def test_an_absent_draft_file_reads_as_empty(self):
+        self.assertFalse(self.draft.exists())
+        self.assertEqual(impacts.drafted(ELECTION), {})
+
+
+class Resume(Corpus):
+    """An interruption costs the points the run did not reach, never those it had
+    already obtained — and a capped run resumed does not pay twice."""
+
+    def setUp(self):
+        super().setUp()
+        self.asked: list[list[str]] = []
+        for patch in (
+            mock.patch.object(llm, "configured", return_value=True),
+            mock.patch.object(llm, "run_batch", self.answer),
+        ):
+            patch.start()
+            self.addCleanup(patch.stop)
+
+    def answer(self, requests_: list[dict]) -> dict[str, dict]:
+        """Pass 1 by its schema, pass 2 by elimination. No model, no network."""
+        self.asked.append([request["custom_id"] for request in requests_])
+        if requests_ and requests_[0]["schema"] is impacts.SCHEMA:
+            return {request["custom_id"]: {"items": statements()} for request in requests_}
+        return {request["custom_id"]: {"verdicts": []} for request in requests_}
+
+    def read(self) -> dict[str, dict]:
+        return json.loads(self.draft.read_text(encoding="utf-8"))
+
+    def test_a_capped_run_resumed_keeps_what_the_first_run_produced(self):
+        with quiet():
+            impacts.main(ELECTION, limit=2)
+        first = self.read()
+        self.assertEqual(len(first), 2)
+
+        with quiet():
+            impacts.main(ELECTION, limit=2)
+        second = self.read()
+        self.assertEqual(len(second), 4)
+        for point_id, draft in first.items():
+            self.assertEqual(second[point_id], draft, f"{point_id} was drafted a second time")
+
+    def test_the_second_run_asks_only_for_points_the_first_did_not_reach(self):
+        with quiet():
+            impacts.main(ELECTION, limit=2)
+            impacts.main(ELECTION, limit=2)
+        # Four batches: pass 1 and pass 2 of each run.
+        self.assertEqual(len(self.asked), 4)
+        self.assertEqual(set(self.asked[0]) & set(self.asked[2]), set())
+
+    def test_a_stale_draft_entry_is_dropped_rather_than_left_for_the_reviewer(self):
+        stale = self.units[-1]["id"]
+        self.draft.write_text(json.dumps({stale: {"of": "0" * 64, "items": []}}), encoding="utf-8")
+        with quiet():
+            impacts.main(ELECTION, limit=1)
+        # Back in the queue by `of`, and gone from the file: nobody transfers an
+        # analysis of a quote that changed.
+        self.assertNotIn(stale, self.read())
+
+    def test_nothing_outside_review_is_written(self):
+        # INV-23 on the run itself, not only on the source: `content/` is read.
+        before = (ROOT / "content" / "impacts" / f"{ELECTION}.json").read_bytes()
+        with quiet():
+            impacts.main(ELECTION, limit=1)
+        self.assertEqual((ROOT / "content" / "impacts" / f"{ELECTION}.json").read_bytes(), before)
+
+
 class CommittedFile(unittest.TestCase):
     """The shipped state, read on the file itself — no mock, no fixture."""
 
@@ -420,6 +541,72 @@ class SecondPass(Corpus):
         self.assertEqual([request["custom_id"] for request in requests], list(drafts))
 
 
+class Pacing(unittest.TestCase):
+    """PR-A — the free tier allows five requests per minute. `post` recovers from
+    a 429; `pace` is what keeps a run from earning one."""
+
+    def setUp(self):
+        # The clock is module state: a test must not inherit the previous one's.
+        reset = mock.patch.object(llm, "_last_call", float("-inf"))
+        reset.start()
+        self.addCleanup(reset.stop)
+
+    def batch(self, count: int, failing: str | None = None) -> list[float]:
+        """The delays `run_batch` asked for, over `count` requests named 0, 1, …"""
+        slept: list[float] = []
+
+        def call(request, key):
+            if request["custom_id"] == failing:
+                raise RuntimeError("429")
+            return {"items": []}
+
+        requests_ = [
+            {"custom_id": str(index), "system": "", "user": "", "schema": {}}
+            for index in range(count)
+        ]
+        with mock.patch.object(llm.time, "sleep", slept.append):
+            with mock.patch.dict(llm.PROVIDERS, {"gemini": {"call": call, "env": ("X",)}}):
+                with mock.patch.dict("os.environ", {"X": "token"}), quiet():
+                    llm.run_batch(requests_)
+        return slept
+
+    def test_the_first_call_of_a_process_is_not_delayed(self):
+        self.assertEqual(self.batch(1), [])
+
+    def test_calls_are_spaced_by_the_interval(self):
+        delays = self.batch(3)
+        self.assertEqual(len(delays), 2)
+        for delay in delays:
+            self.assertAlmostEqual(delay, llm.INTERVAL, delta=1)
+
+    def test_the_spacing_holds_across_two_batches(self):
+        # The two passes of a run share one quota, so the ceiling cannot be
+        # per-batch: the first request of pass 2 follows the last of pass 1.
+        self.batch(1)
+        self.assertEqual(len(self.batch(1)), 1)
+
+    def test_a_failing_call_still_consumes_its_slot(self):
+        # A 429 is a request the provider counted. Skipping the pause after it
+        # would send the next one straight into the same ceiling.
+        self.assertEqual(len(self.batch(3, failing="1")), 2)
+
+    def test_a_failing_call_is_still_reported_against_its_custom_id(self):
+        out = io.StringIO()
+        with mock.patch.object(llm.time, "sleep"):
+            with mock.patch.dict(llm.PROVIDERS, {"gemini": {"call": self.raiser, "env": ("X",)}}):
+                with mock.patch.dict("os.environ", {"X": "token"}):
+                    with contextlib.redirect_stdout(out):
+                        answers = llm.run_batch(
+                            [{"custom_id": "lr-depense-publique", "system": "", "user": "", "schema": {}}]
+                        )
+        self.assertEqual(answers, {})
+        self.assertIn("lr-depense-publique", out.getvalue())
+
+    @staticmethod
+    def raiser(request, key):
+        raise RuntimeError("boom")
+
+
 class Flags(unittest.TestCase):
     """`--limit` and `--force` belong to the impacts step and to no other."""
 
@@ -472,7 +659,10 @@ class WritePaths(unittest.TestCase):
         self.assertTrue(targets, "the write path moved; this test must follow it")
         for target in targets:
             self.assertTrue(target.startswith("out"), f"write through {target!r}")
-        self.assertIn('out = ROOT / "review" / f"{election}-impacts-draft.json"', self.SOURCE)
+        # Named once (PR-B), because the draft is now read back as well as
+        # written. Under review/ and nowhere else, which is the whole of A-17.
+        self.assertIn('return ROOT / "review" / f"{election}-impacts-draft.json"', self.SOURCE)
+        self.assertIn("out = draft_path(election)", self.SOURCE)
 
     def test_nothing_is_written_without_credentials(self):
         with mock.patch.object(llm, "configured", return_value=False):
@@ -517,6 +707,11 @@ class Provider(unittest.TestCase):
                 answers = llm.run_batch([{"custom_id": "a", "system": "", "user": "", "schema": {}}])
         self.assertEqual(calls, ["a"])
         self.assertEqual(answers, {"a": {"items": []}})
+
+    def test_the_retry_strategy_is_still_the_one_DT_31_describes(self):
+        # Pacing is prevention; this is recovery. PR-A must not have replaced one
+        # with the other — a 429 that slips through is still retried.
+        self.assertEqual((llm.ATTEMPTS, llm.BACKOFF), (4, 5))
 
     def test_a_failing_point_does_not_lose_the_others(self):
         def call(request, key):

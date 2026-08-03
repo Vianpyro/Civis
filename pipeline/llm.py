@@ -36,6 +36,29 @@ TIMEOUT = 180
 ATTEMPTS = 4
 BACKOFF = 5  # seconds, multiplied by the attempt number
 
+# Minimum spacing between two calls, in seconds. The free tier of the default
+# model allows five requests per minute; 13 s keeps a run under that ceiling with
+# a margin. This is prevention, not recovery, and the two do not replace each
+# other: `post` still retries a 429 it did not manage to avoid, and its strategy
+# above is untouched. Without it a wave of eight points sends sixteen requests
+# back to back and spends half its time in backoff.
+INTERVAL = 13
+
+# The previous call, on the monotonic clock. Module state because the ceiling is
+# per key and per minute: the two passes of a run share one quota, so the spacing
+# has to hold across `run_batch` calls and not only inside one. Minus infinity
+# rather than zero, so the first call of a process is never delayed.
+_last_call = float("-inf")
+
+
+def pace() -> None:
+    """Block until INTERVAL has elapsed since the previous call."""
+    global _last_call
+    delay = INTERVAL - (time.monotonic() - _last_call)
+    if delay > 0:
+        time.sleep(delay)
+    _last_call = time.monotonic()
+
 
 def post(url: str, body: dict, headers: dict) -> dict:
     """One POST, retrying 429 and 5xx with a linear backoff.
@@ -120,11 +143,20 @@ def run_batch(requests_: list[dict]) -> dict[str, dict]:
     Synchronous loop: DT-31 admits it explicitly, and a pilot of four points does
     not justify a batch API. A failing point is reported and skipped rather than
     losing the others — a draft is a review artefact, not a transaction.
+
+    Paced by `pace`, including around a call that raised: a request that failed
+    still consumed its slot in the minute.
     """
     call = provider()["call"]
     key = api_key()
     answers: dict[str, dict] = {}
+    # Announced once rather than per request: a run that pauses thirteen seconds
+    # without saying so reads as a hang, and a line per request would be the noise
+    # DT-32 removed elsewhere.
+    if len(requests_) > 1:
+        print(f"  {len(requests_)} request(s), at most one every {INTERVAL}s")
     for request in requests_:
+        pace()
         try:
             answers[request["custom_id"]] = call(request, key)
         except Exception as error:  # noqa: BLE001 - one bad point must not stop the run

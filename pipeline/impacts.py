@@ -21,6 +21,8 @@ would hide the drift of the prompt, which is precisely what a review is for.
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 from . import llm, neutrality
 from .check import ELECTION, GROUPS, quote_digest
@@ -202,6 +204,31 @@ def committed(election: str) -> dict[str, dict]:
     return json.loads(path.read_text(encoding="utf-8")).get("impacts", {})
 
 
+def draft_path(election: str) -> Path:
+    """The one write target of this module (INV-23), named once so that the two
+    readers of the draft and its writer cannot drift apart."""
+    return ROOT / "review" / f"{election}-impacts-draft.json"
+
+
+def drafted(election: str) -> dict[str, dict]:
+    """The analyses already drafted and still awaiting a human.
+
+    Read exactly as `committed` is read, on the same field and with the same
+    comparison: an entry whose `of` still matches its quote is an answer already
+    paid for. Without it the queue is derived from `content/` alone, review/ is
+    invisible to it, and two capped runs in a row redraft the same first N points
+    while an interruption loses everything the run had already obtained.
+
+    This does not move review/ any closer to content/ (INV-23). The pipeline
+    reads back what the pipeline wrote; the transfer stays a human gesture, and a
+    point a reviewer deletes from the draft comes back into the queue by itself.
+    """
+    path = draft_path(election)
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def party_labels(election: str) -> list[dict]:
     """Party blocks, read for one purpose only: L-11 on an answer that already
     came back. No request is composed from them — build_requests reads a unit and
@@ -217,19 +244,21 @@ def units(election: str, limit: int | None = None, force: bool = False) -> list[
 
     A point that is never displayed does not need an analysis, a point whose
     document is not cached or whose quote cannot be located is skipped rather
-    than sent without its context, and a point whose committed `of` still matches
-    its quote is current — in steady state this returns nothing and the step
-    calls no model at all (A-15). `--force` ignores that, `--limit` caps the
-    number of points a single run pays for.
+    than sent without its context, and a point whose `of` still matches its quote
+    — in `content/` or in the draft awaiting review — is current. In steady state
+    this returns nothing and the step calls no model at all (A-15). `--force`
+    ignores both, `--limit` caps the number of points a single run pays for.
     """
     points = program_points(election)
     path = ROOT / "content" / "questions" / f"{election}.positions.json"
     positions = json.loads(path.read_text(encoding="utf-8"))
     done = {} if force else committed(election)
+    pending = {} if force else drafted(election)
 
     seen: set[str] = set()
     skipped: list[str] = []
     current: list[str] = []
+    awaiting: list[str] = []
     out: list[dict] = []
     for entries in positions.values():
         for entry in entries:
@@ -238,8 +267,14 @@ def units(election: str, limit: int | None = None, force: bool = False) -> list[
             if point_id in seen or point is None:
                 continue
             seen.add(point_id)
-            if (done.get(point_id) or {}).get("of") == quote_digest(point["quote"]):
+            digest = quote_digest(point["quote"])
+            if (done.get(point_id) or {}).get("of") == digest:
                 current.append(point_id)
+                continue
+            # content/ first: an entry reviewed and committed ends the point's
+            # life in the queue even if a stale draft of it still sits in review/.
+            if (pending.get(point_id) or {}).get("of") == digest:
+                awaiting.append(point_id)
                 continue
             text = cached_text(election, point["source_id"])
             window = context(text, point["quote"]) if text is not None else ""
@@ -261,6 +296,10 @@ def units(election: str, limit: int | None = None, force: bool = False) -> list[
         print(f"  skipped {len(skipped)} point(s): document not cached, or quote not found in it")
     if current:
         print(f"  skipped {len(current)} point(s): analysis up to date (--force to redraft)")
+    # Counted apart from the previous line: this one is the review backlog, and
+    # it is the number that says whether generating more is useful at all (R-5).
+    if awaiting:
+        print(f"  skipped {len(awaiting)} point(s): already drafted, awaiting review (--force to redraft)")
     return out[:limit] if limit else out
 
 
@@ -373,17 +412,37 @@ def main(election: str = ELECTION, limit: int | None = None, force: bool = False
     }
 
     print(f"auditing {len(drafts)} point(s)")
+    # Only the points this run drafted: auditing a point already annotated would
+    # pay a second time for a verdict the draft already carries.
     annotate(drafts, llm.run_batch(audit_requests(drafts)), party_labels(election))
+
+    # Merged into the draft already awaiting review rather than replacing it: an
+    # interruption then costs the points the run did not reach, never the ones it
+    # had already obtained. An entry whose quote moved is dropped instead of being
+    # left for a reviewer to transfer — units() has already put that point back in
+    # the queue, and an analysis of a quote that no longer exists is a trap.
+    digests = {
+        point_id: quote_digest(point["quote"])
+        for point_id, point in program_points(election).items()
+    }
+    kept = {
+        point_id: draft
+        for point_id, draft in drafted(election).items()
+        if draft.get("of") == digests.get(point_id)
+    }
+    merged = {**kept, **drafts}
 
     # The one write path of this module (INV-23). Nothing here writes to content/:
     # the transfer is a human gesture.
-    out = ROOT / "review" / f"{election}-impacts-draft.json"
+    out = draft_path(election)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(drafts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    out.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     statements = sum(len(draft["items"]) for draft in drafts.values())
+    # `os.path.relpath` rather than `Path.relative_to`: the latter raises on a
+    # path outside ROOT, and a message is not worth an exception.
     print(
-        f"wrote {statements} statement(s) over {len(drafts)} point(s) to "
-        f"{out.relative_to(ROOT)} — review before committing"
+        f"wrote {statements} statement(s) over {len(drafts)} new point(s); "
+        f"{len(merged)} point(s) now in {os.path.relpath(out, ROOT)} — review before committing"
     )
     return 0
